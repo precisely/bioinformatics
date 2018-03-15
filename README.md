@@ -50,3 +50,5 @@ Once downloaded, remove the first comment line from the file.
 
 Then, compress using bgzip.
 Then, index using tabix:
+
+
