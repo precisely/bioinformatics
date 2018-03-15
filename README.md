@@ -47,25 +47,12 @@ precisely@consulting-vb:~/repos/bioinformatics/convert23andme$ time python \
   convert23andme/ucsc-gene-symbols-coords.txt.gz
 - This will only need to be updated if we need to support a human
   genome build other than 37.
-- BED file obtained from https://genome.ucsc.edu/cgi-bin/hgTables
-- Using UCSC gene list, and selecting fields from primary and secondary tables, including the 'Gene Symbol' field.
-- Idea of how to append the gene names from here: https://www.biostars.org/p/122690/
-- Making the annotation file:
+- BED file obtained from the UCSC Genome Browser (see below)
+- Idea of how to annotate the variants with gene names from here: 
 
-```
-precisely@consulting-vb:~/data$ awk -F'\t' 'BEGIN{ OFS="\t"} \
-NR!=1 { gsub("chr","",$2); if($2 == "M") $2 = "MT"; print $2, $4, $5, $7  }' \
-ucsc-gene-names.txt \
-| sort -k1,1 -k2,2n \
-| bgzip > ucsc-gene-symbols-coords.txt.gz
-```
+	https://www.biostars.org/p/122690/
 
-- Use Tabix to index the BGzip'ed file:
-
-	`precisely@consulting-vb:~/data$ tabix -p bed ucsc-gene-symbols-coords.txt.gz`
-
-
-## Generating the Gene Coordinate BED file for BCFtools:
+#### Generating the Gene Coordinate BED file using the UCSC Genome Browser
 
 Go to UCSC Genome Browser page:
 https://genome.ucsc.edu/cgi-bin/hgTables
@@ -96,10 +83,23 @@ hg19.kgXref:
 
 Click on "get output" button below the hg19.knownGene listing.
 
-Once downloaded, remove the first comment line from the file.
+Once downloaded, remove the first comment line from the file, and call
+the file `ucsc-gene-names.txt`.
 
-Then, compress using bgzip.
-Then, index using tabix:
+#### Final processing of BED File
+- Post-processing of the BED file:
+
+```
+precisely@consulting-vb:~/data$ awk -F'\t' 'BEGIN{ OFS="\t"} \
+NR!=1 { gsub("chr","",$2); if($2 == "M") $2 = "MT"; print $2, $4, $5, $7  }' \
+ucsc-gene-names.txt \
+| sort -k1,1 -k2,2n \
+| bgzip > ucsc-gene-symbols-coords.txt.gz
+```
+
+- Use Tabix to index the BGzip'ed file:
+
+	`precisely@consulting-vb:~/data$ tabix -p bed ucsc-gene-symbols-coords.txt.gz`
 
 ### Backgroup VCF File Manipulation Documentation 
 
