@@ -1,11 +1,19 @@
-## TODOs:
-## * use named pipe instead of intermediate BCF file.
-## * In a future version, we need to dispatch on file metadata to
-##   automagically select the correct version of the reference genome.
-##   See get_genome_version for where the logic needs to be inserted,
-##   and definition of cruzdb.
-## * Need to parse out the annotation file version, and the file creation timestamp
-## * Need to add the -h headerfile option to bcftools call
+'''
+convert23andme: Python module for converting 23andMe raw data to VCF format
+
+Provided a 23andMe data file as input, along with a
+specially-formatted human genome sequence file and a human genome gene
+coordinates file, this module will convert the data into a
+Precise.ly-formatted VCF file. See the README for more information on
+obtaining the human genome sequence and gene coordinate files.
+
+TODOs:
+* In a future version, we need to dispatch on file metadata to
+  automagically select the correct version of the reference genome.
+  See get_genome_version for where the logic needs to be inserted,
+  and definition of cruzdb.
+'''
+
 
 ### Import statements:
 from pysam import VariantFile
@@ -52,7 +60,8 @@ human_genome_accessions = {
 
     
 def parse_23andMe_file(genotype_23andme_path):
-    '''Parse out the creation date and the genome assembly version.'''
+    '''Parse out the creation date and the genome assembly version
+    from a 23andMe raw data file, and the number of SNPs, and return as a list.'''
 
     snp_counts = 0
     genome_verison = ''
@@ -81,7 +90,10 @@ def parse_23andMe_file(genotype_23andme_path):
 ## and that will require much more work to compute.
 
 def predict_23andMe_chip_version(datetime_object, snp_counts):
-
+'''
+Try to predict the 23andMe chip version used to generate the 23andMe
+raw data file. Experimental.
+'''
     version = ''
     
     if datetime_object < datetime(2007,11,1):
@@ -116,10 +128,15 @@ def predict_23andMe_chip_version(datetime_object, snp_counts):
 
 
 
+
 def convert_23andme_bcf(genotype_23andme_path,
                             ref_human_genome_path,
                             annotate_file_path,
                             output_dir):
+'''
+Main function for converting 23andMe raw data file into a VCF
+file. Returns a string path to the output file location.
+'''
     
     ## Definitions:    
     [sample_id, file_md5_hash_value] = genotype_23andme_path.split('/')[-1].split('_')
@@ -218,6 +235,9 @@ def augmented_vcf_file(vcf_file,
                            genome_version,
                            snp_count,
                            reference_file_name):
+'''
+This helper function writes out the parsed data into VCF format.
+'''
     
     vcf_in  = VariantFile(vcf_file)
 
@@ -268,6 +288,10 @@ def augmented_vcf_file(vcf_file,
 
         
 def augmented_vcf_record(out_file, fields, genome_version):
+
+'''
+This helper function generates a single VCF data record as a string.
+'''
     
     hgvs_str = ''
     
@@ -316,7 +340,11 @@ def augmented_vcf_record(out_file, fields, genome_version):
     
     
 def print_vcf_to_ga4gh_json_file(vcf_file,json_out_file):
-    
+'''
+This helper function prints the parsed data to GA4GH JSON
+format. Deprecated.
+
+'''
     ##json_out_file = ga4gh_out_dir + '/' + sample_id + '_ga4gh.json'
 
     variants      = []
@@ -346,7 +374,11 @@ def print_vcf_to_ga4gh_json_file(vcf_file,json_out_file):
 
     
 def gen_genotype_summary_str(genotype_array, chrom):
-
+'''
+This helper function return the genotype summary or zygosity token for
+a given genotype_array and chromosome.
+'''
+    
     genotype = ''
     
     if genotype_array == [None]:
@@ -373,7 +405,10 @@ def gen_genotype_summary_str(genotype_array, chrom):
 ## Generate json stanza:
 ## If the variant is not within a gene, we discard it.
 def gen_variant_call_struct(rec, sample_id, load_time):
-
+'''
+Helper function for generating a single JSON stanza. Deprecated.
+'''
+    
     genotype_array = list(rec.samples[sample_id].values()[0])
 
     genotype = gen_genotype_summary_str(genotype_array, rec.chrom)
@@ -441,7 +476,10 @@ def gen_svn_genotype_string(genome_version,
                         ref,
                         alt_bases,
                         zygosity):
-
+'''
+Helper function for generating the HGVS (nee SVN) notation string for
+the genotype. Returns the HGVS as a string.
+'''
     
     accession = human_genome_accessions[genome_version][chrom]
 
@@ -498,29 +536,6 @@ def gen_svn_genotype_string(genome_version,
     return svn_str
 
 
-# def get_snp_gene_names(chrom, pos):
-
-#     if chrom == 'MT':
-#         chrom = 'M'
-
-#     chrom_str = 'chr' + chrom
-        
-#     genes = cruzdb.bin_query('refGene', chrom_str, pos, pos)
-
-#     return list(set([g.name2 for g in genes]))
-
-
-### This needs to dispatch based on the headers of the 23&Me data
-### files. Static for now:
-def get_genome_version():
-    return 'GRCh37'
-
-## CruzDB object for obtaining gene names:
-## This needs to dispatch based on the genome version,
-## currently just supporting GRCh37/hg19:
-#if get_genome_version() == 'GRCh37':
-#    cruzdb = Genome('hg19')
-
 
 ## Obtain variable definitions from the environment:
 if __name__ == "__main__":
@@ -538,7 +553,8 @@ if __name__ == "__main__":
                                 output_dir)
 
     except:
-            
+        ## Trap any errors when running as script, and report the
+        ## stack trace:
         [sample_id, file_md5_hash_value] = genotype_23andme_path.split('/')[-1].split('_')
 
         error_file_path = output_dir + '/' + sample_id + '.error'
