@@ -1,0 +1,4 @@
+include Makefile
+include README.md
+include docs/*
+include convert23andme/ucsc-gene-symbols-coords.txt.gz
