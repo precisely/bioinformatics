@@ -10,8 +10,6 @@ obtaining the human genome sequence and gene coordinate files.
 TODOs:
 * In a future version, we need to dispatch on file metadata to
   automagically select the correct version of the reference genome.
-  See get_genome_version for where the logic needs to be inserted,
-  and definition of cruzdb.
 '''
 
 
@@ -90,10 +88,11 @@ def parse_23andMe_file(genotype_23andme_path):
 ## and that will require much more work to compute.
 
 def predict_23andMe_chip_version(datetime_object, snp_counts):
-'''
-Try to predict the 23andMe chip version used to generate the 23andMe
-raw data file. Experimental.
-'''
+    '''
+    Try to predict the 23andMe chip version used to generate the 23andMe
+    raw data file. Experimental.
+    '''
+
     version = ''
     
     if datetime_object < datetime(2007,11,1):
@@ -133,10 +132,10 @@ def convert_23andme_bcf(genotype_23andme_path,
                             ref_human_genome_path,
                             annotate_file_path,
                             output_dir):
-'''
-Main function for converting 23andMe raw data file into a VCF
-file. Returns a string path to the output file location.
-'''
+    '''
+    Main function for converting 23andMe raw data file into a VCF
+    file. Returns a string path to the output file location.
+    '''
     
     ## Definitions:    
     [sample_id, file_md5_hash_value] = genotype_23andme_path.split('/')[-1].split('_')
@@ -235,9 +234,9 @@ def augmented_vcf_file(vcf_file,
                            genome_version,
                            snp_count,
                            reference_file_name):
-'''
-This helper function writes out the parsed data into VCF format.
-'''
+    '''
+    This helper function writes out the parsed data into VCF format.
+    '''
     
     vcf_in  = VariantFile(vcf_file)
 
@@ -288,10 +287,9 @@ This helper function writes out the parsed data into VCF format.
 
         
 def augmented_vcf_record(out_file, fields, genome_version):
-
-'''
-This helper function generates a single VCF data record as a string.
-'''
+    '''
+    This helper function generates a single VCF data record as a string.
+    '''
     
     hgvs_str = ''
     
@@ -340,11 +338,11 @@ This helper function generates a single VCF data record as a string.
     
     
 def print_vcf_to_ga4gh_json_file(vcf_file,json_out_file):
-'''
-This helper function prints the parsed data to GA4GH JSON
-format. Deprecated.
-
-'''
+    '''
+    This helper function prints the parsed data to GA4GH JSON
+    format. Deprecated.
+    '''
+    
     ##json_out_file = ga4gh_out_dir + '/' + sample_id + '_ga4gh.json'
 
     variants      = []
@@ -374,10 +372,10 @@ format. Deprecated.
 
     
 def gen_genotype_summary_str(genotype_array, chrom):
-'''
-This helper function return the genotype summary or zygosity token for
-a given genotype_array and chromosome.
-'''
+    '''
+    This helper function return the genotype summary or zygosity token for
+    a given genotype_array and chromosome.
+    '''
     
     genotype = ''
     
@@ -405,9 +403,9 @@ a given genotype_array and chromosome.
 ## Generate json stanza:
 ## If the variant is not within a gene, we discard it.
 def gen_variant_call_struct(rec, sample_id, load_time):
-'''
-Helper function for generating a single JSON stanza. Deprecated.
-'''
+    '''
+    Helper function for generating a single JSON stanza. Deprecated.
+    '''
     
     genotype_array = list(rec.samples[sample_id].values()[0])
 
@@ -476,10 +474,10 @@ def gen_svn_genotype_string(genome_version,
                         ref,
                         alt_bases,
                         zygosity):
-'''
-Helper function for generating the HGVS (nee SVN) notation string for
-the genotype. Returns the HGVS as a string.
-'''
+    '''
+    Helper function for generating the HGVS (nee SVN) notation string for
+    the genotype. Returns the HGVS as a string.
+    '''
     
     accession = human_genome_accessions[genome_version][chrom]
 
