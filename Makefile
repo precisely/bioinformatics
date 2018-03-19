@@ -4,8 +4,13 @@ build-human-genome-ref-db:
 	mkdir -p $(HOME)/data
 	cd $(HOME)/data
 	wget ftp://ftp-trace.ncbi.nih.gov/1000genomes/ftp/technical/reference/human_g1k_v37.fasta.gz
+	wget ftp://ftp-trace.ncbi.nih.gov/1000genomes/ftp/technical/reference/human_g1k_v37.fasta.gzi
 	wget ftp://ftp-trace.ncbi.nih.gov/1000genomes/ftp/technical/reference/human_g1k_v37.fasta.fai
 
 
+
 install: build-human-genome-ref-db
+	echo
+
+build-docker-image: install
 	echo
