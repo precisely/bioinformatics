@@ -14,3 +14,8 @@ install: build-human-genome-ref-db
 
 build-docker-image: install
 	echo
+
+test-convert23andme:
+	python ./convert23andme/test_convert23andme.py
+
+test: test-convert23andme
