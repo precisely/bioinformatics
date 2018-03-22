@@ -5,7 +5,7 @@ import os, sys, unittest, convert23andme
 class Test_parse_23andMe_file(unittest.TestCase):
 
     def test_parse(self):
-        self.assertTrue(convert23andme.parse_23andMe_file('shorttest_deadbeef.txt'))
+        self.assertTrue(convert23andme.parse_23andMe_file('convert23andme/shorttest_deadbeef.txt'))
 
 
 class Test_convert_23andme_bcf(unittest.TestCase):
