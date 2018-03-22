@@ -11,10 +11,10 @@ class Test_parse_23andMe_file(unittest.TestCase):
 class Test_convert_23andme_bcf(unittest.TestCase):
 
     def test_conversion(self):
-        self.assertTrue(convert23andme.convert_23andme_bcf('shorttest_deadbeef.txt',
+        self.assertTrue(convert23andme.convert_23andme_bcf('convert23andme/shorttest_deadbeef.txt',
                                                               'data/human_g1k_v37.fasta.gz',
                                                               'convert23andme/ucsc-gene-symbols-coords.txt.gz',
-                                                              '/tmp')
+                                                              '/tmp'))
 
 
 
