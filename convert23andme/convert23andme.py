@@ -18,6 +18,7 @@ After tag v0.1, I removed the following functions that were no longer needed:
 * gen_genotype_summary_str
 * print_vcf_to_ga4gh_json_file
 * predict_23andMe_chip_version
+
 '''
 
 
@@ -87,10 +88,6 @@ def parse_23andMe_file(genotype_23andme_path):
                 snp_counts += 1                
                 
     return [datetime_object, genome_version, snp_counts]
-
-
-
-
 
 
 
