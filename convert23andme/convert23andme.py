@@ -18,6 +18,7 @@ After tag v0.1, I removed the following functions that were no longer needed:
 * gen_genotype_summary_str
 * print_vcf_to_ga4gh_json_file
 * predict_23andMe_chip_version
+* agumented_vcf_record
 
 '''
 
@@ -212,8 +213,6 @@ def augmented_vcf_file(vcf_file,
     new_header.add_line('##23andMeHumanGenomeVersion=' + genome_version                               )
     new_header.add_line('##23andmeSNPcount='           + str(snp_count)                               )
     new_header.add_line('##reference=file://'          + reference_file_name                          )
-    new_header.add_line('##INFO=<ID=GS,Number=1,Type=String,Description="Genotype Summary">')
-    new_header.add_line('##INFO=<ID=HGVS,Number=1,Type=String,Description="Genotype in HGVS Sequence Variant Nomenclature format, with `~` instead of `=` and `///` instead of `;`">')
     new_header.add_line('##FILTER=<ID=NOT_DETERMINED,Description="Genotype not determined by 23andMe">')
     
     ##vcf_out = VariantFile(vcf_aug_file, 'w', header=new_header)
@@ -242,61 +241,19 @@ def augmented_vcf_file(vcf_file,
                 
                     fields = line.rstrip().split('\t')
 
-                    print >> vcf_out, augmented_vcf_record(vcf_out, fields, genome_version)
+                    ## Modify FILTER values
+                    if fields[9] == '.':                        
+                        fields[6] = 'NOT_DETERMINED'
+                    else:
+                        fields[6] = 'PASS'
+                    
+                    print >> vcf_out, '\t'.join(fields)
 
 
     logging.info('Printed augmented VCF file to: ' + vcf_aug_file)
     return
 
-        
-def augmented_vcf_record(out_file, fields, genome_version):
-    '''
-    This helper function generates a single VCF data record as a string.
-    '''
-    
-    hgvs_str = ''
-    
-    if fields[9] == '.':
-        genotype_array = [None]
-    else:
-        genotype_array = map(int, fields[9].split('/'))
-        
-    genotype = gen_genotype_summary_str(genotype_array,fields[0])
 
-    if genotype != 'not-determined':
-        hgvs_str = gen_svn_genotype_string(genome_version,
-                                            fields[0],
-                                            fields[1],
-                                            fields[3],
-                                            fields[4],
-                                            genotype)
-
-        ## VCF format doesn't allow equals signs nor semi-colons in the values of INFO sub-fields,        
-        ## so we substitute '~' for '=', and '///' for ';'
-        hgvs_str = hgvs_str.replace('=','~').replace(';','///')
-        
-        info_str = 'GS=' + genotype + ';HGVS=' + hgvs_str
-
-    else:
-        info_str = 'GS=' + genotype
-
-        
-    ## Modify FILTER values
-    if genotype == 'not-determined':
-        fields[6] = 'NOT_DETERMINED'
-    else:
-        fields[6] = 'PASS'
-    
-    ## Modify INFO values
-    if len(fields[7]) > 1:
-        ##append
-        fields[7] = fields[7] + ';' + info_str
-    else:
-        ##new
-        fields[7] = info_str
-
-    return '\t'.join(fields)
-                
 
 
 ## Obtain variable definitions from the environment:
