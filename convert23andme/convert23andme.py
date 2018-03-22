@@ -10,6 +10,14 @@ obtaining the human genome sequence and gene coordinate files.
 TODOs:
 * In a future version, we need to dispatch on file metadata to
   automagically select the correct version of the reference genome.
+
+## Functions removed:
+After tag v0.1, I removed the following functions that were no longer needed:
+* gen_svn_genotype_string
+* gen_variant_call_struct
+* gen_genotype_summary_str
+* print_vcf_to_ga4gh_json_file
+* predict_23andMe_chip_version
 '''
 
 
@@ -79,48 +87,6 @@ def parse_23andMe_file(genotype_23andme_path):
                 snp_counts += 1                
                 
     return [datetime_object, genome_version, snp_counts]
-
-
-
-## Turns out that chip processing times overlap the stated chip release periods listed at:
-## https://isogg.org/wiki/23andMe#Chip_versions
-## So, indicator SNP IDs is probably the only reliable way to identify which chip was used,
-## and that will require much more work to compute.
-
-def predict_23andMe_chip_version(datetime_object, snp_counts):
-    '''
-    Try to predict the 23andMe chip version used to generate the 23andMe
-    raw data file. Experimental.
-    '''
-
-    version = ''
-    
-    if datetime_object < datetime(2007,11,1):
-        version = 'invalid-date'
-
-    elif datetime_object >= datetime(2007,11,1) and datetime_object < datetime(2008,9,1):
-        version = 'v1'
-
-    elif datetime_object >= datetime(2008,9,1) and datetime_object < datetime(2010,11,1) and snp_counts > 547000 and snp_counts < 562000:
-
-        version = 'v2'
-        
-    elif datetime_object >= datetime(2010,11,1) and datetime_object < datetime(2013,11,1) and snp_counts > 900000:
-
-        version = 'v3'
-
-    elif datetime_object >= datetime(2013,11,1) and datetime_object < datetime(2017,8,1) and snp_counts > 563000 and snp_counts < 577000:
-
-        version = 'v4'
-
-    elif datetime_object >= datetime(2017,8,1) and snp_counts > 633000 and snp_counts < 647000:   
-        
-        version = 'v4'
-
-    else:
-        version = 'undefined'
-
-    return version
 
 
 
@@ -334,205 +300,6 @@ def augmented_vcf_record(out_file, fields, genome_version):
 
     return '\t'.join(fields)
                 
-        
-    
-    
-def print_vcf_to_ga4gh_json_file(vcf_file,json_out_file):
-    '''
-    This helper function prints the parsed data to GA4GH JSON
-    format. Deprecated.
-    '''
-    
-    ##json_out_file = ga4gh_out_dir + '/' + sample_id + '_ga4gh.json'
-
-    variants      = []
-    load_time     = time()
-    i             = 0
-
-    vcf_in        = VariantFile(vcf_file)
-    
-    with open(json_out_file,'w') as out_file:
-
-        out_file.write('[')
-        
-        for rec in vcf_in:
-            struct = gen_variant_call_struct(rec,
-                                                 sample_id,
-                                                 load_time)
-            if struct != None:
-                #variants.append(struct)
-                out_file.write(json.dumps(struct, indent=4, separators=(',', ': ')))
-                out_file.write(',')
-           
-        out_file.write(']')
-                ##out_file.write(json.dumps(variants, indent=4, separators=(',', ': ')))
-
-    print json_out_file
-
-
-    
-def gen_genotype_summary_str(genotype_array, chrom):
-    '''
-    This helper function return the genotype summary or zygosity token for
-    a given genotype_array and chromosome.
-    '''
-    
-    genotype = ''
-    
-    if genotype_array == [None]:
-        genotype = 'not-determined'
-        genotype_array = [-1, -1]
-    elif genotype_array == [0, 0]:
-        genotype = 'wildtype'
-    elif genotype_array == [0, 1] or genotype_array == [1, 0]:
-        genotype = 'heterozygous'
-    elif genotype_array == [1, 1]:
-        genotype = 'homozygous'
-    elif genotype_array == [1, 2] or genotype_array == [2, 1]:
-        genotype = 'compound-heterozygous'
-    elif chrom in [ 'Y', 'MT', 'X' ] and genotype_array in [ [0], [1] ]:
-        genotype = 'haploid'        
-    else:
-         print chrom, genotype_array
-         raise Exception(chrom, genotype_array)
-
-    return genotype
-
-
-    
-## Generate json stanza:
-## If the variant is not within a gene, we discard it.
-def gen_variant_call_struct(rec, sample_id, load_time):
-    '''
-    Helper function for generating a single JSON stanza. Deprecated.
-    '''
-    
-    genotype_array = list(rec.samples[sample_id].values()[0])
-
-    genotype = gen_genotype_summary_str(genotype_array, rec.chrom)
-    
-    genome_version = get_genome_version()
-
-    gene = ''
-    if 'GENE' in rec.info:
-        gene = rec.info['GENE']
-
-    alt_bases = ''
-    
-    if rec.alts == None:
-        alt_bases = '<NON_REF>'
-    else:
-        alt_bases = list(rec.alts)
-
-    if genotype != 'not-determined':
-        svn_str = gen_svn_genotype_string(get_genome_version(),
-                                            rec.chrom,
-                                            rec.pos,
-                                            rec.ref,
-                                            alt_bases,
-                                            genotype)
-        filter_val = 'PASS'
-    else:
-        svn_str = ''
-        filter_val = 'NOT-DETERMINED'
-    
-    if gene == '':
-        return None
-    else:
-        return {
-            'alternateBases': alt_bases,
-            'calls': [{
-                'callSetId': sample_id,
-                'genotype': genotype_array,
-                'info': { 'FILTER': [ filter_val ] }
-            }],
-            'end': rec.stop,
-            'referenceBases': rec.ref,
-            'referenceName': 'chr' + rec.chrom,
-            'start': rec.start,
-            'attributes': {
-                'sample': {
-                    'load_time': load_time,
-                    'reference_version': genome_version
-                    },
-                    'variant': {
-                        'gene_symbols': gene,
-                        'id': rec.id
-                        },
-                        'variant_call': {
-                            'genotype': genotype,
-                            'systematic_name': svn_str
-                            }}}
-
-
-    
-    
-## Generate a Sequence Variant Nomenclature-based description of the genotype:        
-def gen_svn_genotype_string(genome_version,
-                        chrom,
-                        start,
-                        ref,
-                        alt_bases,
-                        zygosity):
-    '''
-    Helper function for generating the HGVS (nee SVN) notation string for
-    the genotype. Returns the HGVS as a string.
-    '''
-    
-    accession = human_genome_accessions[genome_version][chrom]
-
-    svn_str = accession + ':g.' 
-    print_sub_template = '[{}{}>{}]'
-    print_wildtype_template = '[{}=]'
-    
-    if zygosity == 'wildtype':
-        svn_str = svn_str + \
-          print_wildtype_template.format(start) + \
-          ';' + \
-          print_wildtype_template.format(start)
-                                           
-    elif len(alt_bases) == 1 and zygosity == 'heterozygous':
-        svn_str = svn_str + \
-          print_wildtype_template.format(start) + \
-          ';' + \
-          print_sub_template.format(start,
-                                        ref,
-                                        alt_bases[0])
-
-    elif len(alt_bases) == 1 and zygosity == 'homozygous':
-        svn_str = svn_str + \
-          print_sub_template.format(start,
-                                        ref,
-                                        alt_bases[0]) + \
-          ';' + \
-          print_sub_template.format(start,
-                                        ref,
-                                        alt_bases[0])
-
-
-    elif len(alt_bases) == 2:
-        svn_str = svn_str + \
-          print_sub_template.format(start,
-                                        ref,
-                                        alt_bases[0]) + \
-          ';' + \
-          print_sub_template.format(start,
-                                        ref,
-                                        alt_bases[1])
-
-    elif zygosity == 'haploid' and alt_bases not in ['.', '<NON_REF>']:
-        svn_str = svn_str + \
-          print_sub_template.format(start,
-                                        ref,
-                                        alt_bases[0])
-
-    elif zygosity == 'haploid' and alt_bases in ['.', '<NON_REF>']:
-        svn_str = svn_str + \
-          print_wildtype_template.format(start)
-
-        
-    return svn_str
-
 
 
 ## Obtain variable definitions from the environment:
