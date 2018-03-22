@@ -122,11 +122,11 @@ ucsc-gene-names.txt \
 ### Docker image for convert23andMe
 
 Here's how to fetch the convert23andme docker image: 
-`docker pull taltman/personal:ver1`
+`docker pull taltman/precisely-bioinformatics:ver2`
 
 And here is an example of running the docker image:
 
-`docker run -it -v $HOME:/host_dir convert23andme`
+`docker run -it -v $HOME:/host_dir precisely-bioinformatics`
 
 And how to call the script from within the container:
 `time python convert23andme/convert23andme.py /host_dir/Downloads/shorttest_deadbeef.txt data/human_g1k_v37.fasta.gz convert23andme/ucsc-gene-symbols-coords.txt.gz /host_dir/tmp`
