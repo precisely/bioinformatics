@@ -23,4 +23,4 @@ RUN pip install --trusted-host pypi.python.org .
 
 # Run app.py when the container launches
 #CMD ["python", "app.py"]
-CMD "/bin/bash"
+ENTRYPOINT python convert23andme/convert23andme.py ${GENOTYPE_23ANDME_RAW_BUCKETNAME} ${GENOTYPE_23ANDME_RAW_FILENAME} data/human_g1k_v37.fasta.gz convert23andme/ucsc-gene-symbols-coords.txt.gz ${GENOTYPE_VCF_TARGET_BUCKETNAME} ${REGION_NAME} ${AWS_ACCESS_KEY_ID} ${AWS_SECRET_ACCESS_KEY}

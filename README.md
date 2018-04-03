@@ -14,15 +14,20 @@ as a script, executing from the command-line as follows:
 
 ```
 precisely@consulting-vb:~/repos/bioinformatics/convert23andme$ time python \
-    ./convert23andme.py \
-	~/Downloads/shorttest_deadbeef.txt \
-	~/data/human_g1k_v37.fasta.gz \
-	~/data/ucsc-gene-symbols-coords.txt.gz ~/tmp
+	./convert23andme.py \
+	GENOTYPE_23ANDME_RAW_BUCKETNAME \
+	GENOTYPE_23ANDME_RAW_FILENAME \
+	data/human_g1k_v37.fasta.gz \
+	convert23andme/ucsc-gene-symbols-coords.txt.gz \
+	GENOTYPE_VCF_TARGET_BUCKETNAME \
+	REGION_NAME \
+	AWS_ACCESS_KEY_ID \
+	AWS_SECRET_ACCESS_KEY
 ```
 
 ### 23andMe's tab-delimited raw data format
 
-- 23&Me's data format documentation: 
+- 23&Me's data format documentation:
 
 	https://customercare.23andme.com/hc/en-us/articles/115004459928-Raw-Data-Technical-Details
 
@@ -31,8 +36,8 @@ precisely@consulting-vb:~/repos/bioinformatics/convert23andme$ time python \
 
 ### Obtaining 23andMe example data files for testing
 
-- Source of publicly-available 23&Me datasets for testing: 
-  
+- Source of publicly-available 23&Me datasets for testing:
+
   https://my.pgp-hms.org/public_genetic_data?data_type=23andMe
 
 
@@ -48,7 +53,7 @@ precisely@consulting-vb:~/repos/bioinformatics/convert23andme$ time python \
 - This will only need to be updated if we need to support a human
   genome build other than 37.
 - BED file obtained from the UCSC Genome Browser (see below)
-- Idea of how to annotate the variants with gene names from here: 
+- Idea of how to annotate the variants with gene names from here:
 
 	https://www.biostars.org/p/122690/
 
@@ -101,27 +106,31 @@ ucsc-gene-names.txt \
 
 	`precisely@consulting-vb:~/data$ tabix -p bed ucsc-gene-symbols-coords.txt.gz`
 
-### Backgroup VCF File Manipulation Documentation 
+### Backgroup VCF File Manipulation Documentation
 
-- BCFtools documentation: 
+- BCFtools documentation:
 
 	https://samtools.github.io/bcftools/bcftools.html
 
-- Using BCFtools to convert 23&Me to VCF: 
+- Using BCFtools to convert 23&Me to VCF:
 
 	https://samtools.github.io/bcftools/howtos/convert.html
 
-- Example using BCFtools to annotate variants with gene information: 
-  
+- Example using BCFtools to annotate variants with gene information:
+
   https://www.biostars.org/p/122690/
-  
-- Docs for PySam: 
+
+- Docs for PySam:
 
 	http://pysam.readthedocs.io/en/stable/usage.html#working-with-vcf-bcf-formatted-files
 
+- Docs for Boto3:
+
+	http://boto3.readthedocs.io/en/latest/
+
 ### Docker image for convert23andMe
 
-Here's how to fetch the convert23andme docker image: 
+Here's how to fetch the convert23andme docker image:
 `docker pull taltman/precisely-bioinformatics:ver2`
 
 And here is an example of running the docker image:
@@ -129,10 +138,9 @@ And here is an example of running the docker image:
 `docker run -it -v $HOME:/host_dir precisely-bioinformatics`
 
 And how to call the script from within the container:
-`time python convert23andme/convert23andme.py /host_dir/Downloads/shorttest_deadbeef.txt data/human_g1k_v37.fasta.gz convert23andme/ucsc-gene-symbols-coords.txt.gz /host_dir/tmp`
+`time python convert23andme/convert23andme.py ${GENOTYPE_23ANDME_RAW_BUCKETNAME} ${GENOTYPE_23ANDME_RAW_FILENAME} data/human_g1k_v37.fasta.gz convert23andme/ucsc-gene-symbols-coords.txt.gz ${GENOTYPE_VCF_TARGET_BUCKETNAME} ${REGION_NAME} ${AWS_ACCESS_KEY_ID} ${AWS_SECRET_ACCESS_KEY}`
 
 So in this example, we're mapping the $HOME dir to the /host_dir
 directory within the container, and that is where the input file is
 referenced on the host file system, and the output file is generated
 in that directory.
-
