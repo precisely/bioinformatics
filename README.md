@@ -15,14 +15,11 @@ as a script, executing from the command-line as follows:
 ```
 precisely@consulting-vb:~/repos/bioinformatics/convert23andme$ time python \
 	./convert23andme.py \
-	GENOTYPE_23ANDME_RAW_BUCKETNAME \
-	GENOTYPE_23ANDME_RAW_FILENAME \
+	S3_RAW_DATA_BUCKET \
+	GENOTYPE_RAW_FILENAME \
 	data/human_g1k_v37.fasta.gz \
 	convert23andme/ucsc-gene-symbols-coords.txt.gz \
-	GENOTYPE_VCF_TARGET_BUCKETNAME \
-	REGION_NAME \
-	AWS_ACCESS_KEY_ID \
-	AWS_SECRET_ACCESS_KEY
+	S3_BUCKET_GENETICS_VCF
 ```
 
 ### 23andMe's tab-delimited raw data format
@@ -138,7 +135,7 @@ And here is an example of running the docker image:
 `docker run -it -v $HOME:/host_dir precisely-bioinformatics`
 
 And how to call the script from within the container:
-`time python convert23andme/convert23andme.py ${GENOTYPE_23ANDME_RAW_BUCKETNAME} ${GENOTYPE_23ANDME_RAW_FILENAME} data/human_g1k_v37.fasta.gz convert23andme/ucsc-gene-symbols-coords.txt.gz ${GENOTYPE_VCF_TARGET_BUCKETNAME} ${REGION_NAME} ${AWS_ACCESS_KEY_ID} ${AWS_SECRET_ACCESS_KEY}`
+`time python convert23andme/convert23andme.py ${S3_RAW_DATA_BUCKET} ${GENOTYPE_RAW_FILENAME} data/human_g1k_v37.fasta.gz convert23andme/ucsc-gene-symbols-coords.txt.gz ${S3_BUCKET_GENETICS_VCF}`
 
 So in this example, we're mapping the $HOME dir to the /host_dir
 directory within the container, and that is where the input file is

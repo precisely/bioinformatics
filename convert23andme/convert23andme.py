@@ -94,8 +94,8 @@ def parse_23andMe_file(genotype_23andme_path):
 
 def convert_23andme_bcf(genotype_23andme_fileName,
                             raw_23andme_file,
-                            ref_human_genome_path,
-                            annotate_file_path,
+                            REF_HUMAN_GENOME_PATH,
+                            ANNOTATE_FILE_PATH,
                             output_bucket):
     '''
     Main function for converting 23andMe raw data file into a VCF
@@ -122,7 +122,7 @@ def convert_23andme_bcf(genotype_23andme_fileName,
     #     '--tsv2vcf',
     #     genotype_23andme_path,
     #     '-f',
-    #     ref_human_genome_path,
+    #     REF_HUMAN_GENOME_PATH,
     #     '-s',
     #     sample_id,
     #     '-Ob',
@@ -145,7 +145,7 @@ def convert_23andme_bcf(genotype_23andme_fileName,
                                         '--tsv2vcf',
                                         raw_23andme_file,
                                         '-f',
-                                        ref_human_genome_path,
+                                        REF_HUMAN_GENOME_PATH,
                                         '-s',
                                         sample_id,
                                         '-Ob',
@@ -153,7 +153,7 @@ def convert_23andme_bcf(genotype_23andme_fileName,
                                         'bcftools',
                                         'annotate',
                                         '-a',
-                                        annotate_file_path,
+                                        ANNOTATE_FILE_PATH,
                                         '-c CHROM,FROM,TO,GENE',
                                         '-h',
                                         tmp_dir + '/header-file.txt',
@@ -172,7 +172,7 @@ def convert_23andme_bcf(genotype_23andme_fileName,
                            processing_datetime,
                            genome_version,
                            snp_count,
-                           ref_human_genome_path)
+                           REF_HUMAN_GENOME_PATH)
 
     vcf_aug_base_file_name = sample_id + '.vcf.gz'
 
@@ -254,45 +254,37 @@ def augmented_vcf_file(vcf_file,
 ## Obtain variable definitions from the environment:
 if __name__ == "__main__":
 
-    genotype_23andme_raw_bucketName = sys.argv[1]
-    genotype_23andme_raw_fileName   = sys.argv[2]
-    ref_human_genome_path           = sys.argv[3]
-    annotate_file_path              = sys.argv[4]
-    genotype_vcf_target_bucketName  = sys.argv[5]
-    region_name                     = sys.argv[6]
-    aws_access_key_id               = sys.argv[7]
-    aws_secret_access_key           = sys.argv[8]
+    S3_RAW_DATA_BUCKET = sys.argv[1]
+    GENOTYPE_RAW_FILENAME           = sys.argv[2]
+    REF_HUMAN_GENOME_PATH           = sys.argv[3]
+    ANNOTATE_FILE_PATH              = sys.argv[4]
+    S3_BUCKET_GENETICS_VCF          = sys.argv[5]
 
     try:
-        s3 = boto3.resource(
-                's3',
-                aws_access_key_id = aws_access_key_id,
-                aws_secret_access_key = aws_secret_access_key,
-                region_name = region_name
-            )
+        s3 = boto3.resource('s3')
 
-        raw_bucket = s3.Bucket(genotype_23andme_raw_bucketName)
-        target_bucket = s3.Bucket(genotype_vcf_target_bucketName)
+        raw_bucket = s3.Bucket(S3_RAW_DATA_BUCKET)
+        target_bucket = s3.Bucket(S3_BUCKET_GENETICS_VCF)
 
         _, tmp_23andme_file = tempfile.mkstemp()
 
         # Download file to a temporary file-like object
         # This is a managed transfer, which will perform a multipart download in multiple threads if necessary
         with open(tmp_23andme_file, 'wb') as data:
-            raw_bucket.download_fileobj(genotype_23andme_raw_fileName, data)
+            raw_bucket.download_fileobj(GENOTYPE_RAW_FILENAME, data)
 
-        convert_23andme_bcf(genotype_23andme_raw_fileName,
+        convert_23andme_bcf(GENOTYPE_RAW_FILENAME,
                                 tmp_23andme_file,
-                                ref_human_genome_path,
-                                annotate_file_path,
-                                genotype_vcf_target_bucketName)
+                                REF_HUMAN_GENOME_PATH,
+                                ANNOTATE_FILE_PATH,
+                                S3_BUCKET_GENETICS_VCF)
 
         os.remove(tmp_23andme_file) # remove the temporary data file
 
     except:
         ## Trap any errors when running as script, and report the
         ## stack trace:
-        [sample_id, file_md5_hash_value] = genotype_23andme_raw_fileName.split('/')[-1].split('_')
+        [sample_id, file_md5_hash_value] = GENOTYPE_RAW_FILENAME.split('/')[-1].split('_')
 
         _, tmp_error_log_file = tempfile.mkstemp()
 
@@ -303,7 +295,7 @@ if __name__ == "__main__":
             print >> error_file, traceback.format_exc()
 
         target_bucket.upload_file(tmp_error_log_file, 'error_logs/' + sample_id + '.error')
-        logging.error('Error log uploaded @ s3://' + genotype_vcf_target_bucketName + '/error_logs/' + sample_id + '.error')
+        logging.error('Error log uploaded @ s3://' + S3_BUCKET_GENETICS_VCF + '/error_logs/' + sample_id + '.error')
 
         os.remove(tmp_error_log_file)   # remove the temporary error file
         sys.exit(1)
