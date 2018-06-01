@@ -90,7 +90,7 @@ def convert_data_rows(input_stream, output_stream):
             
 
 def convert_chromosome(number, rsid):
-    '''Convert from Ancestry's chromosome number format to 23andMe's format using _chromosome_conversions{}.'''
+    '''Convert from Ancestry's chromosome number format to 23andMe's format using _chromosome_conversions.'''
     if int(number) not in range(1, 27):
         raise ValueError('Chromosome number: {} for {} is outside of acceptable range 1-26'.format(number, rsid))               
     if int(number) > 22:
@@ -144,7 +144,7 @@ if __name__ == "__main__":
         #Create generator for input
         input_stream = input_file_generator(ancestry_path)
         #Create output stream
-        output_stream = output_file_generator('testing/out-23andme.txt')
+        output_stream = output_file_generator('convertAncestry/testing/out-23andme.txt')
 
         convert_ancestry(input_stream, output_stream)
 

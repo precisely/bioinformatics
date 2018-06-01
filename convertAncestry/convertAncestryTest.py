@@ -82,13 +82,11 @@ with description('Testing Ancestry.com -> 23andme converter:') as testConverter:
             assert result[r] == expected[r]
     with it('Test formatting of actual data'):
         good_input = 'rs4475691\t5\t846808\tT\tC'
-        expected_output_good_input = 'rs4475691\t5\t846808\tTC'
+        expected_output_good_input = 'rs4475691\t5\t846808\tTC\n'
         skip_input = '#rsid4475691\t5\t846808\tT\tC'
         bad_input = 'This\tis\tnot\ta\tproper line'
-        e = conv.format_data(good_input)
-        print('\n')
-        print(e)
-        print(expected_output_good_input)
-        assert e == expected_output_good_input
+        result = conv.format_data(good_input)
+      
+        assert result == expected_output_good_input
         assert conv.format_data(skip_input) == skip_input
         assert conv.format_data(bad_input) == None

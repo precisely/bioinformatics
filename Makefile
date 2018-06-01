@@ -19,3 +19,12 @@ test-convert23andme:
 	python ./convert23andme/test_convert23andme.py
 
 test: test-convert23andme
+
+AncestryDNA.txt: 
+	wget -O convertAncestry/test/ancestry-sample.zip https://my.pgp-hms.org/user_file/download/3433
+	unzip convertAncestry/test/ancestry-sample.zip
+
+test: ./convertAncestry/convertAncestry.py ./convertAncestry/convertAncestryTest.py ./convertAncestry/test/AncestryDNA.txt
+	mamba convertAncestry/convertAncestryTest.py
+	python convertAncestry/convertAncestry.py convertAncestry/test/AncestryDNA.txt
+
