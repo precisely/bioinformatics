@@ -29,5 +29,5 @@ AncestryDNA.txt:
 test: AncestryDNA.txt
 	cd convertAncestry
 	mamba convertAncestryTest.py
-	python convertAncestry.py convertAncestry/test/AncestryDNA.txt
+	python convertAncestry.py test/AncestryDNA.txt
 
