@@ -1,5 +1,5 @@
 from mamba import description, context, it
-import .convertAncestry as conv
+import convertAncestry as conv
 import datetime
 import types
 import unittest
