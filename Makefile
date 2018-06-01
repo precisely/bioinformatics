@@ -27,6 +27,7 @@ AncestryDNA.txt:
 	unzip convertAncestry/test/ancestry-sample.zip
 
 test: AncestryDNA.txt
-	mamba convertAncestry/convertAncestryTest.py
-	python convertAncestry/convertAncestry.py convertAncestry/test/AncestryDNA.txt
+	cd convertAncestry
+	mamba convertAncestryTest.py
+	python convertAncestry.py convertAncestry/test/AncestryDNA.txt
 
