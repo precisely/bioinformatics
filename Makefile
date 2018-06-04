@@ -27,4 +27,3 @@ test: AncestryDNA.txt test-convert23andme
 	cd convertAncestry && \
 	mamba convertAncestryTest.py \
 	python convertAncestry.py test/AncestryDNA.txt
-
