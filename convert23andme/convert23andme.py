@@ -254,18 +254,20 @@ def augmented_vcf_file(vcf_file,
 ## Obtain variable definitions from the environment:
 if __name__ == "__main__":
 
-    S3_RAW_DATA_BUCKET = sys.argv[1]
-    GENOTYPE_RAW_FILENAME           = sys.argv[2]
-    REF_HUMAN_GENOME_PATH           = sys.argv[3]
-    ANNOTATE_FILE_PATH              = sys.argv[4]
-    S3_BUCKET_GENETICS_VCF          = sys.argv[5]
+    REF_HUMAN_GENOME_PATH           = sys.argv[1]
+    ANNOTATE_FILE_PATH              = sys.argv[2]
+    S3_RAW_DATA_BUCKET              = os.environ['S3_RAW_DATA_BUCKET']
+    GENOTYPE_RAW_FILENAME           = os.environ['GENOTYPE_RAW_FILENAME']
+    S3_BUCKET_GENETICS_VCF          = os.environ['S3_BUCKET_GENETICS_VCF']
+    S3_BUCKET_ERROR                 = os.environ['S3_BUCKET_ERROR']
+    USER_EMAIL                      = os.environ['USER_EMAIL']
 
     try:
         s3 = boto3.resource('s3')
 
         raw_bucket = s3.Bucket(S3_RAW_DATA_BUCKET)
         target_bucket = s3.Bucket(S3_BUCKET_GENETICS_VCF)
-
+        error_bucket = s3.Bucket(S3_BUCKET_ERROR)
         _, tmp_23andme_file = tempfile.mkstemp()
 
         # Download file to a temporary file-like object
@@ -294,8 +296,28 @@ if __name__ == "__main__":
             print >> error_file, "Exception Args:", sys.exc_info()[1]
             print >> error_file, traceback.format_exc()
 
-        target_bucket.upload_file(tmp_error_log_file, 'error_logs/' + sample_id + '.error')
-        logging.error('Error log uploaded @ s3://' + S3_BUCKET_GENETICS_VCF + '/error_logs/' + sample_id + '.error')
+        ses = boto3.client('ses')
+        ses.send_email(
+            Source='no-reply@precise.ly',
+            Destination={
+                'ToAddresses': [
+                    USER_EMAIL
+                ]
+            },
+            Message={
+                'Subject': {
+                    'Data': 'Failed to process your uploaded file',
+                },
+                'Body': {
+                    'Html': {
+                        'Data': 'We\'re sorry, there was a problem processing your 23adMe file. We\'re looking into it.',
+                    }
+                }
+            }
+        )
+
+        error_bucket.upload_file(tmp_error_log_file, sample_id + '.error')
+        logging.error('Error log uploaded @ s3://' + S3_BUCKET_ERROR + '/' + sample_id + '.error')
 
         os.remove(tmp_error_log_file)   # remove the temporary error file
         sys.exit(1)

@@ -15,11 +15,8 @@ as a script, executing from the command-line as follows:
 ```
 precisely@consulting-vb:~/repos/bioinformatics/convert23andme$ time python \
 	./convert23andme.py \
-	S3_RAW_DATA_BUCKET \
-	GENOTYPE_RAW_FILENAME \
-	data/human_g1k_v37.fasta.gz \
-	convert23andme/ucsc-gene-symbols-coords.txt.gz \
-	S3_BUCKET_GENETICS_VCF
+	~/data/human_g1k_v37.fasta.gz \
+	convert23andme/ucsc-gene-symbols-coords.txt.gz
 ```
 
 ### 23andMe's tab-delimited raw data format
