@@ -6,9 +6,10 @@ WORKDIR /app
 
 # Copy the current directory contents into the container at /app
 ADD . /app
+ADD data /app/data
 
 # Install any needed packages specified in requirements.txt
-RUN make
+#RUN make
 
 ## Install OS packages:
 RUN apt-get update && apt-get install -y \
@@ -23,4 +24,4 @@ RUN pip install --trusted-host pypi.python.org .
 
 # Run app.py when the container launches
 #CMD ["python", "app.py"]
-ENTRYPOINT python convert23andme/convert23andme.py ~/data/human_g1k_v37.fasta.gz convert23andme/ucsc-gene-symbols-coords.txt.gz 
+ENTRYPOINT python convert23andme/convert23andme.py data/human_g1k_v37.fasta.gz convert23andme/ucsc-gene-symbols-coords.txt.gz 
