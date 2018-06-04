@@ -12,6 +12,8 @@ setup(
     packages=['convert23andme'],
     install_requires=[
         'pysam',
-        'mamba'
+        'mamba',
+        'expects',
+        'wget'
         ],
     include_package_data=True)

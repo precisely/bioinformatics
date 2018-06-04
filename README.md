@@ -136,3 +136,7 @@ directory within the container, and that is where the input file is
 referenced on the host file system, and the output file is generated
 in that directory.
 
+In order to build a new image, clone this repository then run
+'docker build .'
+'.' signifies current directory. Replace the dot with the path to 
+the bioinformatics directory, which contains the desired Dockerfile.
