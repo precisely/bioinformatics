@@ -19,9 +19,9 @@ test-convert23andme:
 	python ./convert23andme/test_convert23andme.py
 
 AncestryDNA.txt: 
-	mkdir convertAncestry/test
+	mkdir -p convertAncestry/test
 	wget -O convertAncestry/test/ancestry-sample.zip https://my.pgp-hms.org/user_file/download/3433
-	unzip convertAncestry/test/ancestry-sample.zip
+	unzip convertAncestry/test/ancestry-sample.zip -d convertAncestry/test
 
 test: AncestryDNA.txt test-convert23andme
 	cd convertAncestry && \
