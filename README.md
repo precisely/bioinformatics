@@ -15,8 +15,8 @@ as a script, executing from the command-line as follows:
 ```
 precisely@consulting-vb:~/repos/bioinformatics/convert23andme$ time python \
 	./convert23andme.py \
-	~/data/human_g1k_v37.fasta.gz \
-	convert23andme/ucsc-gene-symbols-coords.txt.gz
+	../data/human_g1k_v37.fasta.gz \
+	ucsc-gene-symbols-coords.txt.gz
 ```
 
 ### 23andMe's tab-delimited raw data format
@@ -39,7 +39,10 @@ precisely@consulting-vb:~/repos/bioinformatics/convert23andme$ time python \
 
 - Obtain the 1k Genomes reference human genome:
 
-	See target `build-human-genome-ref-db` in Makefile.
+	Download these files under <project-root>/data/
+	ftp://ftp-trace.ncbi.nih.gov/1000genomes/ftp/technical/reference/human_g1k_v37.fasta.gz
+	ftp://ftp-trace.ncbi.nih.gov/1000genomes/ftp/technical/reference/human_g1k_v37.fasta.gzi
+	ftp://ftp-trace.ncbi.nih.gov/1000genomes/ftp/technical/reference/human_g1k_v37.fasta.fai
 
 ### Building the Gene Coordinates BED File
 - This is checked in as:
@@ -132,7 +135,7 @@ And here is an example of running the docker image:
 `docker run -it -v $HOME:/host_dir precisely-bioinformatics`
 
 And how to call the script from within the container:
-`time python convert23andme/convert23andme.py ${S3_RAW_DATA_BUCKET} ${GENOTYPE_RAW_FILENAME} data/human_g1k_v37.fasta.gz convert23andme/ucsc-gene-symbols-coords.txt.gz ${S3_BUCKET_GENETICS_VCF}`
+`time python convert23andme/convert23andme.py data/human_g1k_v37.fasta.gz convert23andme/ucsc-gene-symbols-coords.txt.gz`
 
 So in this example, we're mapping the $HOME dir to the /host_dir
 directory within the container, and that is where the input file is
