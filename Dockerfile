@@ -21,9 +21,6 @@ RUN pip install --trusted-host pypi.python.org .
 # Define environment variable
 #ENV NAME World
 
-# Run mamba unit tests and sample Ancestry.com input test
-RUN make
-
 # Run app.py when the container launches
 #CMD ["python", "app.py"]
 CMD "/bin/bash"
