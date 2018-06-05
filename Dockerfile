@@ -8,7 +8,7 @@ WORKDIR /app
 ADD . /app
 
 # Install any needed packages specified in requirements.txt
-#RUN make
+#RUN make install
 
 ## Install OS packages:
 RUN apt-get update && apt-get install -y \

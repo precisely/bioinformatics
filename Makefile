@@ -1,15 +1,16 @@
 ## I forget whether the version that you download is GZip'ed or BGzip'ed.
 ## Might be necessary to decompress and recompress using bgzip.
-build-human-genome-ref-db:
+human_g1k_v37.fasta.gz: #build-human-genome-ref-db:
 	mkdir -p $(HOME)/data
 	cd $(HOME)/data
 	wget ftp://ftp-trace.ncbi.nih.gov/1000genomes/ftp/technical/reference/human_g1k_v37.fasta.gz
 	wget ftp://ftp-trace.ncbi.nih.gov/1000genomes/ftp/technical/reference/human_g1k_v37.fasta.gzi
 	wget ftp://ftp-trace.ncbi.nih.gov/1000genomes/ftp/technical/reference/human_g1k_v37.fasta.fai
+	aws cli s3 sync
 
+build-human-genome-ref-db: human_g1k_v37.fasta.gz
 
-
-install: build-human-genome-ref-db
+install: 
 	echo
 
 build-docker-image: install
