@@ -8,7 +8,7 @@ import random
 
 with description('Testing Ancestry.com -> 23andme converter:') as testConverter:
     with it('Creating input/output Generator and checking output file exists'):
-        random_outfile_name = 'testing/test_outputs/' + str(random.randint(1, 10000)) + 'out_23andMe.txt'
+        random_outfile_name = 'testing/test_outputs/out_23andMe.txt'
         in_generator = conv.input_file_generator('testing/AncestryDNA.txt')
         out_generator = conv.output_file_generator(random_outfile_name)
         #prime the generator

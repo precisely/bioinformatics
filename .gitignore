@@ -5,3 +5,5 @@
 convertAncestry/test
 
 convertAncestry/testing
+
+*.DS_Store

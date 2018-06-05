@@ -27,3 +27,7 @@ test: AncestryDNA.txt test-convert23andme
 	cd convertAncestry && \
 	mamba convertAncestryTest.py \
 	python convertAncestry.py test/AncestryDNA.txt
+
+clean: 	
+	rm -rf human_g1k_v37.fasta.gz
+	rm -r convertAncestry/test
