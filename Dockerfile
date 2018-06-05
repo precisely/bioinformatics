@@ -8,13 +8,14 @@ WORKDIR /app
 ADD . /app
 
 # Install any needed packages specified in requirements.txt
-#RUN make
+RUN make
 
 ## Install OS packages:
 RUN apt-get update && apt-get install -y \
     bcftools \
     samtools \
-    tabix
+    tabix \
+    unzip
 
 RUN pip install --trusted-host pypi.python.org .
 

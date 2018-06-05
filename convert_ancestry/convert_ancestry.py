@@ -1,5 +1,5 @@
 '''
-convertAncestry: Python module for converting ancestry.com raw data to 23andMe format
+convert_ancestry: Python module for converting ancestry.com raw data to 23andMe format
 
 Provided an Ancestry.com raw data file as input, this module will convert the given raw 
 data into a raw data file using the 23andMe format.
@@ -137,14 +137,14 @@ def convert_ancestry(input_stream, output_stream):
 
     convert_data_rows(input_stream, output_stream)
 
-# Call the process with the command line instruction: python3 convertAncestry.py path_to_ancestry_file
+# Call the process with the command line instruction: python3 convert_ancestry.py path_to_ancestry_file
 if __name__ == "__main__":
     ancestry_path = sys.argv[1]
     try:
         #Create generator for input
         input_stream = input_file_generator(ancestry_path)
         #Create output stream
-        output_stream = output_file_generator('convertAncestry/testing/out-23andme.txt')
+        output_stream = output_file_generator('convert_ancestry/test/out-23andme.txt')
 
         convert_ancestry(input_stream, output_stream)
 

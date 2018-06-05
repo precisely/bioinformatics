@@ -19,15 +19,15 @@ test-convert23andme:
 	python ./convert23andme/test_convert23andme.py
 
 AncestryDNA.txt: 
-	mkdir -p convertAncestry/test
-	wget -O convertAncestry/test/ancestry-sample.zip https://my.pgp-hms.org/user_file/download/3433
-	unzip convertAncestry/test/ancestry-sample.zip -d convertAncestry/test
+	mkdir -p convert_ancestry/test
+	wget -O convert_ancestry/test/ancestry-sample.zip https://my.pgp-hms.org/user_file/download/3433
+	unzip convert_ancestry/test/ancestry-sample.zip -d convert_ancestry/test
 
-test: AncestryDNA.txt test-convert23andme
-	cd convertAncestry && \
-	mamba convertAncestryTest.py \
-	python convertAncestry.py test/AncestryDNA.txt
+test: AncestryDNA.txt #test-convert23andme
+	cd convert_ancestry && \
+	mamba convert_ancestryTest.py \
+	python convert_ancestry.py test/AncestryDNA.txt
 
 clean: 	
-	rm -rf human_g1k_v37.fasta.gz
-	rm -r convertAncestry/test || true
+	rm -rf human_g1k_v37.fasta.gz || true
+	rm -r convert_ancestry/test || true

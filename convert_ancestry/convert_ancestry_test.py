@@ -1,5 +1,5 @@
 from mamba import description, context, it
-import convertAncestry as conv
+import convert_ancestry as conv
 import datetime
 import types
 import expects

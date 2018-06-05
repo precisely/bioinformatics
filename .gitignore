@@ -2,8 +2,8 @@
 *.pyc
 \#*\#
 
-convertAncestry/test
+convert_ancestry/test
 
-convertAncestry/testing
+convert_ancestry/testing
 
 *.DS_Store
