@@ -21,12 +21,11 @@ test-convert23andme:
 AncestryDNA.txt: 
 	mkdir -p convert_ancestry/test
 	wget -O convert_ancestry/test/ancestry-sample.zip https://my.pgp-hms.org/user_file/download/3433
-	unzip convert_ancestry/test/ancestry-sample.zip -d convert_ancestry/test
+	unzip -o convert_ancestry/test/ancestry-sample.zip -d convert_ancestry/test
 
 test: AncestryDNA.txt #test-convert23andme
 	cd convert_ancestry && \
 	mamba convert_ancestry_test.py && \
-	touch test/out-23andme.txt && \
 	python convert_ancestry.py test/AncestryDNA.txt
 
 clean: 	
