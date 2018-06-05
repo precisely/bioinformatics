@@ -138,19 +138,19 @@ in that directory.
 
 In order to build a new image, clone this repository then run
 
-'docker build -t image_name:tag .'
+`docker build -t image_name:tag .`
 
-'.' argument signifies current directory. If necessary, replace the dot with the path to 
+"." argument signifies current directory. If necessary, replace the dot with the path to 
 the bioinformatics directory, which contains the desired Dockerfile. The -t flag 
 allows you to name and tag the new image. image_name and tag are not required, but
-if you don't give the image a tag it will automatically use 'latest'.
+if you don't give the image a tag it will automatically use "latest".
 
 In order to start a container and run tests use:
 
-'docker run -it image_name /bin/bash'
+`docker run -it image_name:tag /bin/bash`
 
-The -it flag will connect STDOut to your terminal as well as allow you to use a shell 
-inside the container by adding the '/bin/bash' arg after your image_name. To exit the container
+The -it flag will connect stdout to your terminal as well as allow you to use a shell 
+inside the container by adding the: "/bin/bash" arg after your image_name. To exit the container
 enter the following command into the docker shell:
 
-'exit'
+`exit`
