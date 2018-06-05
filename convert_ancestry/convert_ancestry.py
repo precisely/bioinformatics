@@ -16,7 +16,7 @@ _chromosome_conversions = {'23':'X', '24':'Y', '25':'Y', '26':'MT'}
 def output_file_generator(output_filepath):
     '''Create an output stream to the new file.'''
     buffer = ''
-    with open(output_filepath, 'w+') as output:
+    with open(output_filepath, 'w') as output:
         while(buffer != 'close'):
             buffer = yield
             if(buffer == 'close'):
@@ -144,7 +144,7 @@ if __name__ == "__main__":
         #Create generator for input
         input_stream = input_file_generator(ancestry_path)
         #Create output stream
-        output_stream = output_file_generator('convert_ancestry/test/out-23andme.txt')
+        output_stream = output_file_generator('test/out-23andme.txt')
 
         convert_ancestry(input_stream, output_stream)
 

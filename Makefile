@@ -25,7 +25,8 @@ AncestryDNA.txt:
 
 test: AncestryDNA.txt #test-convert23andme
 	cd convert_ancestry && \
-	mamba convert_ancestryTest.py \
+	mamba convert_ancestry_test.py && \
+	touch test/out-23andme.txt && \
 	python convert_ancestry.py test/AncestryDNA.txt
 
 clean: 	
