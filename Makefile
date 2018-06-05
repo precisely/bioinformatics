@@ -30,4 +30,4 @@ test: AncestryDNA.txt test-convert23andme
 
 clean: 	
 	rm -rf human_g1k_v37.fasta.gz
-	rm -r convertAncestry/test
+	rm -r convertAncestry/test || true
