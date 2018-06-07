@@ -3,18 +3,18 @@
 
 ### Installation:
 
-$(HOME)/data/human_g1k_v37.fasta.gz:
-	mkdir -p $(HOME)/data
-	cd $(HOME)/data \
+$(CURDIR)/ref-data/human_g1k_v37.fasta.gz:
+	mkdir -p $(CURDIR)/ref-data
+	cd $(CURDIR)/ref-data \
 		aws s3 cp "s3://precisely-bio-dbs/human-1kg-v37/2010-05-17/human_g1k_v37.fasta.gz" .
 #	wget ftp://ftp-trace.ncbi.nih.gov/1000genomes/ftp/technical/reference/human_g1k_v37.fasta.gzi
 #	wget ftp://ftp-trace.ncbi.nih.gov/1000genomes/ftp/technical/reference/human_g1k_v37.fasta.fai
 
-$(HOME)/data/beagle-refdb/chr9.1kg.phase3.v5a.bref:
-	mkdir -p $(HOME)/data/beagle-refdb
-	aws s3 sync "s3://precisely-bio-dbs/beagle-1kg-bref/b37.bref" $(HOME)/data/beagle-refdb
+$(CURDIR)/ref-data/beagle-refdb/chr9.1kg.phase3.v5a.bref:
+	mkdir -p $(CURDIR)/ref-data/beagle-refdb
+	aws s3 sync "s3://precisely-bio-dbs/beagle-1kg-bref/b37.bref" $(CURDIR)/ref-data/beagle-refdb
 
-install: $(HOME)/data/human_g1k_v37.fasta.gz $(HOME)/data/beagle-refdb/chr9.1kg.phase3.v5a.bref third-party/beagle-leash/Makefile
+install: $(CURDIR)/ref-data/human_g1k_v37.fasta.gz $(CURDIR)/ref-data/beagle-refdb/chr9.1kg.phase3.v5a.bref third-party/beagle-leash/Makefile
 	@echo Installation complete!
 
 third-party/beagle-leash/Makefile:
@@ -24,10 +24,20 @@ third-party/beagle-leash/Makefile:
 		&& cd beagle-leash \
 		&& make install-nodata
 
+
 ### Docker workflows:
 
-build-docker-image: install
-	echo
+## All installation steps that should be performed at docker build time go here:
+docker-install:
+	pip install --trusted-host pypi.python.org .
+
+## Build the docker image for the bioinformatics repository:
+build-docker-image:
+	docker build -t dev/precisely-bioinformatics .
+
+# clean-docker-context:
+# 	rm -rf /dev/shm/docker-context
+
 
 
 ### Tests
@@ -38,7 +48,7 @@ test-convert23andme:
 test: test-convert23andme
 
 test-beagle-leash:
-	export BEAGLE_REFDB_PATH="$(HOME)/data/beagle-refdb" \
+	export BEAGLE_REFDB_PATH="$(CURDIR)/ref-data/beagle-refdb" \
 		&& export TMPDIR="/dev/shm" \
 		&& export PATH="$(PATH):$(CURDIR)/third-party/beagle-leash/inst/beagle-leash/bin" \
 		&& cd third-party/beagle-leash \
@@ -51,4 +61,4 @@ clean-software:
 	rm -rf third-party/beagle-leash
 
 clean-all: clean-software
-	rm -rf $(HOME)/data
+	rm -rf $(CURDIR)/ref-data
