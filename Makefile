@@ -9,8 +9,9 @@ build-human-genome-ref-db:
 
 
 
-install: build-human-genome-ref-db
+install: build-human-genome-ref-db AncestryDNA.txt
 	echo
+	#Make sure the ucsc gene symbols are downloaded?
 
 build-docker-image: install
 	echo
@@ -18,15 +19,17 @@ build-docker-image: install
 test-convert23andme:
 	python ./convert23andme/test_convert23andme.py
 
+
 AncestryDNA.txt: 
 	mkdir -p convert_ancestry/test
-	wget -O convert_ancestry/test/ancestry-sample.zip https://my.pgp-hms.org/user_file/download/3433
-	unzip -o convert_ancestry/test/ancestry-sample.zip -d convert_ancestry/test
+	wget -O convert_ancestry/test/ancestry-sample.zip -c https://my.pgp-hms.org/user_file/download/3433
+	unzip -n convert_ancestry/test/ancestry-sample.zip -d convert_ancestry/test
 
-test: AncestryDNA.txt #test-convert23andme
+test: install #test-convert23andme
 	cd convert_ancestry && \
-	mamba convert_ancestry_test.py && \
+	mamba test_convert_ancestry.py && \
 	python convert_ancestry.py test/AncestryDNA.txt
+	#mamba ancestry-to-vcf.py
 
 clean: 	
 	rm -rf human_g1k_v37.fasta.gz || true

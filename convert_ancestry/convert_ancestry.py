@@ -10,12 +10,14 @@ from time import time
 from datetime import datetime
 import traceback
 
+_output_path = './convert_ancestry/test/'
 _chromosome_conversions = {'23':'X', '24':'Y', '25':'Y', '26':'MT'}
 
 
 def output_file_generator(output_filepath):
     '''Create an output stream to the new file.'''
     buffer = ''
+    _output_path = output_filepath
     with open(output_filepath, 'w') as output:
         while(buffer != 'close'):
             buffer = yield
@@ -26,7 +28,7 @@ def output_file_generator(output_filepath):
 
 def input_file_generator(input_filepath):
     '''Create a generator to stream the input Ancestry file.'''
-    with open(input_filepath) as input:
+    with open(input_filepath, 'r') as input:
         for line in input:
             yield line 
 
@@ -49,6 +51,11 @@ def is_genome_line(line):
 def parse_ancestry_genome_version(line):
     '''Return the human refrence genome used by Ancestry for this file (usually 37).'''
     genome_version = line.rstrip().split('build ')[1].split(' ')[0]
+    try:
+        float(genome_version)
+    except(ValueError):
+        raise ValueError('Bad input for HRG version')   
+
     return genome_version
 
 #Writes the signigicant metadata to the new temp file
@@ -112,7 +119,10 @@ def parse_metadata(input_stream):
             genome_version = parse_ancestry_genome_version(line)
         if is_date_line(line):    
             datetime_obj = parse_ancestry_time_header(line)
-        line = next(input_stream)
+        try:    
+            line = next(input_stream)
+        except(StopIteration):
+            raise StopIteration('File is missing data')    
 
     if not genome_version:
         raise ValueError('Human Reference Genome number not found')
@@ -128,6 +138,7 @@ def convert_ancestry(input_stream, output_stream):
     Main function for converting Ancestry.com style raw data files to 
     23andMe format. Read Ancestry.com data from input_stream.
     Write to a temp file using output_stream.
+    Returns the output path.
     '''
     
     genome_version, datetime_obj = parse_metadata(input_stream) 
@@ -136,6 +147,8 @@ def convert_ancestry(input_stream, output_stream):
     output_stream.send(format_metadata(datetime_obj, genome_version))
 
     convert_data_rows(input_stream, output_stream)
+
+    return _output_path
 
 # Call the process with the command line instruction: python3 convert_ancestry.py path_to_ancestry_file
 if __name__ == "__main__":
