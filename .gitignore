@@ -7,3 +7,5 @@ convert_ancestry/test
 convert_ancestry/testing
 
 *.DS_Store
+
+file_conversion
