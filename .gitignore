@@ -8,4 +8,4 @@ convert_ancestry/testing
 
 *.DS_Store
 
-file_conversion
+file_conversion_env
