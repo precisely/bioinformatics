@@ -10,5 +10,5 @@ setup(
     author='Tomer Altman',
     author_email='analytics@tomeraltman.net',
     packages=['convert23andme'],
-    install_requires=['pysam'],
+    install_requires=['pysam','boto3'],
     include_package_data=True)

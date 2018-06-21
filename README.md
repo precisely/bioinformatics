@@ -51,6 +51,7 @@ precisely@consulting-vb:~/repos/bioinformatics/convert23andme$ time python \
 - Idea of how to annotate the variants with gene names from here: 
 
 	https://www.biostars.org/p/122690/
+- In the future, this should be automated using the cruzdb Python package
 
 #### Generating the Gene Coordinate BED file using the UCSC Genome Browser
 
