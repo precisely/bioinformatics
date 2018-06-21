@@ -52,7 +52,8 @@ test-beagle-leash:
 		&& export TMPDIR="/dev/shm" \
 		&& export PATH="$(PATH):$(CURDIR)/third-party/beagle-leash/inst/beagle-leash/bin" \
 		&& cd third-party/beagle-leash \
-		&& make test
+		&& make fast-test
+
 
 ### Cleaning UP
 
