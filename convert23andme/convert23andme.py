@@ -93,9 +93,11 @@ def parse_23andMe_file(genotype_23andme_path):
 
 
 def convertImpute23andMe2VCF(genotype_23andme_path,
-                            ref_human_genome_path,
-                            annotate_file_path,
-                            output_dir):
+                                ref_human_genome_path,
+                                annotate_file_path,
+                                output_dir,
+                                user_id,
+                                debug=False):
 
     ## Definitions:    
     [sample_id, file_md5_hash_value] = genotype_23andme_path.split('/')[-1].split('_')
@@ -113,6 +115,8 @@ def convertImpute23andMe2VCF(genotype_23andme_path,
     annotated_vcf_file   = tmp_dir + '/' + sample_id + '-gene-annot.vcf.gz'
 
     final_vcf_file       = tmp_dir + '/' + sample_id + '-final.vcf.gz'
+    
+    final_vcf_bgz_file   = tmp_dir + '/' + sample_id + '-final.vcf.bgz'
 
     ## Get 23andMe raw file stats:
     [ processing_datetime,
@@ -127,23 +131,34 @@ def convertImpute23andMe2VCF(genotype_23andme_path,
 
 
     ## Impute the VCF file:
-    subprocess.call(['beagle-leash',
-                         converted_vcf_file,
-                        imputed_vcf_file])
-
+    subprocess.check_output(['beagle-leash',
+                                 converted_vcf_file,
+                                 imputed_vcf_file],
+                                 stderr=subprocess.STDOUT)
+    
+    
     print "foo"
     ## Index the VCF file:
-    subprocess.call(['zcat',
-                         imputed_vcf_file,
-                         '|',
-                         'bgzip',                         
-                         '>',
-                         imputed_vcf_bgz_file])
+    print
+    ## Passing the arguments as a list of strings will not work.
+    ## First joining the arguments into one string bypassed the errors.
+    ## This is because the list form doesn't support pipelines, see subprocess.Popen docs.
+    subprocess.check_output(' '.join(['zcat',
+                                          imputed_vcf_file,
+                                          '|',
+                                          'bgzip',                         
+                                          '>',
+                                          imputed_vcf_bgz_file]),
+                                stderr=subprocess.STDOUT,
+                                shell=True)
+    
     print "bar"
-    subprocess.call(['tabix',
-                         '-p',
-                         'vcf',
-                         imputed_vcf_bgz_file])
+    subprocess.check_output(['tabix',
+                            '-p',
+                            'vcf',
+                            imputed_vcf_bgz_file],
+                            stderr=subprocess.STDOUT)
+    
     print "baz"
     ## Annotate the variants with Gene information,
     ## and add custom header fields:
@@ -151,12 +166,31 @@ def convertImpute23andMe2VCF(genotype_23andme_path,
                              annotated_vcf_file,
                              final_vcf_file,
                              annotate_file_path,
+                             ref_human_genome_path,
                              sample_id,
                              processing_datetime,
                              genome_version,
                              snp_count,
                              tmp_dir)
     print "quux"
+
+    ## Need to marshall data into BGzip format again:
+    subprocess.check_output(' '.join(['zcat',
+                                          final_vcf_file,
+                                          '|',
+                                          'bgzip',                         
+                                          '>',
+                                          final_vcf_bgz_file]),
+                            stderr=subprocess.STDOUT,
+                            shell=True)
+    
+    vcf2dynamoDB(final_vcf_bgz_file,
+                     annotate_file_path,
+                     user_id,
+                     sample_id,
+                     genome_version,
+                     debug=debug)
+                     
     
     ## Clean-Up
     
@@ -212,6 +246,7 @@ def annotateVCFwithGenes(imputed_vcf_file,
                              annotated_vcf_file,
                              final_vcf_file,
                              annotate_file_path,
+                             ref_human_genome_path,
                              sample_id,
                              processing_datetime,
                              genome_version,
@@ -234,6 +269,7 @@ def annotateVCFwithGenes(imputed_vcf_file,
                                           '-c CHROM,FROM,TO,GENE',
                                           '-h',
                                           tmp_dir + '/header-file.txt',
+                                          '-Oz',
                                           '-o',
                                           annotated_vcf_file,
                                           imputed_vcf_file]),
@@ -282,10 +318,16 @@ def addHeaderDocs_filterVal2vcfFile(vcf_file,
     temp_header_file = tmp_dir + '/header_temp.vcf'
 
     with open(temp_header_file, 'w') as header_file:
-        
         logging.info('PySAM is buggy, returning an extra space character when printing the header object. Removing.')
         print >> header_file, new_header,
-        
+
+    # vcf_bgz_in  = VariantFile(vcf_file, 'r')
+    # vcf_bgz_out = VariantFile(vcf_aug_file, 'w', header=new_header)
+
+    
+    # for rec in bcf_in.fetch('chr1', 100000, 200000):
+    # bcf_out.write(rec)
+
     
     with gzip.open(vcf_aug_file, 'w') as vcf_out:
     
@@ -295,7 +337,7 @@ def addHeaderDocs_filterVal2vcfFile(vcf_file,
                     print >> vcf_out, line.rstrip()   
 
                     
-        with open(vcf_file, 'r') as vcf_in:
+        with gzip.open(vcf_file, 'r') as vcf_in:
 
             for line in vcf_in:
 
@@ -318,7 +360,7 @@ def addHeaderDocs_filterVal2vcfFile(vcf_file,
 
 ### Utilities
 
-def test_VCF2dynamoDB (filename, userID, sampleID, genomeVersion, debug=False):
+def vcf2dynamoDB (filename, annotate_file_path, userID, sampleID, genomeVersion, debug=False):
     '''
     A test function for prototyping the bulk upload of VCF file data to DynamoDB.
 
@@ -337,7 +379,7 @@ def test_VCF2dynamoDB (filename, userID, sampleID, genomeVersion, debug=False):
     gene_min_coord = {}
     gene_max_coord = {}
     
-    with gzip.open('ucsc-gene-symbols-coords.txt.gz') as geneCoords:
+    with gzip.open(annotate_file_path) as geneCoords:
         for coordLine in geneCoords:
 
             coords = coordLine.rstrip().split('\t')
@@ -371,16 +413,19 @@ def test_VCF2dynamoDB (filename, userID, sampleID, genomeVersion, debug=False):
             
             
             if rec.alts == None:
-                currAltBases = None
-                currEndBase  = rec.pos
+                currAltBases    = None
+                currAltBasesStr = '.'
+                currEndBase     = rec.pos
             elif len(rec.alts) == 1:
-                currAltBases = rec.alts[0]
-                currEndBase  = rec.pos + len(currAltBases) - 1
+                currAltBases    = rec.alts[0]
+                currAltBasesStr = currAltBases
+                currEndBase     = rec.pos + len(currAltBases) - 1
             else:
                 ## Dynamo cannot handle tuples, so cast as a list
                 ## (this is in the rare case of two alternate alleles at the locus):
-                currAltBases = list(rec.alts)
-                currEndBase  = map(lambda x: currStartBase + len(x) -1, currAltBases)
+                currAltBases    = list(rec.alts)
+                currAltBasesStr = ','.join(currAltBases)
+                currEndBase     = map(lambda x: currStartBase + len(x) -1, currAltBases)
                 
             currChrom     = rec.chrom
             currStartBase = rec.pos            
@@ -401,7 +446,8 @@ def test_VCF2dynamoDB (filename, userID, sampleID, genomeVersion, debug=False):
             rec_sample    = rec.samples[rec.samples.keys()[0]]
             currGenotype  = list(rec_sample['GT'])
             
-            variantID     = ':'.join([sampleID, genomeVersion, currChrom, str(currStartBase), currRsID])
+            variantID     = ':'.join([sampleID, genomeVersion, currChrom, str(currStartBase), currRsID, currAltBasesStr])
+            ##print variantID
             
             currItem = {
                 'userId'             : userID,

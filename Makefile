@@ -26,6 +26,10 @@ $(CURDIR)/ref-data/beagle-refdb/chr9.1kg.phase3.v5a.bref:
 install: $(CURDIR)/ref-data/human_g1k_v37.fasta.gz $(CURDIR)/ref-data/beagle-refdb/chr9.1kg.phase3.v5a.bref third-party/beagle-leash/Makefile
 	@echo Installation complete!
 
+reinstall-beagle:
+	rm -rf third-party/beagle-leash
+	$(MAKE) third-party/beagle-leash/.gitignore
+
 third-party/beagle-leash/.gitignore:
 	mkdir -p third-party
 	cd third-party \
@@ -68,7 +72,7 @@ test-beagle-leash:
 test-pipeline:
 	export BEAGLE_REFDB_PATH="$(CURDIR)/ref-data/beagle-refdb"
 	export TMPDIR="/dev/shm"
-	export PATH="$(PATH):$(CURDIR)/third-party/beagle-leash/inst/beagle-leash/bin"
+	export PATH="$(CURDIR)/third-party/beagle-leash/inst/beagle-leash/bin:$(PATH)"
 	export BEAGLE_LEASH_CHROMS="21"
 	python convert23andme/test_pipeline.py
 
