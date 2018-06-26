@@ -11,8 +11,10 @@
 
 $(CURDIR)/ref-data/human_g1k_v37.fasta.bgz:
 	mkdir -p $(CURDIR)/ref-data
-	cd $(CURDIR)/ref-data \
-		&& aws s3 cp "s3://precisely-bio-dbs/human-1kg-v37/2010-05-17/human_g1k_v37.fasta.bgz" .
+	cd $(CURDIR)/ref-data
+	aws s3 cp "s3://precisely-bio-dbs/human-1kg-v37/2010-05-17/human_g1k_v37.fasta.bgz" .
+	aws s3 cp "s3://precisely-bio-dbs/human-1kg-v37/2010-05-17/human_g1k_v37.fasta.bgz.gzi" .
+	aws s3 cp "s3://precisely-bio-dbs/human-1kg-v37/2010-05-17/human_g1k_v37.fasta.bgz.fai" .	
 
 #	
 #	wget ftp://ftp-trace.ncbi.nih.gov/1000genomes/ftp/technical/reference/human_g1k_v37.fasta.fai
