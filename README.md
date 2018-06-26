@@ -7,6 +7,24 @@ so that other code repos can simply use this repo as a black box.
 
 ## Installation
 
+To get started, you clone the repo, checkout the correct feature branch, build the project, and then build the docker image:
+
+```
+git clone git@github.com:precisely/bioinformatics.git
+git checkout taltman/vcf2dydb
+make install
+make build-docker-image
+```
+
+Within the docker image, you need to set up the AWS environment with IAM user credentials (not automated yet).
+
+Then, you can run the test pipeline as follows
+
+```
+make test-pipeline
+```
+
+
 ### Building a Docker image
 
 * TODO: figure out how to inject AWS IAM credentials into the Docker image
