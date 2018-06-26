@@ -25,7 +25,7 @@ $(CURDIR)/ref-data/beagle-refdb/chr9.1kg.phase3.v5a.bref:
 	aws s3 sync "s3://precisely-bio-dbs/beagle-1kg-bref/b37.bref" $(CURDIR)/ref-data/beagle-refdb
 
 
-install: $(CURDIR)/ref-data/human_g1k_v37.fasta.bgz $(CURDIR)/ref-data/beagle-refdb/chr9.1kg.phase3.v5a.bref third-party/beagle-leash/Makefile
+install: $(CURDIR)/ref-data/human_g1k_v37.fasta.bgz $(CURDIR)/ref-data/beagle-refdb/chr9.1kg.phase3.v5a.bref third-party/beagle-leash/.gitignore
 	@echo Installation complete!
 
 reinstall-beagle-leash:
