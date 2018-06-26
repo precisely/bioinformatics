@@ -136,9 +136,9 @@ directory within the container, and that is where the input file is
 referenced on the host file system, and the output file is generated
 in that directory.
 
-In order to build a new image, clone this repository then run
+In order to build a new image, clone this repository then from within the bioinformatics directory, run:
 
-`docker build -t image_name:tag .`
+`docker build -t <image_name>:<tag> .`
 
 "." argument signifies current directory. If necessary, replace the dot with the path to 
 the bioinformatics directory, which contains the desired Dockerfile. The -t flag 
@@ -147,10 +147,18 @@ if you don't give the image a tag it will automatically use "latest".
 
 In order to start a container and run tests use:
 
-`docker run -it image_name:tag /bin/bash`
+`docker run -it <image_name>:<tag> /bin/bash`
 
-The -it flag will connect stdout to your terminal as well as allow you to use a shell 
-inside the container by adding the: "/bin/bash" arg after your image_name. To exit the container
+The -it flag will connect STDIN to your terminal as well as allow you to use a shell 
+inside the container by adding the: "/bin/bash" argument after your image_name:tag argument. To exit the container
 enter the following command into the docker shell:
 
 `exit`
+
+To run convert_ancestry.py unit tests, and ensure that your Ancestry.com file converter is running properly use the following command:
+
+`mamba test_convert_ancestry.py`
+
+Run the full integration test from the bioinformatics directory with:
+
+`mamba test_ancestry_to_vcf.py`

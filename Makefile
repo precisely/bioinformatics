@@ -3,15 +3,15 @@
 build-human-genome-ref-db:
 	mkdir -p $(HOME)/data
 	cd $(HOME)/data
-	wget ftp://ftp-trace.ncbi.nih.gov/1000genomes/ftp/technical/reference/human_g1k_v37.fasta.gz
-	wget ftp://ftp-trace.ncbi.nih.gov/1000genomes/ftp/technical/reference/human_g1k_v37.fasta.gzi
-	wget ftp://ftp-trace.ncbi.nih.gov/1000genomes/ftp/technical/reference/human_g1k_v37.fasta.fai
-
+	wget -c ftp://ftp-trace.ncbi.nih.gov/1000genomes/ftp/technical/reference/human_g1k_v37.fasta.gz
+	#wget ftp://ftp-trace.ncbi.nih.gov/1000genomes/ftp/technical/reference/human_g1k_v37.fasta.gzi
+	wget -c ftp://ftp-trace.ncbi.nih.gov/1000genomes/ftp/technical/reference/human_g1k_v37.fasta.fai
+	#added -c option to prevent double downloading. fasta.gzi gets No such file error, commented out for now
 
 
 install: build-human-genome-ref-db AncestryDNA.txt
 	echo
-	#Make sure the ucsc gene symbols are downloaded?
+	#Make sure the ucsc gene symbols/etc are downloaded?
 
 build-docker-image: install
 	echo
@@ -26,11 +26,10 @@ AncestryDNA.txt:
 	unzip -n convert_ancestry/test/ancestry-sample.zip -d convert_ancestry/test
 
 test: install #test-convert23andme
-	cd convert_ancestry && \
-	mamba test_convert_ancestry.py && \
-	python convert_ancestry.py test/AncestryDNA.txt
-	#mamba ancestry-to-vcf.py
+	mamba convert_ancestry/test_convert_ancestry.py && \
+	python convert_ancestry/convert_ancestry.py convert_ancestry/test/AncestryDNA.txt
+	#mamba test_ancestry_to_vcf.py
 
 clean: 	
-	rm -rf human_g1k_v37.fasta.gz || true
+	rm -rf human_g1k_v37.* || true
 	rm -r convert_ancestry/test || true
