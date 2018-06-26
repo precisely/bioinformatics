@@ -131,10 +131,11 @@ def convertImpute23andMe2VCF(genotype_23andme_path,
 
 
     ## Impute the VCF file:
-    subprocess.check_output(['beagle-leash',
-                                 converted_vcf_file,
-                                 imputed_vcf_file],
-                                 stderr=subprocess.STDOUT)
+    subprocess.check_call(' '.join(['third-party/beagle-leash/inst/beagle-leash/bin/beagle-leash',
+                                        converted_vcf_file,
+                                        imputed_vcf_file]),
+                            stderr=subprocess.STDOUT,
+                            shell=True)
     
     
     print "foo"
@@ -143,21 +144,21 @@ def convertImpute23andMe2VCF(genotype_23andme_path,
     ## Passing the arguments as a list of strings will not work.
     ## First joining the arguments into one string bypassed the errors.
     ## This is because the list form doesn't support pipelines, see subprocess.Popen docs.
-    subprocess.check_output(' '.join(['zcat',
-                                          imputed_vcf_file,
-                                          '|',
-                                          'bgzip',                         
-                                          '>',
-                                          imputed_vcf_bgz_file]),
-                                stderr=subprocess.STDOUT,
-                                shell=True)
+    subprocess.check_call(' '.join(['zcat',
+                                        imputed_vcf_file,
+                                        '|',
+                                        'bgzip',                         
+                                        '>',
+                                        imputed_vcf_bgz_file]),
+                            stderr=subprocess.STDOUT,
+                            shell=True)
     
     print "bar"
-    subprocess.check_output(['tabix',
-                            '-p',
-                            'vcf',
-                            imputed_vcf_bgz_file],
-                            stderr=subprocess.STDOUT)
+    subprocess.check_call(' '.join(['tabix',
+                                        '-p',
+                                        'vcf',
+                                        imputed_vcf_bgz_file]),
+                              stderr=subprocess.STDOUT)
     
     print "baz"
     ## Annotate the variants with Gene information,
@@ -175,12 +176,12 @@ def convertImpute23andMe2VCF(genotype_23andme_path,
     print "quux"
 
     ## Need to marshall data into BGzip format again:
-    subprocess.check_output(' '.join(['zcat',
-                                          final_vcf_file,
-                                          '|',
-                                          'bgzip',                         
-                                          '>',
-                                          final_vcf_bgz_file]),
+    subprocess.check_call(' '.join(['zcat',
+                                        final_vcf_file,
+                                        '|',
+                                        'bgzip',                         
+                                        '>',
+                                        final_vcf_bgz_file]),
                             stderr=subprocess.STDOUT,
                             shell=True)
     

@@ -5,6 +5,12 @@ bioinformatics software, databases, and methods. The goal is to
 sequester the more detailed bioinformatic data handling in this repo,
 so that other code repos can simply use this repo as a black box.
 
+## Installation
+
+### Building a Docker image
+
+* TODO: figure out how to inject AWS IAM credentials into the Docker image
+
 ## Converting 23andMe data to Precise.ly-formatted VCF
 
 The convert23andme python module in this repository is for converting

@@ -8,7 +8,11 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y \
     bcftools \
     samtools \
-    tabix
+    tabix \
+    unzip \
+    gawk \
+    openjdk-8-jre-headless \
+    awscli
 
 # Copy the current directory contents into the container at /app
 ADD . /app
