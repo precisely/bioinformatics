@@ -5,6 +5,9 @@ import sys
 import random
 import datetime as dt
 
+_original_ancestry_file = 'convert_ancestry/mamba_out/AncestryDNA.txt'
+_converted_23andme_file = 'convert_ancestry/mamba_out/converted_23andme.txt'
+
 '''
 Integration test for converting an Ancestry.com genotype file to
 a 23andMe style file and finally to the VCF style.
@@ -21,31 +24,23 @@ bioinformatics/convertAncestry/test
 
 
 with description('Testing Ancestry.com to VCF conversion path') as testConverter:
-
-    with it('Converting Ancestry to 23andMe'):
-        with context('Creating Generators'):
-            in_stream = ancestry.input_file_generator('convert_ancestry/test/AncestryDNA.txt')
-            out_stream = ancestry.output_file_generator('convert_ancestry/test/samplefile_12345.txt')
-        
-        #with context('Calling convert_ancestry()'):
-            converted_23andme_file = ancestry.convert_ancestry(in_stream, out_stream)
-        
-        # with context('Checking accuracy converted 23andMe file'):
-        #     old_file = ancestry.input_file_generator('convert_ancestry/test/AncestryDNA.txt')
-        #     new_file = ancestry.input_file_generator('convert_ancestry/test/converted23andme.txt')
-        #     assert(check_conversion_accuracy(old_file, new_file))
+    with context('Ancestry.com to 23andMe'):
+        with it('takes in a Ancestry.com file stream and writes to an output stream'):
+            in_stream = open(_original_ancestry_file, 'r')
+            out_stream = open(_converted_23andme_file, 'w')
+            ancestry.convert_ancestry(in_stream, out_stream)
+            #assert File exists?
 
 
-    with it('Converting 23andMe to VCF'):
-        with context('Calling convert_23andme_bcf()'):
-            vcf_file, file_hash = andme.convert_23andme_bcf('convert_ancestry/test/samplefile_12345.txt',
+    with context('Converting 23andMe to VCF'):
+        with it('has consistent data and metadata with the original Ancestry file'):
+            vcf_file_path = andme.convert_23andme_bcf(_converted_23andme_file,
                                         'human_g1k_v37.fasta.gz',
                                         'convert23andme/ucsc-gene-symbols-coords.txt.gz',
-                                        'convert_ancestry/test')    
+                                        'convert_ancestry/mamba_out')    
 
-        with context('Checking accuracy converted VCF file'):
-            old_file = ancestry.input_file_generator('convert_ancestry/test/AncestryDNA.txt')
-            new_file = ancestry.input_file_generator(vcf_file)
+            old_file = open(_original_ancestry_file, 'r')
+            new_file = open(vcf_file_path, 'r')
             assert(check_conversion_accuracy(old_file, new_file))
 
 #Helper functions for check_conversion_accuracy(original_file, converted_file)
