@@ -66,14 +66,14 @@ test: test-convert23andme
 
 test-beagle-leash:
 	export BEAGLE_REFDB_PATH="$(CURDIR)/ref-data/beagle-refdb" \
-		&& export TMPDIR="/dev/shm" \
+		&& export TMPDIR="/tmp" \
 		&& export PATH="$(PATH):$(CURDIR)/third-party/beagle-leash/inst/beagle-leash/bin" \
 		&& cd third-party/beagle-leash \
 		&& make test
 
 test-pipeline: test/ref/example-chr21-23andme.txt 
 	export BEAGLE_REFDB_PATH="$(CURDIR)/ref-data/beagle-refdb"
-	export TMPDIR="/dev/shm"
+	export TMPDIR="/tmp"
 	export PATH="$(CURDIR)/third-party/beagle-leash/inst/beagle-leash/bin:$(PATH)"
 	export BEAGLE_LEASH_CHROMS="21"
 	python convert23andme/test_pipeline.py

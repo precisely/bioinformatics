@@ -363,7 +363,7 @@ def addHeaderDocs_filterVal2vcfFile(vcf_file,
 
 def vcf2dynamoDB (filename, annotate_file_path, userID, sampleID, genomeVersion, debug=False):
     '''
-    A test function for prototyping the bulk upload of VCF file data to DynamoDB.
+    A function for bulk upload of VCF file data to DynamoDB.
 
     TODO:
     * insert accession number instead of chromosome number
