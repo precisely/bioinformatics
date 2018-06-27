@@ -5,6 +5,35 @@ bioinformatics software, databases, and methods. The goal is to
 sequester the more detailed bioinformatic data handling in this repo,
 so that other code repos can simply use this repo as a black box.
 
+## Installation
+
+To get started, you clone the repo, checkout the correct feature branch, build the project, and then build the docker image:
+
+```
+git clone git@github.com:precisely/bioinformatics.git
+git checkout taltman/vcf2dydb
+make install
+```
+### Building a Docker image
+
+* TODO: figure out how to inject AWS IAM credentials into the Docker image
+
+```
+make build-docker-image
+```
+
+### Testing the pipeline
+
+Within the docker image, you need to set up the AWS environment with IAM user credentials (not automated yet).
+
+Then, you can run the test pipeline as follows
+
+```
+make test-pipeline
+```
+
+
+
 ## Converting 23andMe data to Precise.ly-formatted VCF
 
 The convert23andme python module in this repository is for converting

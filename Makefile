@@ -11,8 +11,10 @@
 
 $(CURDIR)/ref-data/human_g1k_v37.fasta.bgz:
 	mkdir -p $(CURDIR)/ref-data
-	cd $(CURDIR)/ref-data \
-		&& aws s3 cp "s3://precisely-bio-dbs/human-1kg-v37/2010-05-17/human_g1k_v37.fasta.bgz" .
+	cd $(CURDIR)/ref-data
+	aws s3 cp "s3://precisely-bio-dbs/human-1kg-v37/2010-05-17/human_g1k_v37.fasta.bgz" .
+	aws s3 cp "s3://precisely-bio-dbs/human-1kg-v37/2010-05-17/human_g1k_v37.fasta.bgz.gzi" .
+	aws s3 cp "s3://precisely-bio-dbs/human-1kg-v37/2010-05-17/human_g1k_v37.fasta.bgz.fai" .	
 
 #	
 #	wget ftp://ftp-trace.ncbi.nih.gov/1000genomes/ftp/technical/reference/human_g1k_v37.fasta.fai
@@ -23,7 +25,7 @@ $(CURDIR)/ref-data/beagle-refdb/chr9.1kg.phase3.v5a.bref:
 	aws s3 sync "s3://precisely-bio-dbs/beagle-1kg-bref/b37.bref" $(CURDIR)/ref-data/beagle-refdb
 
 
-install: $(CURDIR)/ref-data/human_g1k_v37.fasta.bgz $(CURDIR)/ref-data/beagle-refdb/chr9.1kg.phase3.v5a.bref third-party/beagle-leash/Makefile
+install: $(CURDIR)/ref-data/human_g1k_v37.fasta.bgz $(CURDIR)/ref-data/beagle-refdb/chr9.1kg.phase3.v5a.bref third-party/beagle-leash/.gitignore
 	@echo Installation complete!
 
 reinstall-beagle-leash:
@@ -57,7 +59,7 @@ build-docker-image:
 
 ### Tests
 
-test-convert23andme:
+test-convert23andme: 
 	python ./convert23andme/test_convert23andme.py
 
 test: test-convert23andme
@@ -69,7 +71,7 @@ test-beagle-leash:
 		&& cd third-party/beagle-leash \
 		&& make test
 
-test-pipeline: test/ref/example-chr21-23andme.txt
+test-pipeline: test/ref/example-chr21-23andme.txt 
 	export BEAGLE_REFDB_PATH="$(CURDIR)/ref-data/beagle-refdb"
 	export TMPDIR="/dev/shm"
 	export PATH="$(CURDIR)/third-party/beagle-leash/inst/beagle-leash/bin:$(PATH)"
