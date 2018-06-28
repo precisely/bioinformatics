@@ -88,7 +88,7 @@ def convert_chromosome(number, rsid):
  
 def is_header_line(line):
     '''Check if given line is part of the input file's header.'''
-    return line.startswith('#')
+    return line.startswith(':')
 
 
 def parse_metadata(input_stream):
