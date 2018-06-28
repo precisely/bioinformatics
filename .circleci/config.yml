@@ -1,0 +1,8 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: mxscott11/precisely-bioinformatics:demo
+    steps:
+      - checkout
+      - run: mamba convert_ancestry/test_convert_ancestry.py
