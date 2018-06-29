@@ -6,7 +6,7 @@ jobs:
     steps:
       - checkout
       - run: |
-          ls
+          docker --help
           docker build -t circleci:run_tests .
           docker run -it circleci:run_tests /bin/bash
           mamba convert_ancestry/test_convert_ancestry.py
