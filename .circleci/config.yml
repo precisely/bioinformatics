@@ -7,7 +7,7 @@ jobs:
       - checkout
       - run: |
           apt-get update
-          apt-get install docker
+          apt-get install -y docker
           docker build -t circleci:run_tests .
           echo BUILT YO
           docker run -it circleci:run_tests /bin/bash
