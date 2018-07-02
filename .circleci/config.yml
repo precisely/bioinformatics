@@ -10,6 +10,6 @@ jobs:
       - run: |
           docker build -t circleci:run_tests .
           docker run -i circleci:run_tests
-          python setup.py install
+          make setup-test
           mamba convert_ancestry/test_convert_ancestry.py
           
