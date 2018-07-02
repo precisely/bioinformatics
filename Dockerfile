@@ -13,7 +13,8 @@ RUN apt-get update && apt-get install -y \
     gawk \
     openjdk-8-jre-headless \
     awscli \
-    time
+    time \
+    emacs-nox
 
 
 # Copy the current directory contents into the container at /app

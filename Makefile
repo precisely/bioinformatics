@@ -53,10 +53,20 @@ python-package-install:
 
 ## All installation steps that should be performed at docker build time go here:
 docker-install: reinstall-beagle-leash python-package-install
+	mv .aws /root/
 
 ## Build the docker image for the bioinformatics repository:
 build-docker-image:
+	docker_build_dir=`mktemp -d -t docker_build_dir.XXXX`
+	mkdir -p $$docker_build_dir/bioinformatics
+	rsync -a . $$docker_build_dir/bioinformatics/
+	rm -rf $$docker_build_dir/bioinformatics.git
+	rsync -a $(HOME)/.aws $$docker_build_dir/bioinformatics/
+	cd $$docker_build_dir/bioinformatics
 	docker build -t dev/precisely-bioinformatics .
+	cd -
+	#rm -rf $$docker_build_dir
+
 
 # clean-docker-context:
 # 	rm -rf /dev/shm/docker-context
@@ -82,7 +92,7 @@ test-pipeline: test/ref/example-chr21-23andme.txt
 	export TMPDIR="/tmp"
 	export PATH="$(CURDIR)/third-party/beagle-leash/inst/beagle-leash/bin:$(PATH)"
 	export BEAGLE_LEASH_CHROMS="21"
-	python convert23andme/test_pipeline.py `ls test/pgp-samples | head -n 1`
+	python convert23andme/test_pipeline.py `ls -S test/pgp-samples/*.txt | tail -n 1`
 
 test/23andme-datasets.html:
 	mkdir -p test
@@ -124,7 +134,18 @@ test-ten-samples: test/pgp-samples/.done
 	export BEAGLE_REFDB_PATH="$(CURDIR)/ref-data/beagle-refdb"
 	export TMPDIR="/tmp"
 	export PATH="$(CURDIR)/third-party/beagle-leash/inst/beagle-leash/bin:$(PATH)"
-	python convert23andme/test_pipeline.py `ls test/pgp-samples/*.txt | shuf`
+	for sample in `ls test/pgp-samples/*.txt | shuf`
+	do
+		python convert23andme/test_pipeline.py $$sample || echo
+	done	
+
+test-cli:
+	python ./convert23andme/userGenotype2VCF -d test_userid \
+		tomer-precisely-user-upload \
+		genome-Nicholas-Blasgen-Full-20140913183959_e7b7f69733b0c138a54da0a71751c33b.txt \
+		tomer-precisely-genetics-vcf \
+		tomer-precisely-upload-errors
+
 
 ### Cleaning Up
 

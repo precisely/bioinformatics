@@ -1,0 +1,68 @@
+""" User Genotype to VCF Converter for Precisely
+
+Usage:
+  userGenotype2VCF [-d] <user-id> <input-bucket> <sample-file> <output-bucket> <error-bucket>
+  userGenotype2VCF (-h | --help)
+  userGenotype2VCF --version
+
+Options:
+  -h --help     Show this screen.
+  -d            Turn on debugging output
+  --version     Show version.
+
+"""
+import convert23andme, subprocess
+import boto3
+import botocore
+import os.path
+from docopt import docopt
+
+
+def processFile (user_id,
+                     input_bucket,
+                     input_filename,
+                     output_bucket,
+                     error_bucket):
+
+    '''
+    Docs:
+    '''
+
+    ## S3 copy file to /tmp/genotype_input.
+
+    s3 = boto3.resource('s3')
+
+    try:
+        s3.Bucket(input_bucket).download_file(input_filename, '/tmp/' + input_filename)
+    except botocore.exceptions.ClientError as e:
+        if e.response['Error']['Code'] == "404":
+            print("The object does not exist.")
+        else:
+            raise
+    
+    final_vcf_file_path = convert23andme.convertImpute23andMe2VCF('/tmp/' + input_filename,
+                                                                  'ref-data/human_g1k_v37.fasta.bgz',
+                                                                  'convert23andme/ucsc-gene-symbols-coords.txt.gz',
+                                                                  '/tmp',
+                                                                  user_id,
+                                                                  debug=arguments['-d'])
+
+    ## S3 copy file to output_bucket_URI
+    file_handle = open(final_vcf_file,'rb')
+    new_filename = os.path.basename(final_vcf_file_path)
+    
+    try:
+        s3.Bucket(output_bucket).put_object(Key=new_filename, Body=file_handle)
+    except botocore.exceptions.ClientError as e:
+        raise
+
+
+
+if __name__ == '__main__':
+    arguments = docopt(__doc__, version='userGenotype2VCF 0.1')
+    print(arguments)
+    processFile(arguments['<user-id>'],
+                    arguments['<input-bucket>'],
+                    arguments['<sample-file>'],
+                    arguments['<output-bucket>'],
+                    arguments['<error-bucket>'])

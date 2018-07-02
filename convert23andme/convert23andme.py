@@ -151,7 +151,7 @@ def convertImpute23andMe2VCF(genotype_23andme_path,
                            '>',
                            imputed_vcf_bgz_file])
     print bgzip_call
-    subprocess.check_call(pgzip_call,
+    subprocess.check_call(bgzip_call,
                           stderr=subprocess.STDOUT,
                           shell=True)
     
@@ -161,7 +161,8 @@ def convertImpute23andMe2VCF(genotype_23andme_path,
                            imputed_vcf_bgz_file])
     print tabix_call
     subprocess.check_call(tabix_call,
-                          stderr=subprocess.STDOUT)
+                          stderr=subprocess.STDOUT,
+                          shell=True)
     
 
     ## Annotate the variants with Gene information,
@@ -206,12 +207,16 @@ def convertImpute23andMe2VCF(genotype_23andme_path,
     # except OSError:
     #     pass
 
+    output_vcf_path = output_dir + '/' + sample_id + '-final.vcf.gz'
     logging.info('Moving output from temp directory to output directory.')
+    if os.path.exists(output_vcf_path):
+        os.remove(output_vcf_path)                   
     shutil.move(final_vcf_file, output_dir)
+    
     logging.info('Deleting temp directory.')
     shutil.rmtree(tmp_dir)
 
-    return
+    return output_vcf_path
 
 
     
@@ -371,7 +376,7 @@ def addHeaderDocs_filterVal2vcfFile(vcf_file,
 
 def vcf2dynamoDB (filename, annotate_file_path, userID, sampleID, genomeVersion, debug=False):
     '''
-    A test function for prototyping the bulk upload of VCF file data to DynamoDB.
+    A function for bulk upload of VCF file data to DynamoDB.
 
     TODO:
     * insert accession number instead of chromosome number

@@ -156,7 +156,7 @@ Here's how to fetch the convert23andme docker image:
 
 And here is an example of running the docker image:
 
-`docker run -it -v $HOME:/host_dir dev/precisely-bioinformatics .`
+`docker run -it -v $HOME:/host_dir dev/precisely-bioinformatics`
 
 And how to call the script from within the container:
 `time python convert23andme/convert23andme.py /host_dir/Downloads/shorttest_deadbeef.txt data/human_g1k_v37.fasta.gz convert23andme/ucsc-gene-symbols-coords.txt.gz /host_dir/tmp`
@@ -166,3 +166,7 @@ directory within the container, and that is where the input file is
 referenced on the host file system, and the output file is generated
 in that directory.
 
+## TODO
+
+* Figure out how to inject AWS credentials
+* Make userGenotype2VCF flexible so that it can be run from outside of the install directory.
