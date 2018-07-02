@@ -11,5 +11,6 @@ jobs:
           docker build -t circleci:run_tests .
           docker images
           docker run -i circleci:run_tests
-          pip install mamba
+          python setup.py install
           mamba convert_ancestry/test_convert_ancestry.py
+          mamba test_ancestry_to_vcf.py
