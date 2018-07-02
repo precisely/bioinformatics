@@ -30,6 +30,10 @@ test: install #test-convert23andme
 	python convert_ancestry/convert_ancestry.py convert_ancestry/test/AncestryDNA.txt
 	#mamba test_ancestry_to_vcf.py
 
+setup-test: 
+	pip install mamba
+	pip install expects
+
 clean: 	
 	rm -rf human_g1k_v37.* || true
 	rm -r convert_ancestry/test || true
