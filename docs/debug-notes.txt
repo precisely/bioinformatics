@@ -1,0 +1,25 @@
+test/pgp-samples/208_bfe90cfc2b7580d9f66d1b1a3ea479a5.txt
+:
+Exception in thread "main" java.lang.ArrayIndexOutOfBoundsException: 1
+        at sample.ImputationData.refHapSegs(ImputationData.java:214)
+        at sample.ImputationData.<init>(ImputationData.java:81)
+        at main.LiAndStephensHapSampler.multiThreadedHapSample(LiAndStephensHapSampler.java:85)
+        at main.LiAndStephensHapSampler.sample(LiAndStephensHapSampler.java:73)
+        at main.MainHelper.LSImpute(MainHelper.java:256)
+        at main.Main.phaseData(Main.java:156)
+        at main.Main.main(Main.java:115)
+/app/third-party/beagle-leash/inst/beagle-leash/bin/run-beagle-pipeline.make:91: recipe for target '/dev/shm/beagle-leash-VnA/imputed-chrs/chrX-gt-gprobs.vcf.gz' failed
+make[1]: *** [/dev/shm/beagle-leash-VnA/imputed-chrs/chrX-gt-gprobs.vcf.gz] Error 1
+make[1]: *** Deleting file '/dev/shm/beagle-leash-VnA/imputed-chrs/chrX-gt-gprobs.vcf.gz'
+
+Exception in thread "main" java.lang.ArrayIndexOutOfBoundsException: 1
+        at sample.ImputationData.refHapSegs(ImputationData.java:214)
+        at sample.ImputationData.<init>(ImputationData.java:81)
+        at main.LiAndStephensHapSampler.multiThreadedHapSample(LiAndStephensHapSampler.java:85)
+        at main.LiAndStephensHapSampler.sample(LiAndStephensHapSampler.java:73)
+        at main.MainHelper.LSImpute(MainHelper.java:256)
+        at main.Main.phaseData(Main.java:156)
+        at main.Main.main(Main.java:115)
+/app/third-party/beagle-leash/inst/beagle-leash/bin/run-beagle-pipeline.make:91: recipe for target '/dev/shm/beagle-leash-VnA/imputed-chrs/chr1-gt-gprobs.vcf.gz' failed
+make[1]: *** [/dev/shm/beagle-leash-VnA/imputed-chrs/chr1-gt-gprobs.vcf.gz] Error 1
+make[1]: *** Deleting file '/dev/shm/beagle-leash-VnA/imputed-chrs/chr1-gt-gprobs.vcf.gz'

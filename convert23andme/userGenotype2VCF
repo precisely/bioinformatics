@@ -1,0 +1,48 @@
+""" User Genotype to VCF Converter for Precisely
+
+Usage:
+  userGenotype2VCF [-d] <user-id> <input-bucket-uri> <sample-file> <output-bucket-uri> <error-bucket-uri>
+  userGenotype2VCF (-h | --help)
+  userGenotype2VCF --version
+
+Options:
+  -h --help     Show this screen.
+  -d            Turn on debugging output
+  --version     Show version.
+
+"""
+import convert23andme, subprocess
+from docopt import docopt
+
+
+def processFile (user_id,
+                     input_bucket_URI,
+                     input_filename,
+                     output_bucket_URI,
+                     error_bucket_URI):
+
+    '''
+    Docs:
+    '''
+
+    ## S3 copy file to /tmp/genotype_input.txt
+    
+    convert23andme.convertImpute23andMe2VCF('/tmp/' + input_filename,
+                                            'ref-data/human_g1k_v37.fasta.bgz',
+                                            'convert23andme/ucsc-gene-symbols-coords.txt.gz',
+                                            user_id,
+                                            debug=arguments['-d'])
+
+    ## S3 copy file to output_bucket_URI
+
+
+
+
+if __name__ == '__main__':
+    arguments = docopt(__doc__, version='userGenotype2VCF 0.1')
+    print(arguments)
+    processFile(arguments['<user-id>'],
+                    arguments['<input-bucket-uri>'],
+                    arguments['<sample-file>'],
+                    arguments['<output-bucket-uri>'],
+                    arguments['<error-bucket-uri>'])

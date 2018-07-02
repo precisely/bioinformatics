@@ -78,6 +78,12 @@ test-pipeline: test/ref/example-chr21-23andme.txt
 	export BEAGLE_LEASH_CHROMS="21"
 	python convert23andme/test_pipeline.py
 
+test-cli:
+	python ./userGenotype2VCF -d test_userid \
+		tomer-precisely-user-upload \
+		genome-Nicholas-Blasgen-Full-20140913183959_e7b7f69733b0c138a54da0a71751c33b.txt \
+		tomer-precisely-genetics-vcf \
+		tomer-precisely-upload-errors
 
 ### Cleaning Up
 

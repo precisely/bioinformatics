@@ -166,3 +166,7 @@ directory within the container, and that is where the input file is
 referenced on the host file system, and the output file is generated
 in that directory.
 
+## TODO
+
+* Figure out how to inject AWS credentials
+* Make userGenotype2VCF flexible so that it can be run from outside of the install directory.
