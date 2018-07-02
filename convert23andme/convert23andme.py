@@ -133,7 +133,8 @@ def convertImpute23andMe2VCF(genotype_23andme_path,
     ## Impute the VCF file:
     subprocess.check_call(' '.join(['third-party/beagle-leash/inst/beagle-leash/bin/beagle-leash',
                                         converted_vcf_file,
-                                        imputed_vcf_file]),
+                                        imputed_vcf_file,
+                                    "6"]),
                             stderr=subprocess.STDOUT,
                             shell=True)
     
@@ -185,12 +186,12 @@ def convertImpute23andMe2VCF(genotype_23andme_path,
                             stderr=subprocess.STDOUT,
                             shell=True)
     
-    vcf2dynamoDB(final_vcf_bgz_file,
-                     annotate_file_path,
-                     user_id,
-                     sample_id,
-                     genome_version,
-                     debug=debug)
+    # vcf2dynamoDB(final_vcf_bgz_file,
+    #                  annotate_file_path,
+    #                  user_id,
+    #                  sample_id,
+    #                  genome_version,
+    #                  debug=debug)
                      
     
     ## Clean-Up

@@ -5,7 +5,12 @@
 ## bgzip <(zcat human_g1k_v37.fasta.gz) --stdout > human_g1k_v37.fasta.bgz
 ## aws s3 cp human_g1k_v37.fasta.bgz "s3://precisely-bio-dbs/human-1kg-v37/2010-05-17/"
 
+## All recipe lines in one shell:
 .ONESHELL:
+
+## If any recipe errors, delete the target file:
+.DELETE_ON_ERROR:
+
 
 ### Installation:
 
@@ -25,7 +30,7 @@ $(CURDIR)/ref-data/beagle-refdb/chr9.1kg.phase3.v5a.bref:
 	aws s3 sync "s3://precisely-bio-dbs/beagle-1kg-bref/b37.bref" $(CURDIR)/ref-data/beagle-refdb
 
 
-install: $(CURDIR)/ref-data/human_g1k_v37.fasta.bgz $(CURDIR)/ref-data/beagle-refdb/chr9.1kg.phase3.v5a.bref third-party/beagle-leash/.gitignore
+install: $(CURDIR)/ref-data/human_g1k_v37.fasta.bgz $(CURDIR)/ref-data/beagle-refdb/chr9.1kg.phase3.v5a.bref third-party/beagle-leash/.gitignore python-install
 	@echo Installation complete!
 
 reinstall-beagle-leash:
@@ -38,15 +43,16 @@ third-party/beagle-leash/.gitignore:
 		&& git clone https://taltman1@bitbucket.org/taltman1/beagle-leash.git \
 		&& $(MAKE) -C beagle-leash --file=Makefile install-nodata
 
+python-install:
+	python  -m pip install \
+		--user \
+		--trusted-host pypi.python.org \
+		.
 
 ### Docker workflows:
 
 ## All installation steps that should be performed at docker build time go here:
-docker-install: reinstall-beagle-leash
-	python  -m pip install \
-		--user $(USER) \
-		--trusted-host pypi.python.org \
-		.
+docker-install: reinstall-beagle-leash python-install
 
 ## Build the docker image for the bioinformatics repository:
 build-docker-image:
@@ -76,8 +82,49 @@ test-pipeline: test/ref/example-chr21-23andme.txt
 	export TMPDIR="/dev/shm"
 	export PATH="$(CURDIR)/third-party/beagle-leash/inst/beagle-leash/bin:$(PATH)"
 	export BEAGLE_LEASH_CHROMS="21"
-	python convert23andme/test_pipeline.py
+	python convert23andme/test_pipeline.py `ls test/pgp-samples | head -n 1`
 
+test/23andme-datasets.html:
+	mkdir -p test
+	cd test
+	wget -O 23andme-datasets.html "https://my.pgp-hms.org/public_genetic_data?data_type=23andMe"
+
+test/23andme-dataset-URLs.txt: test/23andme-datasets.html
+	mkdir -p test
+	awk -F'"' '/download/ { print $$2 }' $^ \
+		| shuf --random-source=$^ \
+		| awk '{ print "https://my.pgp-hms.org" $$1 }' \
+		| tee $@ \
+		| head > test/23andme-dataset-URLs-sample.txt
+
+#test/pgp-samples/447: 
+
+test/pgp-samples/.done: test/23andme-dataset-URLs.txt
+	mkdir -p test/pgp-samples
+	cd test/pgp-samples
+	wget -i ../23andme-dataset-URLs-sample.txt
+	for file in `ls`
+	do
+		if file $$file | grep Zip
+		then
+			unzip $$file
+		fi
+	done	
+	for file in `ls`
+	do
+		if file $$file | grep ASCII
+		then
+			tr -d '\r' < $$file > `basename $$file .txt | sed 's/_/-/g'`_`md5sum $$file | cut -d' ' -f 1`.txt
+			rm $$file
+		fi
+	done
+	touch .done
+
+test-ten-samples: test/pgp-samples/.done
+	export BEAGLE_REFDB_PATH="$(CURDIR)/ref-data/beagle-refdb"
+	export TMPDIR="/dev/shm"
+	export PATH="$(CURDIR)/third-party/beagle-leash/inst/beagle-leash/bin:$(PATH)"
+	python convert23andme/test_pipeline.py `ls test/pgp-samples/* | shuf`
 
 ### Cleaning Up
 
