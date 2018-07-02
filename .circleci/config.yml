@@ -16,4 +16,4 @@ jobs:
           ls
           pip install mamba
           mamba convert_ancestry/test_convert_ancestry.py
-          mamba test_ancestry_to_vcf.py
+          
