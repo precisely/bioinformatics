@@ -2,7 +2,8 @@ version: 2
 jobs:
   build:
     docker:
-      - image: ubuntu
+      - image: ubuntu-14.04-XXL-1325-0ccc9c
+
     steps:
       - checkout
       - run: |
