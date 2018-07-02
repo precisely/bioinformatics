@@ -4,16 +4,16 @@ jobs:
     machine: true
       image: circleci/classic:latest
 
-    steps:
-      - checkout
-      - setup_remote_docker:
+      steps:
+        - checkout
+        - setup_remote_docker:
           
-      - run: |
-          ls
-          docker ps -a
-          docker build -t circleci:run_tests .
-          echo BUILT YO
-          docker ps -a
-          ls
-          docker start circleci:run_tests
-          mamba convert_ancestry/test_convert_ancestry.py
+        - run: |
+            ls
+            docker ps -a
+            docker build -t circleci:run_tests .
+            echo BUILT YO
+            docker ps -a
+            ls
+            docker start circleci:run_tests
+            mamba convert_ancestry/test_convert_ancestry.py
