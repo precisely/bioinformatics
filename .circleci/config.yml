@@ -8,7 +8,6 @@ jobs:
       - setup_remote_docker:
           
       - run: |
-          ls
           docker ps -a
           docker build -t circleci:run_tests .
           echo BUILT YO
