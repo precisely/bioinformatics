@@ -131,37 +131,39 @@ def convertImpute23andMe2VCF(genotype_23andme_path,
 
 
     ## Impute the VCF file:
-    subprocess.check_call(' '.join(['third-party/beagle-leash/inst/beagle-leash/bin/beagle-leash',
+    beagle_leash_call = ' '.join(['third-party/beagle-leash/inst/beagle-leash/bin/beagle-leash',
                                         converted_vcf_file,
-                                        imputed_vcf_file,
-                                    "6"]),
-                            stderr=subprocess.STDOUT,
-                            shell=True)
+                                        imputed_vcf_file])
+    print beagle_leash_call
+    subprocess.check_call(beagle_leash_call,
+                          stderr=subprocess.STDOUT,
+                          shell=True)
     
     
-    print "foo"
     ## Index the VCF file:
-    print
     ## Passing the arguments as a list of strings will not work.
     ## First joining the arguments into one string bypassed the errors.
     ## This is because the list form doesn't support pipelines, see subprocess.Popen docs.
-    subprocess.check_call(' '.join(['zcat',
-                                        imputed_vcf_file,
-                                        '|',
-                                        'bgzip',                         
-                                        '>',
-                                        imputed_vcf_bgz_file]),
-                            stderr=subprocess.STDOUT,
-                            shell=True)
+    bgzip_call = ' '.join(['zcat',
+                           imputed_vcf_file,
+                           '|',
+                           'bgzip',                         
+                           '>',
+                           imputed_vcf_bgz_file])
+    print bgzip_call
+    subprocess.check_call(pgzip_call,
+                          stderr=subprocess.STDOUT,
+                          shell=True)
     
-    print "bar"
-    subprocess.check_call(' '.join(['tabix',
-                                        '-p',
-                                        'vcf',
-                                        imputed_vcf_bgz_file]),
-                              stderr=subprocess.STDOUT)
+    tabix_call = ' '.join(['tabix',
+                           '-p',
+                           'vcf',
+                           imputed_vcf_bgz_file])
+    print tabix_call
+    subprocess.check_call(tabix_call,
+                          stderr=subprocess.STDOUT)
     
-    print "baz"
+
     ## Annotate the variants with Gene information,
     ## and add custom header fields:
     annotateVCFwithGenes(imputed_vcf_bgz_file,
@@ -174,17 +176,19 @@ def convertImpute23andMe2VCF(genotype_23andme_path,
                              genome_version,
                              snp_count,
                              tmp_dir)
-    print "quux"
+
 
     ## Need to marshall data into BGzip format again:
-    subprocess.check_call(' '.join(['zcat',
-                                        final_vcf_file,
-                                        '|',
-                                        'bgzip',                         
-                                        '>',
-                                        final_vcf_bgz_file]),
-                            stderr=subprocess.STDOUT,
-                            shell=True)
+    bgzip_call_2 = ' '.join(['zcat',
+                             final_vcf_file,
+                             '|',
+                             'bgzip',                         
+                             '>',
+                             final_vcf_bgz_file])
+    print bgzip_call_2
+    subprocess.check_call(bgzip_call_2,
+                          stderr=subprocess.STDOUT,
+                          shell=True)
     
     # vcf2dynamoDB(final_vcf_bgz_file,
     #                  annotate_file_path,
@@ -263,8 +267,8 @@ def annotateVCFwithGenes(imputed_vcf_file,
 
         ## Apparently bcftools breaks the VCF format spec by mandating header columns.
         ## The error message suggests trying to use tabix to index the VCF file as a work-around.
-        
-    subprocess.check_output(' '.join(['bcftools',
+
+    bcftools_call = ' '.join(['bcftools',
                                           'annotate',
                                           '-a',
                                           annotate_file_path,
@@ -274,8 +278,11 @@ def annotateVCFwithGenes(imputed_vcf_file,
                                           '-Oz',
                                           '-o',
                                           annotated_vcf_file,
-                                          imputed_vcf_file]),
-                                shell=True)
+                                          imputed_vcf_file])
+    print bcftools_call
+    subprocess.check_call(bcftools_call,
+                          stderr=subprocess.STDOUT,
+                          shell=True)
 
     ## Re-insert annotations lost via Beagle:
     addHeaderDocs_filterVal2vcfFile(annotated_vcf_file,

@@ -12,7 +12,8 @@ RUN apt-get update && apt-get install -y \
     unzip \
     gawk \
     openjdk-8-jre-headless \
-    awscli
+    awscli \
+    time
 
 
 # Copy the current directory contents into the container at /app

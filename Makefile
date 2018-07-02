@@ -30,7 +30,7 @@ $(CURDIR)/ref-data/beagle-refdb/chr9.1kg.phase3.v5a.bref:
 	aws s3 sync "s3://precisely-bio-dbs/beagle-1kg-bref/b37.bref" $(CURDIR)/ref-data/beagle-refdb
 
 
-install: $(CURDIR)/ref-data/human_g1k_v37.fasta.bgz $(CURDIR)/ref-data/beagle-refdb/chr9.1kg.phase3.v5a.bref third-party/beagle-leash/.gitignore python-install
+install: $(CURDIR)/ref-data/human_g1k_v37.fasta.bgz $(CURDIR)/ref-data/beagle-refdb/chr9.1kg.phase3.v5a.bref third-party/beagle-leash/.gitignore python-package-install
 	@echo Installation complete!
 
 reinstall-beagle-leash:
@@ -43,7 +43,7 @@ third-party/beagle-leash/.gitignore:
 		&& git clone https://taltman1@bitbucket.org/taltman1/beagle-leash.git \
 		&& $(MAKE) -C beagle-leash --file=Makefile install-nodata
 
-python-install:
+python-package-install:
 	python  -m pip install \
 		--user \
 		--trusted-host pypi.python.org \
@@ -52,7 +52,7 @@ python-install:
 ### Docker workflows:
 
 ## All installation steps that should be performed at docker build time go here:
-docker-install: reinstall-beagle-leash python-install
+docker-install: reinstall-beagle-leash python-package-install
 
 ## Build the docker image for the bioinformatics repository:
 build-docker-image:
@@ -72,14 +72,14 @@ test: test-convert23andme
 
 test-beagle-leash:
 	export BEAGLE_REFDB_PATH="$(CURDIR)/ref-data/beagle-refdb" \
-		&& export TMPDIR="/dev/shm" \
+		&& export TMPDIR="/tmp" \
 		&& export PATH="$(PATH):$(CURDIR)/third-party/beagle-leash/inst/beagle-leash/bin" \
 		&& cd third-party/beagle-leash \
 		&& make test
 
 test-pipeline: test/ref/example-chr21-23andme.txt 
 	export BEAGLE_REFDB_PATH="$(CURDIR)/ref-data/beagle-refdb"
-	export TMPDIR="/dev/shm"
+	export TMPDIR="/tmp"
 	export PATH="$(CURDIR)/third-party/beagle-leash/inst/beagle-leash/bin:$(PATH)"
 	export BEAGLE_LEASH_CHROMS="21"
 	python convert23andme/test_pipeline.py `ls test/pgp-samples | head -n 1`
@@ -122,9 +122,9 @@ test/pgp-samples/.done: test/23andme-dataset-URLs.txt
 
 test-ten-samples: test/pgp-samples/.done
 	export BEAGLE_REFDB_PATH="$(CURDIR)/ref-data/beagle-refdb"
-	export TMPDIR="/dev/shm"
+	export TMPDIR="/tmp"
 	export PATH="$(CURDIR)/third-party/beagle-leash/inst/beagle-leash/bin:$(PATH)"
-	python convert23andme/test_pipeline.py `ls test/pgp-samples/* | shuf`
+	python convert23andme/test_pipeline.py `ls test/pgp-samples/*.txt | shuf`
 
 ### Cleaning Up
 
