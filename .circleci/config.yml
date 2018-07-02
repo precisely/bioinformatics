@@ -9,8 +9,6 @@ jobs:
       - run: |
           docker ps -a
           docker build -t circleci:run_tests .
-          echo BUILT YO
-          docker ps -a
-          ls
+          docker images
           docker start circleci:run_tests
           mamba convert_ancestry/test_convert_ancestry.py
