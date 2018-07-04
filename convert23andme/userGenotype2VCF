@@ -14,7 +14,7 @@ Options:
 import convert23andme, subprocess
 import boto3
 import botocore
-import os.path
+import os, os.path
 from docopt import docopt
 
 
@@ -28,7 +28,7 @@ def processFile (user_id,
     Docs:
     '''
 
-    ## S3 copy file to /tmp/genotype_input.
+    ### S3 copy file to /tmp/genotype_input.
 
     s3 = boto3.resource('s3')
 
@@ -39,6 +39,14 @@ def processFile (user_id,
             print("The object does not exist.")
         else:
             raise
+
+        
+    ### Impute:
+
+    ## First, we set an environment variable for beagle-leash:
+    script_dir_path = os.path.dirname(os.path.realpath(__file__))
+    ref_data_path = script_dir_path + '/../ref-data/beagle-refdb'
+    os.environ['BEAGLE_REFDB_PATH'] = ref_data_path
     
     final_vcf_file_path = convert23andme.convertImpute23andMe2VCF('/tmp/' + input_filename,
                                                                   'ref-data/human_g1k_v37.fasta.bgz',
@@ -47,7 +55,9 @@ def processFile (user_id,
                                                                   user_id,
                                                                   debug=arguments['-d'])
 
-    ## S3 copy file to output_bucket_URI
+    
+    ### S3 copy file to output_bucket:
+    
     file_handle = open(final_vcf_file,'rb')
     new_filename = os.path.basename(final_vcf_file_path)
     
@@ -59,8 +69,12 @@ def processFile (user_id,
 
 
 if __name__ == '__main__':
+
     arguments = docopt(__doc__, version='userGenotype2VCF 0.1')
-    print(arguments)
+
+    if arguments['-d']:
+        print(arguments)
+
     processFile(arguments['<user-id>'],
                     arguments['<input-bucket>'],
                     arguments['<sample-file>'],

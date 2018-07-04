@@ -22,6 +22,11 @@ After tag v0.1, I removed the following functions that were no longer needed:
 * predict_23andMe_chip_version
 * agumented_vcf_record
 
+
+## Error code cheat sheet:
+2:  Input file has unsupported reference human genome version
+20: Otherwise untrapped error
+
 '''
 
 
@@ -83,7 +88,7 @@ def parse_23andMe_file(genotype_23andme_path):
                 datetime_object = datetime.strptime(timestamp_str, '%c')
             
             if line.startswith('# More information on reference human assembly build'):
-                genome_version = line.rstrip().split('build ')[1].split(' ')[0]
+                genome_version = line.rstrip().split('build ')[1].split(' ')[0].split(':')[0]
             
             if not line.startswith('#'):
                 snp_counts += 1                
@@ -123,6 +128,12 @@ def convertImpute23andMe2VCF(genotype_23andme_path,
           genome_version,
           snp_count        ] = parse_23andMe_file(genotype_23andme_path)
 
+    ## Test the genome_version, throwing an exception if not version 37:
+    if genome_version != '37':
+        print >> sys.stderr, 'Error: Unsupported human genome number; currently supporting only version 37.'
+        print >> sys.stderr, 'Version provided in input file: "' + genome_version + '"'
+        sys.exit(2)
+    
     ## Convert 23 & Me text file to VCF format:
     convert_23andme_vcf(genotype_23andme_path,
                             sample_id,
@@ -508,6 +519,8 @@ if __name__ == "__main__":
     annotate_file_path    = sys.argv[3]
     output_dir            = sys.argv[4]
 
+    error_file_path = output_dir + '/' + sample_id + '.error'
+    
     try:
     
         convert_23andme_vcf(genotype_23andme_path,
@@ -519,8 +532,6 @@ if __name__ == "__main__":
         ## Trap any errors when running as script, and report the
         ## stack trace:
         [sample_id, file_md5_hash_value] = genotype_23andme_path.split('/')[-1].split('_')
-
-        error_file_path = output_dir + '/' + sample_id + '.error'
         
         with open(error_file_path, 'w') as error_file:
             
@@ -529,4 +540,4 @@ if __name__ == "__main__":
             print >> error_file, traceback.format_exc()
 
         print error_file_path
-        sys.exit(1)
+        sys.exit(20)

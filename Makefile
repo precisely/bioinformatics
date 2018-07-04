@@ -139,6 +139,13 @@ test-ten-samples: test/pgp-samples/.done
 		python convert23andme/test_pipeline.py $$sample || echo
 	done	
 
+## First one should fail due to being from a human genome reference version 36 array.
+## The second one should succeed since it is from a version 37 array.
+test-version-compliance:
+	python convert23andme/testGenotype2VCF test/pgp-samples/208_bfe90cfc2b7580d9f66d1b1a3ea479a5.txt 
+	python convert23andme/testGenotype2VCF test/pgp-samples/genome-Nicholas-Blasgen-Full-20140913183959_e7b7f69733b0c138a54da0a71751c33b.txt 
+
+
 test-cli:
 	python ./convert23andme/userGenotype2VCF -d test_userid \
 		tomer-precisely-user-upload \
