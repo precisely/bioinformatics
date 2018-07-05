@@ -146,6 +146,14 @@ test-version-compliance:
 	python convert23andme/testGenotype2VCF test/pgp-samples/genome-Nicholas-Blasgen-Full-20140913183959_e7b7f69733b0c138a54da0a71751c33b.txt 
 
 
+test-cli-fast:
+	export BEAGLE_LEASH_CHROMS="21"
+	python ./convert23andme/userGenotype2VCF -d test_userid \
+		tomer-precisely-user-upload \
+		genome-Nicholas-Blasgen-Full-20140913183959_e7b7f69733b0c138a54da0a71751c33b.txt \
+		tomer-precisely-genetics-vcf \
+		tomer-precisely-upload-errors
+
 test-cli:
 	python ./convert23andme/userGenotype2VCF -d test_userid \
 		tomer-precisely-user-upload \
