@@ -16,38 +16,59 @@ make install
 ```
 ### Building a Docker image
 
-* TODO: figure out how to inject AWS IAM credentials into the Docker image
+* WARNING: Your build machine must have a working `$HOME/.aws` directory; this is copied into the Docker build context for enabling S3 access.
 
 ```
 make build-docker-image
 ```
 
-### Testing the pipeline
 
-Within the docker image, you need to set up the AWS environment with IAM user credentials (not automated yet).
+## Running
 
-Then, you can run the test pipeline as follows
-
-```
-make test-pipeline
-```
-
-
-
-## Converting 23andMe data to Precise.ly-formatted VCF
+### Converting 23andMe data to Precise.ly-formatted VCF
 
 The convert23andme python module in this repository is for converting
 23andMe raw data files into a version of VCF that is tailored to our
 needs here at Precise.ly. The module can be used both as a module and
-as a script, executing from the command-line as follows:
+as a script. A front-end script called `userGenotype2VCF` handles
+fetching files to and from S3, provides command-line argument parsing,
+logging, error handling, and more. This is the preferred interface.
+
 
 ```
-precisely@consulting-vb:~/repos/bioinformatics/convert23andme$ time python \
-    ./convert23andme.py \
-	~/Downloads/shorttest_deadbeef.txt \
-	~/data/human_g1k_v37.fasta.gz \
-	~/data/ucsc-gene-symbols-coords.txt.gz ~/tmp
+python ./convert23andme/userGenotype2VCF -d test_userid \
+		tomer-precisely-user-upload \
+		genome-Nicholas-Blasgen-Full-20140913183959_e7b7f69733b0c138a54da0a71751c33b.txt \
+		tomer-precisely-genetics-vcf \
+		tomer-precisely-upload-errors
 ```
+
+### Testing the pipeline
+
+You can run the test pipeline as follows:
+
+```
+make test-cli
+```
+
+This will run the pipeline using `userGenotype2VCF` on a full sample file, which takes approximately one hour to process using a single CPU.
+
+If you want to test the pipeline more quickly, the following will process just chromosome 21 (the smallest) from a sample:
+
+```
+make test-cli-fast
+```
+
+To test the code on ten random samples from the Personal Genomes Project, you can run:
+
+```
+make test-ten-samples
+```
+
+Note: this make target uses the older test interface for running the pipeline, and does not exercise the `userGenotype2VCF` interface.
+
+
+## Reference information
 
 ### 23andMe's tab-delimited raw data format
 

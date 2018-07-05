@@ -35,7 +35,7 @@ from pysam import VariantFile
 import subprocess, sys, json, shutil, os
 from time import time
 from datetime import datetime
-import tempfile, gzip, logging, traceback, boto3
+import tempfile, gzip, logging, traceback, boto3, csv
 
 
 ### Global Definitions:
@@ -201,13 +201,16 @@ def convertImpute23andMe2VCF(genotype_23andme_path,
     subprocess.check_call(bgzip_call_2,
                           stderr=subprocess.STDOUT,
                           shell=True)
-    
-    # vcf2dynamoDB(final_vcf_bgz_file,
-    #                  annotate_file_path,
-    #                  user_id,
-    #                  sample_id,
-    #                  genome_version,
-    #                  debug=debug)
+
+    ## Should be changed to "debug=debug" only if it is desired for this code
+    ## to write to DynamoDB directly.
+    vcf2dynamoDB(final_vcf_bgz_file,
+                     annotate_file_path,
+                     user_id,
+                     sample_id,
+                     genome_version,
+                     tmp_dir,
+                     debug=True)
                      
     
     ## Clean-Up
@@ -224,8 +227,8 @@ def convertImpute23andMe2VCF(genotype_23andme_path,
         os.remove(output_vcf_path)                   
     shutil.move(final_vcf_file, output_dir)
     
-    logging.info('Deleting temp directory.')
-    shutil.rmtree(tmp_dir)
+    #logging.info('Deleting temp directory.')
+    #shutil.rmtree(tmp_dir)
 
     return output_vcf_path
 
@@ -385,7 +388,7 @@ def addHeaderDocs_filterVal2vcfFile(vcf_file,
 
 ### Utilities
 
-def vcf2dynamoDB (filename, annotate_file_path, userID, sampleID, genomeVersion, debug=False):
+def vcf2dynamoDB (filename, annotate_file_path, userID, sampleID, genomeVersion, tmp_dir, debug=False):
     '''
     A function for bulk upload of VCF file data to DynamoDB.
 
@@ -424,6 +427,7 @@ def vcf2dynamoDB (filename, annotate_file_path, userID, sampleID, genomeVersion,
 
     num_rec = 0
     vcf_in = VariantFile(filename)
+    dynamo_debug_entry_list = []
     
     with table.batch_writer() as vcf_batch:
         
@@ -435,7 +439,6 @@ def vcf2dynamoDB (filename, annotate_file_path, userID, sampleID, genomeVersion,
             ## as doesn't like handling the VariantFile records directly:
             ## This def for endBase will work for SNVs and single MNVs,
             ## But could be more complicated for indels & multiple MNVs of differing lengths...
-            
             
             if rec.alts == None:
                 currAltBases    = None
@@ -456,8 +459,11 @@ def vcf2dynamoDB (filename, annotate_file_path, userID, sampleID, genomeVersion,
             currStartBase = rec.pos            
             currRefBases  = rec.ref
             currFilter    = rec.filter.keys()[0]
-            currRsID      = rec.id
-        
+            if rec.id:                
+                currRsID  = rec.id
+            else:
+                currRsID  = '.'
+                
             if 'GENE' in rec.info:
                 currGene     = rec.info['GENE']
                 geneMinCoord = gene_min_coord[currChrom + '_' + currGene]
@@ -470,6 +476,16 @@ def vcf2dynamoDB (filename, annotate_file_path, userID, sampleID, genomeVersion,
                 
             rec_sample    = rec.samples[rec.samples.keys()[0]]
             currGenotype  = list(rec_sample['GT'])
+            ## Canonicalize heterozygous genotypes to be in numerical order (since unphased):
+            if currGenotype == [1, 0]:
+                currGenotype = [0, 1]
+
+            currGenotypeProbs = list(rec_sample['GP'])
+
+            if 'IMP' in rec.info:
+                isImputedP = True
+            else:
+                isImputedP = False
             
             variantID     = ':'.join([sampleID, genomeVersion, currChrom, str(currStartBase), currRsID, currAltBasesStr])
             ##print variantID
@@ -477,19 +493,20 @@ def vcf2dynamoDB (filename, annotate_file_path, userID, sampleID, genomeVersion,
             currItem = {
                 'userId'             : userID,
                 'variantId'          : variantID,
-                'chromosomeAccession': currChrom,
-                'startBase'          : currStartBase,
-                'endBase'            : currEndBase,
+                'referenceName'      : currChrom,
+                'startBaseIndex'     : currStartBase,
+                'endBaseIndex'       : currEndBase,
                 'alternateBases'     : currAltBases,
                 'referenceBases'     : currRefBases,
                 'filter'             : currFilter,
                 'geneSymbol'         : currGene,
                 'genotype'           : currGenotype,
                 'rsId'               : currRsID,
-                'geneMinCoord'       : geneMinCoord,
-                'geneMaxCoord'       : geneMaxCoord#,
-                #'genotypeLikelihood': rec.GP(),
-                }
+                'geneStart'          : geneMinCoord,
+                'geneEnd'            : geneMaxCoord,
+                'genotypeLikelihood' : currGenotyeProbs,
+                'isImputed'          : currImputedP
+            }
                 
             if debug == True:
                 #print rec.samples
@@ -498,9 +515,16 @@ def vcf2dynamoDB (filename, annotate_file_path, userID, sampleID, genomeVersion,
                 #print currItem
                 if (num_rec % 50) == 0:
                     print "Processed " + str(num_rec) + " variants."
-                
-            vcf_batch.put_item(Item=currItem)
+                dynamo_debug_entry_list.append(currItem)
+            else:
+                vcf_batch.put_item(Item=currItem)
 
+    if debug == True:
+        with gzip.open(tmp_dir + '/' + sampleID + '_printDebugList.csv.gz', 'w') as debug_out:
+            dynamo_debug_list_of_lists = map(lambda x: x.values(), dynamo_debug_entry_list)
+            writer = csv.writer(debug_out)
+            writer.writerows(dynamo_debug_list_of_lists)
+                
     return
             
                     
