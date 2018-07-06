@@ -126,14 +126,21 @@ WORKDIR /precisely/app
 RUN chown -R docker:docker /precisely
 USER docker
 
+# Temporarily copy in the requirements.txt file from the Python scripts area to
+# install dependencies. This is necessary because that file is not yet available
+# in the container, especially in link mode.
+COPY python/requirements.txt .
+RUN sudo pip install -r requirements.txt
+RUN rm requirements.txt
+
 m4_ifelse(mode, [[[link]]], [[[m4_dnl
 # go; this container is meant to be connected to using tmux
 CMD ["sh"]
 ]]], [[[m4_dnl
-# Copy the current directory into the app; make sure it contains code you want
-# to deploy!
+# Copy the current directory into the app; make sure it contains code intended
+# for deployment!
 COPY . /precisely/app
 
 # run the app entry point script
-CMD ["run.sh"]
+CMD ["./run.sh"]
 ]]])m4_dnl

@@ -25,11 +25,14 @@ if [[ -z "${container_name}" ]]; then
     exit 1
 fi
 
-if [[ "${mode}" == "link" && -z "${app_source_path}" ]]; then
-    echo "app source path required in link mode" 1>&2
-    exit 1
+if [[ "${mode}" == "link" ]]; then
+    if [[ -z "${app_source_path}" ]]; then
+        echo "app source path required in link mode" 1>&2
+        exit 1
+    else
+        app_source_path=$(realpath "${app_source_path}")
+    fi
 fi
-app_source_path=$(realpath "${app_source_path}")
 
 if [[ "${mode}" == "link" ]]; then
     docker create -i -t --name "${container_name}" \
