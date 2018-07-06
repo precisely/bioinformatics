@@ -5,25 +5,40 @@ bioinformatics software, databases, and methods. The goal is to
 sequester the more detailed bioinformatic data handling in this repo,
 so that other code repos can simply use this repo as a black box.
 
+
 ## Installation
 
-To get started, you clone the repo, checkout the correct feature branch, build the project, and then build the docker image:
+An easy mnemonic: run the various `docker-*` scripts in alphabetical order!
+
+First, build the Docker image. The `docker-build.sh` script takes four parameters: mode, target image tag, and AWS profile (from `~/.aws/credentials`). Mode is either `link` or `build`. `link` is for development mode, and mounts a volume from the host to connect to the `/precisely/app` directory in the container.
 
 ```
-git clone git@github.com:precisely/bioinformatics.git
-git checkout taltman/vcf2dydb
-make install
+./docker-build.sh link bio1-img dev-profile-precisely
 ```
-### Building a Docker image
 
-* WARNING: Your build machine must have a working `$HOME/.aws` directory; this is copied into the Docker build context for enabling S3 access.
+Second, create a container. The `docker-create.sh` script takes three or four parameters: mode, image tag, container name, and (in link mode only) the application source path.
 
 ```
-make build-docker-image
+./docker-create.sh link bio1-img bio1 .
+```
+
+Third, start the container.
+
+```
+./docker-start.sh bio1
+```
+
+In development (link) mode, you can now connect to the container and use it:
+
+```
+./docker-tmux.sh bio1
 ```
 
 
 ## Running
+
+**Warning: Outdated instructions.**
+
 
 ### Converting 23andMe data to Precise.ly-formatted VCF
 
