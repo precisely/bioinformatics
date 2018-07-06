@@ -1,0 +1,3 @@
+pysam
+boto3
+docopt
