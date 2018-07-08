@@ -65,7 +65,7 @@ build-docker-image:
 	cd $$docker_build_dir/bioinformatics
 	docker build -t dev/precisely-bioinformatics .
 	cd -
-	#rm -rf $$docker_build_dir
+	rm -rf $$docker_build_dir
 
 
 # clean-docker-context:
@@ -131,12 +131,28 @@ test/pgp-samples/.done: test/23andme-dataset-URLs.txt
 	touch .done
 
 test-ten-samples: test/pgp-samples/.done
-	export BEAGLE_REFDB_PATH="$(CURDIR)/ref-data/beagle-refdb"
-	export TMPDIR="/tmp"
-	export PATH="$(CURDIR)/third-party/beagle-leash/inst/beagle-leash/bin:$(PATH)"
 	for sample in `ls test/pgp-samples/*.txt | shuf`
 	do
-		python convert23andme/test_pipeline.py $$sample || echo
+		aws s3 cp $$sample "s3://tomer-precisely-user-upload"
+		python ./convert23andme/userGenotype2VCF -d test_userid \
+			tomer-precisely-user-upload \
+			`basename $$sample` \
+			tomer-precisely-genetics-vcf \
+			tomer-precisely-upload-errors
+	done
+
+
+
+test-ten-samples-fast: test/pgp-samples/.done
+	export BEAGLE_LEASH_CHROMS="21"
+	for sample in `ls test/pgp-samples/*.txt | shuf`
+	do
+		aws s3 cp $$sample "s3://tomer-precisely-user-upload"
+		python ./convert23andme/userGenotype2VCF -d test_userid \
+			tomer-precisely-user-upload \
+			`basename $$sample` \
+			tomer-precisely-genetics-vcf \
+			tomer-precisely-upload-errors || echo
 	done	
 
 ## First one should fail due to being from a human genome reference version 36 array.
@@ -165,6 +181,12 @@ test-cli:
 ### Cleaning Up
 
 ## This leaves data downloads intact
+clean-build-dirs:
+	rm -rf /tmp/docker_build_dir*
+
+clean-temp-dirs: clean-build-dirs
+	rm -rf beagle-* tmp*
+
 clean-software:
 	rm -rf third-party/beagle-leash
 

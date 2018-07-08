@@ -77,7 +77,7 @@ def parse_23andMe_file(genotype_23andme_path):
     from a 23andMe raw data file, and the number of SNPs, and return as a list.'''
 
     snp_counts = 0
-    genome_verison = ''
+    genome_version = ''
     
     with open(genotype_23andme_path) as file_23andMe:
 
@@ -480,13 +480,15 @@ def vcf2dynamoDB (filename, annotate_file_path, userID, sampleID, genomeVersion,
             if currGenotype == [1, 0]:
                 currGenotype = [0, 1]
 
-            currGenotypeProbs = list(rec_sample['GP'])
 
             if 'IMP' in rec.info:
                 isImputedP = True
+                currGenotypeProbs = list(rec_sample['GP'])
             else:
                 isImputedP = False
-            
+                currGenotypeProbs = []
+
+                
             variantID     = ':'.join([sampleID, genomeVersion, currChrom, str(currStartBase), currRsID, currAltBasesStr])
             ##print variantID
             
@@ -504,8 +506,8 @@ def vcf2dynamoDB (filename, annotate_file_path, userID, sampleID, genomeVersion,
                 'rsId'               : currRsID,
                 'geneStart'          : geneMinCoord,
                 'geneEnd'            : geneMaxCoord,
-                'genotypeLikelihood' : currGenotyeProbs,
-                'isImputed'          : currImputedP
+                'genotypeLikelihood' : currGenotypeProbs,
+                'isImputed'          : isImputedP
             }
                 
             if debug == True:
