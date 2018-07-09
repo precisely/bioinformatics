@@ -110,6 +110,35 @@ RUN aws s3 cp "s3://precisely-bio-dbs/human-1kg-v37/2010-05-17/human_g1k_v37.fas
 WORKDIR /precisely/data/beagle-refdb
 RUN aws s3 sync "s3://precisely-bio-dbs/beagle-1kg-bref/b37.bref" .
 
+# download testing data
+# adapted from the old Makefile
+WORKDIR /precisely/data/samples
+RUN \
+  wget -O 23andme-datasets.html "https://my.pgp-hms.org/public_genetic_data?data_type=23andMe"
+# This link extraction code should really use a proper HTML parser instead of awk.
+RUN \
+  awk -F'"' '/download/ { print $2 }' 23andme-datasets.html \
+    | shuf --random-source=23andme-datasets.html \
+    | awk '{ print "https://my.pgp-hms.org" $1 }' \
+    | tee 23andme-dataset-URLs.txt \
+    | head > 23andme-dataset-URLs-sample.txt
+RUN wget -i 23andme-dataset-URLs-sample.txt
+RUN \
+  for file in `ls`; do \
+    if file $file | grep Zip; then \
+      unzip $file; \
+    fi; \
+  done
+RUN \
+  for file in `ls`; do \
+    if file $file | grep ASCII; then \
+      tr -d '\r' < $file > `basename $file .txt | sed 's/_/-/g'`_`md5sum $file | cut -d' ' -f 1`.txt; \
+      rm $file; \
+    fi; \
+  done
+RUN \
+  rm -f 23andme-dataset-URLs-sample.txt 23andme-dataset-URLs.txt 23andme-datasets.html
+
 # install beagle-leash (which seems to also install Beagle)
 WORKDIR /precisely
 RUN git clone https://bitbucket.org/taltman1/beagle-leash.git
