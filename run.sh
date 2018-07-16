@@ -3,14 +3,29 @@
 set -e
 set -o pipefail
 
+if [ "$#" -eq 0 ]; then
+    echo "usage: run.sh <input-23andme-genome-file> <sample-id>" 1>&2
+    exit 1
+fi
+
+input_23andme_genome_file="$1"
+sample_id="$2"
+
+if [[ -z "${input_23andme_genome_file}" ]]; then
+    echo "input 23andMe genome file required"
+    exit 1
+fi
+
+if [[ -z "${sample_id}" ]]; then
+    echo "sample ID required"
+    exit 1
+fi
+
 export BEAGLE_REFDB_PATH=/precisely/data/beagle-refdb
 
 beagle_leash=/precisely/beagle-leash/inst/beagle-leash/bin/beagle-leash
 path_reference_human_genome=/precisely/data/human_g1k_v37.fasta.bgz
-sample_id=SAMPLEID
 num_cores=2
-
-input_23andme_genome_file=/precisely/data/samples/genome-Adam-Davidson-Full-20150524125003_cc8525e1045f9cfacd8e6dd012134e07.txt
 
 # step 0: check for genome version 37, others seem to fail (?); this information
 # is stored in a comment
