@@ -1,8 +1,16 @@
 #!/usr/bin/env bash
 
+# this script should fail on any invocation error
 set -e
 set -o pipefail
 
+# configuration
+export BEAGLE_REFDB_PATH=/precisely/data/beagle-refdb
+beagle_leash=/precisely/beagle-leash/inst/beagle-leash/bin/beagle-leash
+beagle_num_cores=2
+path_reference_human_genome=/precisely/data/human_g1k_v37.fasta.bgz
+
+# parameter handling
 if [ "$#" -eq 0 ]; then
     echo "usage: run.sh <input-23andme-genome-file> <sample-id>" 1>&2
     exit 1
@@ -20,12 +28,6 @@ if [[ -z "${sample_id}" ]]; then
     echo "sample ID required"
     exit 1
 fi
-
-export BEAGLE_REFDB_PATH=/precisely/data/beagle-refdb
-
-beagle_leash=/precisely/beagle-leash/inst/beagle-leash/bin/beagle-leash
-path_reference_human_genome=/precisely/data/human_g1k_v37.fasta.bgz
-num_cores=2
 
 # step 0: check for genome version 37, others seem to fail (?); this information
 # is stored in a comment
@@ -51,7 +53,7 @@ fi
 
 # step 2: use Beagle to impute from the input VCF to a fuller VCF
 if [[ ! -f "${vcf_file_imputed}" ]]; then
-    BEAGLE_LEASH_CHROMS="21" ${beagle_leash} "${vcf_file_converted}" "${vcf_file_imputed}" ${num_cores}
+    BEAGLE_LEASH_CHROMS="21" ${beagle_leash} "${vcf_file_converted}" "${vcf_file_imputed}" ${beagle_num_cores}
 fi
 
 # step 3: use bgzip to compress the imputed output
