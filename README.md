@@ -37,8 +37,10 @@ In development (link) mode, you can now connect to the container and use it:
 
 ## Running
 
-**Warning: Outdated instructions.**
+The `run.sh` script is the entry point. Right now, it's hard-coded to run a simplified (only chromosome 21) imputation pass and produce some output files. Please read it to understand what it does, it's fairly short and straightforward.
 
+
+## Running (old instructions)
 
 ### Converting 23andMe data to Precise.ly-formatted VCF
 
