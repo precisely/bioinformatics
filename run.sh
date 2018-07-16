@@ -36,9 +36,9 @@ if [[ $(grep '.*#' "${input_23andme_genome_file}" |
     exit 1
 fi
 
-vcf_file_converted=/precisely/app/vcf-step-1-converted-SAMPLEID.vcf.gz
-vcf_file_imputed=/precisely/app/vcf-step-2-imputed-SAMPLEID.vcf.gz
-vcf_file_compressed=/precisely/app/vcf-step-3-imputed-SAMPLEID.vcf.bgz
+vcf_file_converted=/precisely/app/vcf-step-1-converted-${sample_id}.vcf.gz
+vcf_file_imputed=/precisely/app/vcf-step-2-imputed-${sample_id}.vcf.gz
+vcf_file_compressed=/precisely/app/vcf-step-3-imputed-${sample_id}.vcf.bgz
 
 # step 1: convert 23andMe file to VCF
 if [[ ! -f "${vcf_file_converted}" ]]; then
