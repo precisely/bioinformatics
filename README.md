@@ -37,7 +37,9 @@ In development (link) mode, you can now connect to the container and use it:
 
 ## Running
 
-The `run.sh` script is the entry point. Right now, it's hard-coded to run a simplified (only chromosome 21) imputation pass and produce some output files. Please read it to understand what it does, it's fairly short and straightforward.
+The `run.sh` script is the entry point. It takes two parameters: an input 23andMe genome file, and a sample ID (an arbitrary string).
+
+Right now, it's hard-coded to run a simplified (only chromosome 21) imputation pass and produce some output files. Please read it to understand what it does, it's fairly short and straightforward.
 
 
 ## Running (old instructions)
