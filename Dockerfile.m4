@@ -102,6 +102,12 @@ ARG aws_secret_access_key
 ENV AWS_ACCESS_KEY_ID ${aws_access_key_id}
 ENV AWS_SECRET_ACCESS_KEY ${aws_secret_access_key}
 
+# working area
+WORKDIR /precisely
+RUN chown docker:docker .
+USER docker
+RUN mkdir -p data data/beagle-refdb data/samples beagle-leash app
+
 # download genome data
 WORKDIR /precisely/data
 RUN aws s3 cp "s3://precisely-bio-dbs/human-1kg-v37/2010-05-17/human_g1k_v37.fasta.bgz" .
@@ -145,15 +151,10 @@ RUN git clone https://bitbucket.org/taltman1/beagle-leash.git
 WORKDIR /precisely/beagle-leash
 # The beagle-leash install step should run as the unprivileged user because it
 # does dumb things with .bashrc.
-RUN chown -R docker:docker /precisely/beagle-leash
-USER docker
 RUN make install-nodata
-USER root
 
 # finally, set up the app
 WORKDIR /precisely/app
-RUN chown -R docker:docker /precisely
-USER docker
 
 # Temporarily copy in the requirements.txt file from the Python scripts area to
 # install dependencies. This is necessary because that file is not yet available
