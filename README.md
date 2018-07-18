@@ -6,6 +6,11 @@ sequester the more detailed bioinformatic data handling in this repo,
 so that other code repos can simply use this repo as a black box.
 
 
+## Requirements
+
+Docker must be installed and available.
+
+
 ## Installation
 
 An easy mnemonic: run the various `docker-*` scripts in alphabetical order!
