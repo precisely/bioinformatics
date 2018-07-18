@@ -1,5 +1,13 @@
 #!/usr/bin/env bash
 
+set -e
+set -o pipefail
+
+readlinkf() { perl -MCwd -e 'print Cwd::abs_path glob shift' "$1"; }
+basedir=$(dirname $(readlinkf $0))
+
+
+### parameters
 if [ "$#" -eq 0 ]; then
     echo "usage: docker-create.sh <mode> <image-tag> <container-name> <app-source-path>" 1>&2
     exit 1
@@ -30,10 +38,12 @@ if [[ "${mode}" == "link" ]]; then
         echo "app source path required in link mode" 1>&2
         exit 1
     else
-        app_source_path=$(realpath "${app_source_path}")
+        app_source_path=$(readlinkf "${app_source_path}")
     fi
 fi
 
+
+### run
 if [[ "${mode}" == "link" ]]; then
     docker create -i -t --name "${container_name}" \
            --net=host \

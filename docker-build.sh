@@ -1,5 +1,13 @@
 #!/usr/bin/env bash
 
+set -e
+set -o pipefail
+
+readlinkf() { perl -MCwd -e 'print Cwd::abs_path glob shift' "$1"; }
+basedir=$(dirname $(readlinkf $0))
+
+
+### parameter handling
 if [ "$#" -eq 0 ]; then
     echo "usage: docker-build.sh <mode> <image-tag> <aws-profile>" 1>&2
     exit 1
@@ -32,16 +40,13 @@ if [[ -z "${aws_access_key_id}" || -z "${aws_secret_access_key}" ]]; then
     exit 1
 fi
 
-basedir=$(dirname $(greadlink -f $0))
-pushd $basedir > /dev/null
 
+### run
 if [[ -z `docker images -q "${image_tag}"` ]]; then
     m4 -P -Dmode=${mode} Dockerfile.m4 | \
-        docker build . \
+        docker build "${basedir}" \
                --tag "${image_tag}" \
                --build-arg aws_access_key_id=${aws_access_key_id} \
                --build-arg aws_secret_access_key=${aws_secret_access_key} \
                --file -
 fi
-
-popd > /dev/null

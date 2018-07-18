@@ -1,16 +1,20 @@
 #!/usr/bin/env bash
 
-# this script should fail on any invocation error
 set -e
 set -o pipefail
 
-# configuration
+readlinkf() { perl -MCwd -e 'print Cwd::abs_path glob shift' "$1"; }
+basedir=$(dirname $(readlinkf $0))
+
+
+### configuration
 export BEAGLE_REFDB_PATH=/precisely/data/beagle-refdb
 beagle_leash=/precisely/beagle-leash/inst/beagle-leash/bin/beagle-leash
 beagle_num_cores=2
 path_reference_human_genome=/precisely/data/human_g1k_v37.fasta.bgz
 
-# parameter handling
+
+### parameters
 if [ "$#" -eq 0 ]; then
     echo "usage: run.sh <input-23andme-genome-file> <sample-id>" 1>&2
     exit 1
@@ -20,21 +24,23 @@ input_23andme_genome_file="$1"
 sample_id="$2"
 
 if [[ -z "${input_23andme_genome_file}" ]]; then
-    echo "input 23andMe genome file required"
+    echo "input 23andMe genome file required" 1>&2
     exit 1
 fi
 
 if [[ -z "${sample_id}" ]]; then
-    echo "sample ID required"
+    echo "sample ID required" 1>&2
     exit 1
 fi
 
+
+### run
 # step 0: check for genome version 37, others seem to fail (?); this information
 # is stored in a comment
 if [[ $(grep '.*#' "${input_23andme_genome_file}" |
             grep 'We are using reference human assembly build' |
             sed 's/.*build \([[:digit:]]\+\).*/\1/') -ne 37 ]]; then
-    echo "unsupported genome version"
+    echo "unsupported genome version" 1>&2
     exit 1
 fi
 
