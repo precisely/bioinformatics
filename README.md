@@ -51,13 +51,13 @@ Right now, it's hard-coded to run a simplified (only chromosome 21) imputation p
 
 ### 23andMe's tab-delimited raw data format
 
-- 23&Me's data format documentation: https://customercare.23andme.com/hc/en-us/articles/115004459928-Raw-Data-Technical-Details
+- 23andMe's data format documentation: https://customercare.23andme.com/hc/en-us/articles/115004459928-Raw-Data-Technical-Details
 - http://fileformats.archiveteam.org/wiki/23andMe
 
 
 ### Obtaining 23andMe example data files for testing
 
-- Source of publicly-available 23&Me datasets for testing: https://my.pgp-hms.org/public_genetic_data?data_type=23andMe
+- Source of publicly-available 23andMe datasets for testing: https://my.pgp-hms.org/public_genetic_data?data_type=23andMe
 
 
 ### Building the Compressed Reference Human Genome for bcftools

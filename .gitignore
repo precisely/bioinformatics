@@ -1,6 +1,10 @@
+.DS_Store
+Thumbs.db
+[Dd]esktop.ini
 *~
-*.pyc
 \#*\#
-third-party
-ref-data
-test
+
+# Python-specific
+__pycache__/
+*.py[cod]
+*$py.class
