@@ -1,0 +1,158 @@
+""" User Genotype to VCF Converter for Precisely
+
+Usage:
+  userGenotype2VCF [-d] <user-id> <input-bucket> <sample-file> <output-bucket> <error-bucket>
+  userGenotype2VCF (-h | --help)
+  userGenotype2VCF --version
+
+Options:
+  -h --help     Show this screen.
+  -d            Turn on debugging output
+  --version     Show version.
+
+"""
+
+'''
+Exit code cheet sheet:
+2: Downloading input file from S3 failed
+3: Imputation failed
+4: Upload of final VCF file to S3 failed
+5: Upload of logfile to S3 failed
+'''
+
+import convert23andme, subprocess
+import boto3
+import botocore
+import os, os.path, sys
+from docopt import docopt
+import logging
+
+
+def processFile (user_id,
+                     input_bucket,
+                     input_filename,
+                     output_bucket,
+                     error_bucket):
+
+    '''
+    Docs:
+    '''
+
+    ### S3 copy file to /tmp/genotype_input.
+    logging.info('Boto: Fetching input file "%s" from s3 bucket "%s"', input_filename, input_bucket)
+    
+    try:
+        s3.Bucket(input_bucket).download_file(input_filename, '/tmp/' + input_filename)
+    except botocore.exceptions.ClientError as exception:
+        if exception.response['Error']['Code'] == "404":
+            logging.exception("The S3 object does not exist.")
+        else:
+            logging.exception('Exception occured: ' + str(exception))
+        uploadLogFile2S3(error_bucket)
+        sys.exit(2)
+    else:
+        logging.info('Boto input file fetching completed.')
+
+        
+    ### Impute:
+
+    ## First, we set an environment variable for beagle-leash:
+    script_dir_path = os.path.dirname(os.path.realpath(__file__))
+    ref_data_path = script_dir_path + '/../ref-data/beagle-refdb'
+
+    logging.info('Setting the environmental variable BEAGLE_REFDB_PATH to "%s" for beagle-leash.', ref_data_path)
+    os.environ['BEAGLE_REFDB_PATH'] = ref_data_path
+
+    
+    logging.info('Running convertImpute23andMe2VCF with input file "%s", user ID "%s"', input_filename, user_id)
+    
+    try:
+        final_vcf_file_path = convert23andme.convertImpute23andMe2VCF('/tmp/' + input_filename,
+                                                                      'ref-data/human_g1k_v37.fasta.bgz',
+                                                                      'convert23andme/ucsc-gene-symbols-coords.txt.gz',
+                                                                      '/tmp',
+                                                                      user_id,
+                                                                      debug=arguments['-d'])
+    except:
+        exception = sys.exc_info()[0]
+        logging.exception('Exception occurred: ' + str(exception))
+        uploadLogFile2S3(error_bucket)
+        sys.exit(3)
+    else:
+        logging.info('Call to convertImpute23andMe2VCF completed.')
+
+        
+    ### S3 copy file to output_bucket:
+    
+    file_handle = open(final_vcf_file_path,'rb')
+    new_filename = os.path.basename(final_vcf_file_path)
+
+    logging.info('Boto: Uploading output VCF file "%s" to s3 bucket "%s"', final_vcf_file_path, output_bucket)
+
+    try:
+        s3.Bucket(output_bucket).put_object(Key=new_filename, Body=file_handle)
+    except botocore.exceptions.ClientError as exception:
+        logging.exception('Exception occured: ' + str(exception))        
+        uploadLogFile2S3(error_bucket)
+        sys.exit(4)
+    else:
+        logging.info('Boto output file upload completed.')
+
+
+    ## Uploading the log file
+    uploadLogFile2S3(error_bucket)
+
+    ## We completed the script cleanly, so explicitly exit with code zero:
+    sys.exit(0)
+
+    
+
+def uploadLogFile2S3(error_bucket):
+
+    logging.info('Boto: Uploading log file "%s" to s3 bucket "%s"', logfile_path, error_bucket)
+    logging.disable(logging.CRITICAL)
+
+    file_handle = open(logfile_path,'rb')
+    new_filename = os.path.basename(logfile_path)
+
+
+
+    try:
+        s3.Bucket(error_bucket).put_object(Key=new_filename, Body=file_handle)
+    except botocore.exceptions.ClientError as exception:
+        #logging.exception('Exception occured: ' + str(exception))
+        print 'Exception occured: ' + str(exception)
+        sys.exit(5)
+    else:
+        #logging.info('Boto log file upload completed.')
+        print 'Boto log file upload completed.'
+
+    
+
+if __name__ == '__main__':
+
+    arguments = docopt(__doc__, version='userGenotype2VCF 0.1')
+    logfile_path = '/tmp/' + arguments['<sample-file>'] + '.log'
+    
+    if arguments['-d']:
+        print(arguments)
+        logging.basicConfig(filename = logfile_path,
+                            filemode = 'w',
+                            format   = '%(asctime)s %(message)s',
+                            level    = logging.DEBUG)
+    else:
+        logging.basicConfig(filename = logfile_path,
+                            filemode = 'w',
+                            format   = '%(asctime)s %(message)s',
+                            level    = logging.INFO)
+
+    logging.info('Script called with arguments:')
+    logging.info(str(arguments))
+
+    s3 = boto3.resource('s3')
+
+    processFile(arguments['<user-id>'],
+                    arguments['<input-bucket>'],
+                    arguments['<sample-file>'],
+                    arguments['<output-bucket>'],
+                    arguments['<error-bucket>'])

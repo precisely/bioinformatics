@@ -1,0 +1,43 @@
+""" test Genotype to VCF Converter for Precisely
+
+Usage:
+  userGenotype2VCF <sample-file>
+  userGenotype2VCF (-h | --help)
+  userGenotype2VCF --version
+
+Set enviroment variable 'BEAGLE_LEASH_CHROMS' to give a list of chromosomes to process.
+
+Options:
+  -h --help     Show this screen.
+  -d            Turn on debugging output
+  --version     Show version.
+
+"""
+import convert23andme, subprocess
+import boto3
+import botocore
+import os.path
+from docopt import docopt
+
+
+def processFile (input_filename):
+
+    '''
+    Docs:
+    '''
+
+    
+    final_vcf_file_path = convert23andme.convertImpute23andMe2VCF(input_filename,
+                                                                  'ref-data/human_g1k_v37.fasta.bgz',
+                                                                  'convert23andme/ucsc-gene-symbols-coords.txt.gz',
+                                                                  '/tmp',
+                                                                  'test-userid-1',
+                                                                  debug=True)
+
+
+
+
+if __name__ == '__main__':
+    arguments = docopt(__doc__, version='userGenotype2VCF 0.1')
+    print(arguments)
+    processFile(arguments['<sample-file>'])
