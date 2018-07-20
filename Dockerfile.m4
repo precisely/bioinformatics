@@ -116,6 +116,7 @@ RUN aws s3 cp "s3://precisely-bio-dbs/human-1kg-v37/2010-05-17/human_g1k_v37.fas
 WORKDIR /precisely/data/beagle-refdb
 RUN aws s3 sync "s3://precisely-bio-dbs/beagle-1kg-bref/b37.bref" .
 
+# TODO: Make optional for production?
 # download testing data
 # adapted from the old Makefile
 WORKDIR /precisely/data/samples
@@ -142,8 +143,6 @@ RUN \
       rm $file; \
     fi; \
   done
-RUN \
-  rm -f 23andme-dataset-URLs-sample.txt 23andme-dataset-URLs.txt 23andme-datasets.html
 
 # install beagle-leash (which seems to also install Beagle)
 WORKDIR /precisely
@@ -152,6 +151,31 @@ WORKDIR /precisely/beagle-leash
 # The beagle-leash install step should run as the unprivileged user because it
 # does dumb things with .bashrc.
 RUN make install-nodata
+
+# TODO: Make optional for production?
+# install local AWS clones: Minio first
+RUN sudo mkdir /precisely/aws-local && sudo chown docker:docker /precisely/aws-local
+WORKDIR /precisely/aws-local
+RUN mkdir -p conf/minio data/minio data/dynamo
+RUN curl -L -O https://dl.minio.io/server/minio/release/linux-amd64/minio
+RUN chmod +x minio
+# now DynamoDB Local
+RUN mkdir dynamo
+WORKDIR /precisely/aws-local/dynamo
+RUN curl -L -O https://s3-us-west-2.amazonaws.com/dynamodb-local/dynamodb_local_latest.zip
+RUN unzip dynamodb_local_latest.zip
+RUN rm dynamodb_local_latest.zip
+# add startup scripts
+WORKDIR /precisely/aws-local
+RUN echo '#!/usr/bin/env bash\n\n\
+export MINIO_ACCESS_KEY=access-key\n\
+export MINIO_SECRET_KEY=secret-key\n\
+export MINIO_BROWSER=off\n\
+/precisely/aws-local/minio server --config-dir /precisely/aws-local/conf/minio /precisely/aws-local/data/minio\n' >> minio.sh
+RUN chmod +x minio.sh
+RUN echo '#!/usr/bin/env bash\n\n\
+java -Djava.library.path=/precisely/aws-local/dynamo/DynamoDBLocal_lib -jar /precisely/aws-local/dynamo/DynamoDBLocal.jar -sharedDb -dbPath /precisely/aws-local/data/dynamo\n' >> dynamo.sh
+RUN chmod +x dynamo.sh
 
 # finally, set up the app
 WORKDIR /precisely/app
