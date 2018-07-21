@@ -63,6 +63,7 @@ RUN apt-get install -y \
 RUN apt-get install -y \
   cmake \
   openjdk-8-jre-headless \
+  maven \
   libc++-dev
 
 # bioinformatics packages
@@ -70,6 +71,10 @@ RUN apt-get install -y \
   bcftools \
   samtools \
   tabix
+
+# node requires a dedicated APT source on Debian; this is a dependency for LocalStack
+RUN curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
+RUN apt-get install -y nodejs
 
 # the tmux package distributed with Debian is broken; install from source
 RUN curl -L -O https://github.com/tmux/tmux/releases/download/2.7/tmux-2.7.tar.gz && \
@@ -169,13 +174,16 @@ RUN grep -v 'export PATH=.*inst/beagle-leash/bin' ~/.bashrc > ~/.bashrc-tmp && m
 RUN sudo ln -s ln -s /precisely/beagle-leash/inst/beagle-leash/bin/beagle-leash /usr/local/bin
 
 # TODO: Make optional for production?
-# install local AWS clones: Minio first
+# install local AWS clones: LocalStack, Minio, and DynamoDB Local
 RUN sudo mkdir /precisely/aws-local && sudo chown docker:docker /precisely/aws-local
 WORKDIR /precisely/aws-local
-RUN mkdir -p conf/minio data/minio data/dynamo
+RUN mkdir -p conf/minio data/localstack data/minio data/dynamo
+# LocalStack
+RUN pip install --no-warn-script-location --user localstack==0.8.7
+# Minio
 RUN curl -L -O https://dl.minio.io/server/minio/release/linux-amd64/minio
 RUN chmod +x minio
-# now DynamoDB Local
+# DynamoDB Local
 RUN mkdir dynamo
 WORKDIR /precisely/aws-local/dynamo
 RUN curl -L -O https://s3-us-west-2.amazonaws.com/dynamodb-local/dynamodb_local_latest.zip
@@ -183,6 +191,11 @@ RUN unzip dynamodb_local_latest.zip
 RUN rm dynamodb_local_latest.zip
 # add startup scripts
 WORKDIR /precisely/aws-local
+RUN echo '#!/usr/bin/env bash\n\n\
+export HOSTNAME=localhost\n\
+export DATA_DIR=/precisely/aws-local/data/localstack\n\
+localstack start\n' >> localstack.sh
+RUN chmod +x localstack.sh
 RUN echo '#!/usr/bin/env bash\n\n\
 export MINIO_ACCESS_KEY=access-key\n\
 export MINIO_SECRET_KEY=secret-key\n\
