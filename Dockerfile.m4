@@ -50,6 +50,7 @@ RUN apt-get install -y \
   emacs-nox \
   gawk \
   git-core \
+  htop \
   less \
   rlwrap \
   silversearcher-ag \
@@ -88,13 +89,13 @@ WORKDIR /home/docker
 # configure the internal docker user environment:
 # download a tmux configuration
 RUN curl -L -o .tmux.conf https://raw.githubusercontent.com/gcv/dotfiles/ddcd10e97939595911e2c2bfc5690a487ebac00a/public/tmux.conf
+RUN chown docker:docker .tmux.conf
 # make bash suck slightly less
 RUN echo '\n\
+export PATH=${HOME}/.local/bin:${PATH}\n\n\
 alias v="ls -la"\n\
 alias ..="cd .."\n\
 shopt -s autocd\n' >> .bashrc
-# fix permissions
-RUN chown docker:docker .tmux.conf
 
 # set up 
 ARG aws_access_key_id
