@@ -162,9 +162,11 @@ RUN \
 WORKDIR /precisely
 RUN git clone https://bitbucket.org/taltman1/beagle-leash.git
 WORKDIR /precisely/beagle-leash
-# The beagle-leash install step should run as the unprivileged user because it
-# does dumb things with .bashrc.
 RUN make install-nodata
+# The beagle-leash install step does bad things with .bashrc which require
+# repair (it blindly overrides the PATH and does so incorrectly).
+RUN grep -v 'export PATH=.*inst/beagle-leash/bin' ~/.bashrc > ~/.bashrc-tmp && mv ~/.bashrc-tmp ~/.bashrc
+RUN sudo ln -s ln -s /precisely/beagle-leash/inst/beagle-leash/bin/beagle-leash /usr/local/bin
 
 # TODO: Make optional for production?
 # install local AWS clones: Minio first
