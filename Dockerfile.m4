@@ -123,25 +123,38 @@ RUN aws s3 sync "s3://precisely-bio-dbs/beagle-1kg-bref/b37.bref" .
 WORKDIR /precisely/data/samples
 RUN \
   wget -O 23andme-datasets.html "https://my.pgp-hms.org/public_genetic_data?data_type=23andMe"
-# This link extraction code should really use a proper HTML parser instead of awk.
+# The link extraction code should really use a proper HTML parser instead of awk.
 RUN \
-  awk -F'"' '/download/ { print $2 }' 23andme-datasets.html \
-    | shuf --random-source=23andme-datasets.html \
+  awk -F'"' '/user_file\/download/ { print $2 }' 23andme-datasets.html \
     | awk '{ print "https://my.pgp-hms.org" $1 }' \
     | tee 23andme-dataset-URLs.txt \
-    | head > 23andme-dataset-URLs-sample.txt
-RUN wget -i 23andme-dataset-URLs-sample.txt
+    | shuf \
+    | head -20 > 23andme-dataset-URLs-sample.txt
+# This downloads a randomly-chosen selection of sample 23andMe datasets, bad
+# idea for a reproducible build:
+#RUN wget --tries=3 -i 23andme-dataset-URLs-sample.txt
+# Download a handful of pre-selected 23andMe datasets, including non-v37 genomes:
+RUN wget --tries=3 https://my.pgp-hms.org/user_file/download/609
+RUN wget --tries=3 https://my.pgp-hms.org/user_file/download/1117
+RUN wget --tries=3 https://my.pgp-hms.org/user_file/download/1386
+RUN wget --tries=3 https://my.pgp-hms.org/user_file/download/1386
+RUN wget --tries=3 https://my.pgp-hms.org/user_file/download/1816
+RUN wget --tries=3 https://my.pgp-hms.org/user_file/download/1820
+RUN wget --tries=3 https://my.pgp-hms.org/user_file/download/302
+RUN wget --tries=3 https://my.pgp-hms.org/user_file/download/3507
+RUN wget --tries=3 https://my.pgp-hms.org/user_file/download/856
+RUN wget --tries=3 https://my.pgp-hms.org/user_file/download/1011
+RUN wget --tries=3 https://my.pgp-hms.org/user_file/download/1232
+RUN wget --tries=3 https://my.pgp-hms.org/user_file/download/151
+RUN wget --tries=3 https://my.pgp-hms.org/user_file/download/1821
+RUN wget --tries=3 https://my.pgp-hms.org/user_file/download/2017
+RUN wget --tries=3 https://my.pgp-hms.org/user_file/download/2024
+# uncompress as needed
 RUN \
   for file in `ls`; do \
     if file $file | grep Zip; then \
       unzip $file; \
-    fi; \
-  done
-RUN \
-  for file in `ls`; do \
-    if file $file | grep ASCII; then \
-      tr -d '\r' < $file > `basename $file .txt | sed 's/_/-/g'`_`md5sum $file | cut -d' ' -f 1`.txt; \
-      rm $file; \
+      rm -f $file; \
     fi; \
   done
 
