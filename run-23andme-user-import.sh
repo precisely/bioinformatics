@@ -9,7 +9,7 @@ basedir=$(dirname "$(readlinkf $0)")
 
 ### configuration
 if [[ -z "${S3_BUCKET_USER_UPLOAD}" ]]; then
-    echo "" 1>&2
+    echo "S3_BUCKET_USER_UPLOAD environment variable required" 1>&2
     exit 1
 fi
 
@@ -53,17 +53,34 @@ workdir="./$(date +"%Y-%m-%d.%H-%M-%S.%N")"
 mkdir "${workdir}"
 pushd "${workdir}" > /dev/null
 
+mkdir "${PARAM_SAMPLE_ID}"
+pushd "${PARAM_SAMPLE_ID}" > /dev/null
+
 mkdir headers
 mkdir imputed
+
 aws s3 --endpoint-url "${AWS_S3_ENDPOINT_URL}" \
-    cp "s3://${S3_BUCKET_USER_UPLOAD}/${PARAM_USER_23ANDME_GENOME_UPLOAD_PATH}" 23andme-raw.txt
+    cp "s3://${S3_BUCKET_USER_UPLOAD}/${PARAM_USER_23ANDME_GENOME_UPLOAD_PATH}" 23andme-raw.txt > /dev/null
+
 "${basedir}/convert-23andme-to-vcf.sh" 23andme-raw.txt 23andme.vcf.gz ${PARAM_SAMPLE_ID} ${test_mode}
 "${basedir}/extract-vcf-headers.sh" 23andme.vcf.gz > headers/23andme.txt
+
 for chr in {1..23}; do
-    local imputed_filename="imputed/chr-${chr}.vcf.gz"
+    imputed_filename="imputed/chr-${chr}.vcf.gz"
     "${basedir}/impute-genotype.sh" 23andme.vcf.gz "${imputed_filename}" ${chr} 3 ${test_mode}
     "${basedir}/extract-vcf-headers.sh" "${imputed_filename}" > "headers/imputed-${chr}.txt"
 done
-aws s3 --endpoint-url "${AWS_S3_ENDPOINT_URL}" sync . "${S3_BUCKET_GENETICS_VCF}/${PARAM_SAMPLE_ID}"
+
+popd > /dev/null
+
+# Do not clobber destination! Might be nice to do this before running expensive
+# imputations, too.
+if [[ ! -z $(aws s3 --endpoint-url "${AWS_S3_ENDPOINT_URL}" ls "s3://${S3_BUCKET_GENETICS_VCF}/${PARAM_SAMPLE_ID}") ]]; then
+    echo "${PARAM_SAMPLE_ID} already exists in S3" 1>&2
+    exit 1
+fi
+
+src_dir=$(readlinkf "${PARAM_SAMPLE_ID}")
+aws s3 --endpoint-url "${AWS_S3_ENDPOINT_URL}" cp --recursive "${src_dir}" "s3://${S3_BUCKET_GENETICS_VCF}/${PARAM_SAMPLE_ID}" --exclude "23andme-raw.txt" > /dev/null
 
 popd > /dev/null
