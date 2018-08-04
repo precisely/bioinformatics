@@ -13,15 +13,15 @@ Docker must be installed and available.
 
 ## Installation
 
-An easy mnemonic: run the various `docker-*` scripts in alphabetical order!
+An easy mnemonic: run the various `docker/*` scripts in alphabetical order!
 
-First, build the Docker image. The `docker-build.sh` script takes four parameters: mode, target image tag, and AWS profile (from `~/.aws/credentials`). Mode is either `link` or `build`. `link` is for development mode, and mounts a volume from the host to connect to the `/precisely/app` directory in the container.
+First, build the Docker image. The `docker/build.sh` script takes four parameters: mode, target image tag, and AWS profile (from `~/.aws/credentials`). Mode is either `link` or `build`. `link` is for development mode, and mounts a volume from the host to connect to the `/precisely/app` directory in the container.
 
 ```
 ./docker/build.sh link bio1-img dev-profile-precisely
 ```
 
-Second, create a container. The `docker-create.sh` script takes three or four parameters: mode, image tag, container name, and (in link mode only) the application source path.
+Second, create a container. The `docker/create.sh` script takes three or four parameters: mode, image tag, container name, and (in link mode only) the application source path.
 
 ```
 ./docker/create.sh link bio1-img bio1 .
