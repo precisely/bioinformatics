@@ -43,7 +43,7 @@ fi
 
 ### run
 if [[ -z `docker images -q "${image_tag}"` ]]; then
-    m4 -P -Dmode=${mode} Dockerfile.m4 | \
+    m4 -P -Dmode=${mode} "${basedir}/Dockerfile.m4" | \
         docker build "${basedir}" \
                --tag "${image_tag}" \
                --build-arg aws_access_key_id=${aws_access_key_id} \
