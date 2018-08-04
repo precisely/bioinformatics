@@ -4,7 +4,7 @@ set -e
 set -o pipefail
 
 readlinkf() { perl -MCwd -e 'print Cwd::abs_path glob shift' "$1"; }
-basedir=$(dirname $(readlinkf $0))
+basedir=$(dirname "$(readlinkf $0)")
 
 
 ### parameters

@@ -96,13 +96,16 @@ WORKDIR /home/docker
 RUN curl -L -o .tmux.conf https://raw.githubusercontent.com/gcv/dotfiles/ddcd10e97939595911e2c2bfc5690a487ebac00a/public/tmux.conf
 RUN chown docker:docker .tmux.conf
 # make bash suck slightly less
-RUN echo '\n\
+RUN echo $'\n\
 export PATH=${HOME}/.local/bin:${PATH}\n\n\
 alias v="ls -la"\n\
 alias ..="cd .."\n\
+alias ...="cd ../.."\n\
+alias ....="cd ../../.."\n\
+alias .....="cd ../../../.."\n\n\
 shopt -s autocd\n' >> .bashrc
 
-# set up 
+# set up
 ARG aws_access_key_id
 ARG aws_secret_access_key
 ENV AWS_ACCESS_KEY_ID ${aws_access_key_id}
@@ -139,21 +142,25 @@ RUN \
 # idea for a reproducible build:
 #RUN wget --tries=3 -i 23andme-dataset-URLs-sample.txt
 # Download a handful of pre-selected 23andMe datasets, including non-v37 genomes:
-RUN wget --tries=3 https://my.pgp-hms.org/user_file/download/609
-RUN wget --tries=3 https://my.pgp-hms.org/user_file/download/1117
-RUN wget --tries=3 https://my.pgp-hms.org/user_file/download/1386
-RUN wget --tries=3 https://my.pgp-hms.org/user_file/download/1386
-RUN wget --tries=3 https://my.pgp-hms.org/user_file/download/1816
-RUN wget --tries=3 https://my.pgp-hms.org/user_file/download/1820
-RUN wget --tries=3 https://my.pgp-hms.org/user_file/download/302
-RUN wget --tries=3 https://my.pgp-hms.org/user_file/download/3507
-RUN wget --tries=3 https://my.pgp-hms.org/user_file/download/856
-RUN wget --tries=3 https://my.pgp-hms.org/user_file/download/1011
-RUN wget --tries=3 https://my.pgp-hms.org/user_file/download/1232
-RUN wget --tries=3 https://my.pgp-hms.org/user_file/download/151
-RUN wget --tries=3 https://my.pgp-hms.org/user_file/download/1821
-RUN wget --tries=3 https://my.pgp-hms.org/user_file/download/2017
-RUN wget --tries=3 https://my.pgp-hms.org/user_file/download/2024
+# NB: The following are unreliable, and so commented out.
+#RUN wget --tries=3 https://my.pgp-hms.org/user_file/download/609
+#RUN wget --tries=3 https://my.pgp-hms.org/user_file/download/1117
+#RUN wget --tries=3 https://my.pgp-hms.org/user_file/download/1386
+#RUN wget --tries=3 https://my.pgp-hms.org/user_file/download/1386
+#RUN wget --tries=3 https://my.pgp-hms.org/user_file/download/1816
+#RUN wget --tries=3 https://my.pgp-hms.org/user_file/download/1820
+#RUN wget --tries=3 https://my.pgp-hms.org/user_file/download/302
+#RUN wget --tries=3 https://my.pgp-hms.org/user_file/download/3507
+#RUN wget --tries=3 https://my.pgp-hms.org/user_file/download/856
+#RUN wget --tries=3 https://my.pgp-hms.org/user_file/download/1011
+#RUN wget --tries=3 https://my.pgp-hms.org/user_file/download/1232
+#RUN wget --tries=3 https://my.pgp-hms.org/user_file/download/151
+#RUN wget --tries=3 https://my.pgp-hms.org/user_file/download/1821
+#RUN wget --tries=3 https://my.pgp-hms.org/user_file/download/2017
+#RUN wget --tries=3 https://my.pgp-hms.org/user_file/download/2024
+# The following are standardized for testing purposes, and provided on our own
+# S3 bucket:
+RUN aws s3 sync "s3://precisely-bio-dbs/samples/23andme" .
 # uncompress as needed
 RUN \
   for file in `ls`; do \
