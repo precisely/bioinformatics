@@ -10,14 +10,13 @@ path_reference_human_genome=/precisely/data/human_g1k_v37.fasta.bgz
 
 ### parameters
 if [ "$#" -eq 0 ]; then
-    echo "usage: convert-23andme-to-vcf.sh <input-23andme-file-path> <output-vcf-path> <sample-id> <test-mode>?" 1>&2
+    echo "usage: convert-23andme-to-vcf.sh <input-23andme-file-path> <output-vcf-path> <test-mode>?" 1>&2
     exit 1
 fi
 
 input_23andme_file_path="$1"
 output_vcf_path="$2"
-sample_id="$3"
-test_mode="$4"
+test_mode="$3"
 
 if [[ -z "${input_23andme_file_path}" ]]; then
     echo "input 23andMe genome file path required" 1>&2
@@ -26,11 +25,6 @@ fi
 
 if [[ -z "${output_vcf_path}" ]]; then
     echo "output VCF file path required" 1>&2
-    exit 1
-fi
-
-if [[ -z "${sample_id}" ]]; then
-    echo "sample ID required" 1>&2
     exit 1
 fi
 
@@ -48,6 +42,8 @@ if [[ $(grep '.*#' "${input_23andme_file_path}" |
     echo "unsupported genome version" 1>&2
     exit 1
 fi
+
+sample_id=$(sha256sum "${input_23andme_file_path}" | awk '{print $1}')
 
 # convert 23andMe file to VCF
 if [[ -e "${output_vcf_path}" ]]; then
