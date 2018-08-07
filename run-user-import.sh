@@ -31,10 +31,22 @@ fi
 
 
 ### parameters
+if [ "$#" -eq 0 ]; then
+    echo "usage: run-user-import.sh <test-mode> <cleanup-run>" 1>&2
+    exit 1
+fi
+
 test_mode="$1"
+cleanup_run="$2"
 
 if [[ -z "${test_mode}" ]]; then
-    test_mode=false
+    echo "test-mode parameter required (true or false)" 1>&2
+    exit 1
+fi
+
+if [[ -z "${cleanup_run}" ]]; then
+    echo "cleanup-run parameter required (true or false)" 1>&2
+    exit 1
 fi
 
 if [[ -z "${PARAM_USER_DATA_SOURCE}" ]]; then
@@ -58,6 +70,16 @@ if [[ -z "${PARAM_USER_ID}" ]]; then
 fi
 
 
+### cleanup
+function cleanup {
+    if [[ "${cleanup_run}" == "true" ]]; then
+        [[ ! -z "${workdir}" ]] && rm -rf "${workdir}"
+    fi
+}
+
+trap cleanup EXIT
+
+
 ### run
 function avoid_dest_overwrite {
     local phase=$1
@@ -70,7 +92,7 @@ function avoid_dest_overwrite {
 # Do not do any expensive work if the destination path exists in S3.
 avoid_dest_overwrite "check before conversion and imputation"
 
-workdir="./$(date +"%Y-%m-%d.%H-%M-%S.%N")"
+workdir="${basedir}/$(date +"%Y-%m-%d.%H-%M-%S.%N")"
 mkdir "${workdir}"
 pushd "${workdir}" > /dev/null
 
