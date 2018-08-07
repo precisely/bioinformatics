@@ -94,18 +94,26 @@ function after {
 
 ### run
 
-# FIXME: Write tests for individual scripts.
-
 function test_overall_functionality {
     say_test_name
     before
+    local hash=a5cef5de111d61d4e8f57f0ab6166a1d8279cdc419f414383d8505efe74704f0
     eval \
         PARAM_USER_DATA_SOURCE=23andme \
-        PARAM_USER_GENOME_UPLOAD_PATH=a5cef5de111d61d4e8f57f0ab6166a1d8279cdc419f414383d8505efe74704f0 \
+        PARAM_USER_GENOME_UPLOAD_PATH=${hash} \
         PARAM_USER_ID=test-user-1 \
         "${basedir}/../run-user-import.sh" true true
     [[ $? == 0 ]] || add_error "initial run failed"
-    # FIXME: assert some things...
+    awss3 ls s3://${S3_BUCKET_GENETICS_VCF}/test-user-1/23andme/${hash} || \
+        add_error "did not create user directory at destination"
+    awss3 ls s3://${S3_BUCKET_GENETICS_VCF}/test-user-1/23andme/${hash}/raw.vcf.gz || \
+        add_error "did not copy in raw converted VCF file"
+    awss3 ls s3://${S3_BUCKET_GENETICS_VCF}/test-user-1/23andme/${hash}/imputed/chr1.vcf.gz || \
+        add_error "did not copy in chromosome files"
+    awss3 ls s3://${S3_BUCKET_GENETICS_VCF}/test-user-1/23andme/${hash}/headers/23andme.txt || \
+        add_error "did not copy in raw converted VCF file header"
+    awss3 ls s3://${S3_BUCKET_GENETICS_VCF}/test-user-1/23andme/${hash}/headers/imputed-chr1.txt || \
+        add_error "did not copy in raw converted VCF file header"
     # Try rerunning and make sure it does not upload again.
     eval \
         PARAM_USER_DATA_SOURCE=23andme \
@@ -119,9 +127,10 @@ function test_overall_functionality {
 function test_v36_rejection {
     say_test_name
     before
+    local hash=b76a6dae4094f31a59cee93a2a3aacf3d56bb32d0dcb4fa8bd9e24e4308b2348
     eval \
         PARAM_USER_DATA_SOURCE=23andme \
-        PARAM_USER_GENOME_UPLOAD_PATH=b76a6dae4094f31a59cee93a2a3aacf3d56bb32d0dcb4fa8bd9e24e4308b2348 \
+        PARAM_USER_GENOME_UPLOAD_PATH=${hash} \
         PARAM_USER_ID=test-user-1 \
         "${basedir}/../run-user-import.sh" true true
     [[ $? != 0 ]] || add_error "accepted v36 genotype instead of rejecting"
