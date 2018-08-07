@@ -102,7 +102,7 @@ function test_overall_functionality {
         PARAM_USER_DATA_SOURCE=23andme \
         PARAM_USER_GENOME_UPLOAD_PATH=${hash} \
         PARAM_USER_ID=test-user-1 \
-        "${basedir}/../run-user-import.sh" true true
+        "${basedir}/../run-user-import.sh" true true 1>&2 2>/dev/null
     [[ $? == 0 ]] || add_error "initial run failed"
     awss3 ls s3://${S3_BUCKET_GENETICS_VCF}/test-user-1/23andme/${hash} || \
         add_error "did not create user directory at destination"
@@ -119,7 +119,7 @@ function test_overall_functionality {
         PARAM_USER_DATA_SOURCE=23andme \
         PARAM_USER_GENOME_UPLOAD_PATH=a5cef5de111d61d4e8f57f0ab6166a1d8279cdc419f414383d8505efe74704f0 \
         PARAM_USER_ID=test-user-1 \
-        "${basedir}/../run-user-import.sh" true true
+        "${basedir}/../run-user-import.sh" true true 1>&2 2>/dev/null
     [[ $? != 0 ]] || add_error "second upload on same user ID succeeded"
     after
 }
@@ -132,7 +132,7 @@ function test_v36_rejection {
         PARAM_USER_DATA_SOURCE=23andme \
         PARAM_USER_GENOME_UPLOAD_PATH=${hash} \
         PARAM_USER_ID=test-user-1 \
-        "${basedir}/../run-user-import.sh" true true
+        "${basedir}/../run-user-import.sh" true true 1>&2 2>/dev/null
     [[ $? != 0 ]] || add_error "accepted v36 genotype instead of rejecting"
     after
 }
