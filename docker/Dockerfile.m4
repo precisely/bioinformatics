@@ -125,19 +125,18 @@ RUN aws s3 cp "s3://precisely-bio-dbs/human-1kg-v37/2010-05-17/human_g1k_v37.fas
 WORKDIR /precisely/data/beagle-refdb
 RUN aws s3 sync "s3://precisely-bio-dbs/beagle-1kg-bref/b37.bref" .
 
-# TODO: Make optional for production?
 # download testing data
 # adapted from the old Makefile
 WORKDIR /precisely/data/samples
-RUN \
-  wget -O 23andme-datasets.html "https://my.pgp-hms.org/public_genetic_data?data_type=23andMe"
+#RUN \
+#  wget -O 23andme-datasets.html "https://my.pgp-hms.org/public_genetic_data?data_type=23andMe"
 # The link extraction code should really use a proper HTML parser instead of awk.
-RUN \
-  awk -F'"' '/user_file\/download/ { print $2 }' 23andme-datasets.html \
-    | awk '{ print "https://my.pgp-hms.org" $1 }' \
-    | tee 23andme-dataset-URLs.txt \
-    | shuf \
-    | head -20 > 23andme-dataset-URLs-sample.txt
+#RUN \
+#  awk -F'"' '/user_file\/download/ { print $2 }' 23andme-datasets.html \
+#    | awk '{ print "https://my.pgp-hms.org" $1 }' \
+#    | tee 23andme-dataset-URLs.txt \
+#    | shuf \
+#    | head -20 > 23andme-dataset-URLs-sample.txt
 # This downloads a randomly-chosen selection of sample 23andMe datasets, bad
 # idea for a reproducible build:
 #RUN wget --tries=3 -i 23andme-dataset-URLs-sample.txt
