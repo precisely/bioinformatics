@@ -8,6 +8,11 @@ basedir=$(dirname "$(readlinkf $0)")
 
 
 ### configuration
+if [[ -z "${AWS_S3_ENDPOINT_URL}" ]]; then
+    echo "AWS_S3_ENDPOINT_URL environment variable required" 1>&2
+    exit 1
+fi
+
 if [[ -z "${S3_BUCKET_BIOINFORMATICS_UPLOAD}" ]]; then
     echo "S3_BUCKET_BIOINFORMATICS_UPLOAD environment variable required" 1>&2
     exit 1
@@ -23,11 +28,6 @@ fi
 #     echo "S3_BUCKET_BIOINFORMATICS_ERROR environment variable required" 1>&2
 #     exit 1
 # fi
-
-if [[ -z "${AWS_S3_ENDPOINT_URL}" ]]; then
-    echo "AWS_S3_ENDPOINT_URL environment variable required" 1>&2
-    exit 1
-fi
 
 
 ### parameters
@@ -65,7 +65,7 @@ if [[ -z "${PARAM_USER_GENOME_UPLOAD_PATH}" ]]; then
 fi
 
 if [[ -z "${PARAM_USER_ID}" ]]; then
-    echo "USER_ID environment variable required" 1>&2
+    echo "PARAM_USER_ID environment variable required" 1>&2
     exit 1
 fi
 
