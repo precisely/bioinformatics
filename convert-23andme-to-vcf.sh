@@ -9,7 +9,7 @@ path_reference_human_genome=/precisely/data/human_g1k_v37.fasta.bgz
 
 
 ### parameters
-if [ "$#" -eq 0 ]; then
+if [[ "$#" -eq 0 ]]; then
     echo "usage: convert-23andme-to-vcf.sh <input-23andme-file-path> <output-vcf-path> <test-mode>?" 1>&2
     exit 1
 fi

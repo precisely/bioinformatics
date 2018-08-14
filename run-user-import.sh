@@ -31,7 +31,7 @@ fi
 
 
 ### parameters
-if [ "$#" -eq 0 ]; then
+if [[ "$#" -eq 0 ]]; then
     echo "usage: run-user-import.sh <test-mode> <cleanup-run>" 1>&2
     exit 1
 fi

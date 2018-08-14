@@ -5,7 +5,7 @@ set -o pipefail
 
 
 ### parameters
-if [ "$#" -eq 0 ]; then
+if [[ "$#" -eq 0 ]]; then
     echo "usage: impute-genotype.sh <input-vcf-path> <output-imputed-vcf-path> all|<num-chromosome>? <num-cores>? <test-mode>?" 1>&2
     exit 1
 fi
