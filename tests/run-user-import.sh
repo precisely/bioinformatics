@@ -81,9 +81,9 @@ function before {
     minio_start
     awss3 mb s3://${S3_BUCKET_BIOINFORMATICS_UPLOAD}
     awss3 mb s3://${S3_BUCKET_BIOINFORMATICS_VCF}
-    # normal v37 genotype
-    cp /precisely/data/samples/genome_Joseph_Bedell_Full_20110113135135.txt "${minio_workdir}/${S3_BUCKET_BIOINFORMATICS_UPLOAD}/b76a6dae4094f31a59cee93a2a3aacf3d56bb32d0dcb4fa8bd9e24e4308b2348"
     # v36 genotype
+    cp /precisely/data/samples/genome_Joseph_Bedell_Full_20110113135135.txt "${minio_workdir}/${S3_BUCKET_BIOINFORMATICS_UPLOAD}/b76a6dae4094f31a59cee93a2a3aacf3d56bb32d0dcb4fa8bd9e24e4308b2348"
+    # normal v37 genotype
     cp /precisely/data/samples/genome_Andrew_Beeler_Full_20160320135452.txt "${minio_workdir}/${S3_BUCKET_BIOINFORMATICS_UPLOAD}/a5cef5de111d61d4e8f57f0ab6166a1d8279cdc419f414383d8505efe74704f0"
 }
 
@@ -99,10 +99,10 @@ function test_overall_functionality {
     before
     local hash=a5cef5de111d61d4e8f57f0ab6166a1d8279cdc419f414383d8505efe74704f0
     eval \
-        PARAM_USER_DATA_SOURCE=23andme \
-        PARAM_USER_GENOME_UPLOAD_PATH=${hash} \
+        PARAM_DATA_SOURCE=23andme \
+        PARAM_UPLOAD_PATH=${hash} \
         PARAM_USER_ID=test-user-1 \
-        "${basedir}/../run-user-import.sh" true true 1>&2 2>/dev/null
+        "${basedir}/../run-user-import.sh" --test-mode=true --cleanup-after=true 1>&2 2>/dev/null
     [[ $? == 0 ]] || add_error "initial run failed"
     awss3 ls s3://${S3_BUCKET_BIOINFORMATICS_VCF}/test-user-1/23andme/${hash} || \
         add_error "did not create user directory at destination"
@@ -116,10 +116,10 @@ function test_overall_functionality {
         add_error "did not copy in raw converted VCF file header"
     # Try rerunning and make sure it does not upload again.
     eval \
-        PARAM_USER_DATA_SOURCE=23andme \
-        PARAM_USER_GENOME_UPLOAD_PATH=a5cef5de111d61d4e8f57f0ab6166a1d8279cdc419f414383d8505efe74704f0 \
+        PARAM_DATA_SOURCE=23andme \
+        PARAM_UPLOAD_PATH=a5cef5de111d61d4e8f57f0ab6166a1d8279cdc419f414383d8505efe74704f0 \
         PARAM_USER_ID=test-user-1 \
-        "${basedir}/../run-user-import.sh" true true 1>&2 2>/dev/null
+        "${basedir}/../run-user-import.sh" --test-mode=true --cleanup-after=true 1>&2 2>/dev/null
     [[ $? != 0 ]] || add_error "second upload on same user ID succeeded"
     after
 }
@@ -129,10 +129,10 @@ function test_v36_rejection {
     before
     local hash=b76a6dae4094f31a59cee93a2a3aacf3d56bb32d0dcb4fa8bd9e24e4308b2348
     eval \
-        PARAM_USER_DATA_SOURCE=23andme \
-        PARAM_USER_GENOME_UPLOAD_PATH=${hash} \
+        PARAM_DATA_SOURCE=23andme \
+        PARAM_UPLOAD_PATH=${hash} \
         PARAM_USER_ID=test-user-1 \
-        "${basedir}/../run-user-import.sh" true true 1>&2 2>/dev/null
+        "${basedir}/../run-user-import.sh" --test-mode=true --cleanup-after=true 1>&2 2>/dev/null
     [[ $? != 0 ]] || add_error "accepted v36 genotype instead of rejecting"
     after
 }
