@@ -8,8 +8,8 @@ basedir=$(dirname "$(readlinkf $0)")
 
 
 ### configuration
-export S3_BUCKET_USER_UPLOAD=test-precisely-user-upload
-export S3_BUCKET_GENETICS_VCF=test-precisely-genetics-vcf
+export S3_BUCKET_BIOINFORMATICS_UPLOAD=test-precisely-bioinformatics-upload
+export S3_BUCKET_BIOINFORMATICS_VCF=test-precisely-bioinformatics-vcf
 export AWS_S3_ENDPOINT_URL=http://localhost:9000
 export AWS_ACCESS_KEY_ID=access-key
 export AWS_SECRET_ACCESS_KEY=secret-key
@@ -79,12 +79,12 @@ function report {
 
 function before {
     minio_start
-    awss3 mb s3://${S3_BUCKET_USER_UPLOAD}
-    awss3 mb s3://${S3_BUCKET_GENETICS_VCF}
+    awss3 mb s3://${S3_BUCKET_BIOINFORMATICS_UPLOAD}
+    awss3 mb s3://${S3_BUCKET_BIOINFORMATICS_VCF}
     # normal v37 genotype
-    cp /precisely/data/samples/genome_Joseph_Bedell_Full_20110113135135.txt "${minio_workdir}/${S3_BUCKET_USER_UPLOAD}/b76a6dae4094f31a59cee93a2a3aacf3d56bb32d0dcb4fa8bd9e24e4308b2348"
+    cp /precisely/data/samples/genome_Joseph_Bedell_Full_20110113135135.txt "${minio_workdir}/${S3_BUCKET_BIOINFORMATICS_UPLOAD}/b76a6dae4094f31a59cee93a2a3aacf3d56bb32d0dcb4fa8bd9e24e4308b2348"
     # v36 genotype
-    cp /precisely/data/samples/genome_Andrew_Beeler_Full_20160320135452.txt "${minio_workdir}/${S3_BUCKET_USER_UPLOAD}/a5cef5de111d61d4e8f57f0ab6166a1d8279cdc419f414383d8505efe74704f0"
+    cp /precisely/data/samples/genome_Andrew_Beeler_Full_20160320135452.txt "${minio_workdir}/${S3_BUCKET_BIOINFORMATICS_UPLOAD}/a5cef5de111d61d4e8f57f0ab6166a1d8279cdc419f414383d8505efe74704f0"
 }
 
 function after {
@@ -104,15 +104,15 @@ function test_overall_functionality {
         PARAM_USER_ID=test-user-1 \
         "${basedir}/../run-user-import.sh" true true 1>&2 2>/dev/null
     [[ $? == 0 ]] || add_error "initial run failed"
-    awss3 ls s3://${S3_BUCKET_GENETICS_VCF}/test-user-1/23andme/${hash} || \
+    awss3 ls s3://${S3_BUCKET_BIOINFORMATICS_VCF}/test-user-1/23andme/${hash} || \
         add_error "did not create user directory at destination"
-    awss3 ls s3://${S3_BUCKET_GENETICS_VCF}/test-user-1/23andme/${hash}/raw.vcf.gz || \
+    awss3 ls s3://${S3_BUCKET_BIOINFORMATICS_VCF}/test-user-1/23andme/${hash}/raw.vcf.gz || \
         add_error "did not copy in raw converted VCF file"
-    awss3 ls s3://${S3_BUCKET_GENETICS_VCF}/test-user-1/23andme/${hash}/imputed/chr1.vcf.gz || \
+    awss3 ls s3://${S3_BUCKET_BIOINFORMATICS_VCF}/test-user-1/23andme/${hash}/imputed/chr1.vcf.gz || \
         add_error "did not copy in chromosome files"
-    awss3 ls s3://${S3_BUCKET_GENETICS_VCF}/test-user-1/23andme/${hash}/headers/23andme.txt || \
+    awss3 ls s3://${S3_BUCKET_BIOINFORMATICS_VCF}/test-user-1/23andme/${hash}/headers/23andme.txt || \
         add_error "did not copy in raw converted VCF file header"
-    awss3 ls s3://${S3_BUCKET_GENETICS_VCF}/test-user-1/23andme/${hash}/headers/imputed-chr1.txt || \
+    awss3 ls s3://${S3_BUCKET_BIOINFORMATICS_VCF}/test-user-1/23andme/${hash}/headers/imputed-chr1.txt || \
         add_error "did not copy in raw converted VCF file header"
     # Try rerunning and make sure it does not upload again.
     eval \
