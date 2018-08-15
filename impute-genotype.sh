@@ -50,15 +50,19 @@ beagle_leash=/precisely/beagle-leash/inst/beagle-leash/bin/beagle-leash
 
 
 ### run
-if [[ -e "${output_imputed_vcf_path}" ]]; then
+if [[ -e "${output_imputed_vcf_path}*" ]]; then
     echo "${output_imputed_vcf_path} already exists, no imputation attempted"
 else
     if [[ "${num_chromosome}" != "all" ]]; then
         export BEAGLE_LEASH_CHROMS=${num_chromosome}
     fi
     if [[ "${test_mode}" == "true" ]]; then
-        printf "##input=${input_vcf_path}\n##chromosome=${num_chromosome}\ninput: ${input_vcf_path}\nchromosome: ${num_chromosome}\n" > "${output_imputed_vcf_path}"
+        printf "##input=${input_vcf_path}\n##chromosome=${num_chromosome}\ninput: ${input_vcf_path}\nchromosome: ${num_chromosome}\n" > "${output_imputed_vcf_path}.bgz"
+        printf "sample tabix index\n" > "${output_imputed_vcf_path}.bgz.tbi"
     else
-        "${beagle_leash}" "${input_vcf_path}" "${output_imputed_vcf_path}" ${num_cores}
+        "${beagle_leash}" "${input_vcf_path}" "${output_imputed_vcf_path}.gz" ${num_cores}
+        zcat "${output_imputed_vcf_path}.gz" | bgzip > "${output_imputed_vcf_path}.bgz"
+        rm -f "${output_imputed_vcf_path}.gz"
+        tabix -p vcf "${output_imputed_vcf_path}.bgz"
     fi
 fi

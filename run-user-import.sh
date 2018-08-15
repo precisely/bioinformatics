@@ -171,9 +171,9 @@ mkdir imputed
 # TODO: How many cores for imputation?
 num_cores=3
 for chr in {1..22} X Y MT; do
-    imputed_filename="imputed/chr${chr}.vcf.gz"
+    imputed_filename="imputed/chr${chr}.vcf"
     "${basedir}/impute-genotype.sh" raw.vcf.gz "${imputed_filename}" ${chr} ${num_cores} ${test_mode}
-    "${basedir}/extract-vcf-headers.sh" "${imputed_filename}" > "headers/imputed-chr${chr}.txt"
+    "${basedir}/extract-vcf-headers.sh" "${imputed_filename}.bgz" > "headers/imputed-chr${chr}.txt"
 done
 
 popd > /dev/null

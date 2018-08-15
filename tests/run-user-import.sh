@@ -108,8 +108,10 @@ function test_overall_functionality {
         add_error "did not create user directory at destination"
     awss3 ls s3://${S3_BUCKET_BIOINFORMATICS_VCF}/test-user-1/23andme/${hash}/raw.vcf.gz || \
         add_error "did not copy in raw converted VCF file"
-    awss3 ls s3://${S3_BUCKET_BIOINFORMATICS_VCF}/test-user-1/23andme/${hash}/imputed/chr1.vcf.gz || \
+    awss3 ls s3://${S3_BUCKET_BIOINFORMATICS_VCF}/test-user-1/23andme/${hash}/imputed/chr1.vcf.bgz || \
         add_error "did not copy in chromosome files"
+    awss3 ls s3://${S3_BUCKET_BIOINFORMATICS_VCF}/test-user-1/23andme/${hash}/imputed/chr1.vcf.bgz.tbi || \
+        add_error "did not copy in tabix index files"
     awss3 ls s3://${S3_BUCKET_BIOINFORMATICS_VCF}/test-user-1/23andme/${hash}/headers/23andme.txt || \
         add_error "did not copy in raw converted VCF file header"
     awss3 ls s3://${S3_BUCKET_BIOINFORMATICS_VCF}/test-user-1/23andme/${hash}/headers/imputed-chr1.txt || \
