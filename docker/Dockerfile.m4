@@ -171,7 +171,7 @@ RUN \
 
 # install beagle-leash (which seems to also install Beagle)
 WORKDIR /precisely
-RUN git clone https://bitbucket.org/taltman1/beagle-leash.git
+RUN git clone https://bitbucket.org/altmananalytics/beagle-leash.git
 WORKDIR /precisely/beagle-leash
 RUN make install-nodata
 # The beagle-leash install step does bad things with .bashrc which require
