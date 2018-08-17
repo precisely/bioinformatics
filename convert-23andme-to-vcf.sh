@@ -6,6 +6,7 @@ set -o pipefail
 
 ### configuration
 path_reference_human_genome=/precisely/data/human_g1k_v37.fasta.bgz
+path_sample_test_run=/precisely/data/samples/2018-08-16-imputation-run-abeeler-miniaturized/abeeler1/23andme/a5cef5de111d61d4e8f57f0ab6166a1d8279cdc419f414383d8505efe74704f0
 
 
 ### parameters
@@ -50,7 +51,7 @@ if [[ -e "${output_vcf_path}" ]]; then
     echo "${output_vcf_path} already exists, no conversion attempted"
 else
     if [[ "${test_mode}" == "true" ]]; then
-        printf "##input=${input_23andme_file_path}\n##sample_id: ${sample_id}\ninput: ${input_23andme_file_path}\nsample_id: ${sample_id}\n" > "${output_vcf_path}"
+        cp "${path_sample_test_run}/raw.vcf.gz" "${output_vcf_path}"
     else
         bcftools convert \
                  --tsv2vcf "${input_23andme_file_path}" \

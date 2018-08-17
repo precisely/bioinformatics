@@ -4,6 +4,10 @@ set -e
 set -o pipefail
 
 
+### configuration
+path_sample_test_run=/precisely/data/samples/2018-08-16-imputation-run-abeeler-miniaturized/abeeler1/23andme/a5cef5de111d61d4e8f57f0ab6166a1d8279cdc419f414383d8505efe74704f0
+
+
 ### parameters
 if [[ "$#" -eq 0 ]]; then
     echo "usage: impute-genotype.sh <input-vcf-path> <output-imputed-vcf-path> <num-chromosome> <num-cores>? <test-mode>?" 1>&2
@@ -55,8 +59,8 @@ if [[ -e "${output_imputed_vcf_path}*" ]]; then
     echo "${output_imputed_vcf_path} already exists, no imputation attempted"
 else
     if [[ "${test_mode}" == "true" ]]; then
-        printf "##input=${input_vcf_path}\n##chromosome=${num_chromosome}\ninput: ${input_vcf_path}\nchromosome: ${num_chromosome}\n" > "${output_imputed_vcf_path}.bgz"
-        printf "sample tabix index\n" > "${output_imputed_vcf_path}.bgz.tbi"
+        cp "${path_sample_test_run}/imputed/chr${num_chromosome}.vcf.bgz" "${output_imputed_vcf_path}.bgz"
+        cp "${path_sample_test_run}/imputed/chr${num_chromosome}.vcf.bgz.tbi" "${output_imputed_vcf_path}.bgz.tbi"
     else
         if [[ "${num_chromosome}" == "Y" || "${num_chromosome}" == "MT" ]]; then
             # Imputation is not supported for Y and MT chromosomes; for these,
