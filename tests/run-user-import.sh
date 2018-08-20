@@ -13,6 +13,7 @@ export S3_BUCKET_BIOINFORMATICS_VCF=test-precisely-bioinformatics-vcf
 export AWS_S3_ENDPOINT_URL=http://localhost:9000
 export AWS_ACCESS_KEY_ID=access-key
 export AWS_SECRET_ACCESS_KEY=secret-key
+export STAGE=test
 
 
 ### helper

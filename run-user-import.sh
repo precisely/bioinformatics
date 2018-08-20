@@ -23,6 +23,11 @@ if [[ -z "${S3_BUCKET_BIOINFORMATICS_VCF}" ]]; then
     exit 1
 fi
 
+if [[ -z "${STAGE}" ]]; then
+    echo "STAGE environment variable required" 1>&2
+    exit 1
+fi
+
 # TODO: Figure out what to do with this.
 # if [[ -z "${S3_BUCKET_BIOINFORMATICS_ERROR}" ]]; then
 #     echo "S3_BUCKET_BIOINFORMATICS_ERROR environment variable required" 1>&2
@@ -187,6 +192,14 @@ src_dir=$(readlinkf "${user_id}")
 aws s3 --endpoint-url "${AWS_S3_ENDPOINT_URL}" cp --recursive "${src_dir}" "s3://${S3_BUCKET_BIOINFORMATICS_VCF}/${user_id}" --exclude "**/${input_file}" > /dev/null
 
 popd > /dev/null
+
+"${basedir}/run-initial-call-variants-import.sh" \
+    --user-id="${user_id}" \
+    --workdir="${workdir}" \
+    --data-source="${data_source}" \
+    --stage="${STAGE}" \
+    --test-mode="${test_mode}" \
+    --cleanup-after="${cleanup_after}"
 
 # if we are not cleaning up afterwards, print the path to the working directory:
 # it may come in handy

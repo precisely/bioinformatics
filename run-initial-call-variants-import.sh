@@ -30,7 +30,7 @@ if [[ ${PIPESTATUS[0]} -ne 4 ]]; then
     echo "enhanced getopt not available" 1>&2
     exit 1
 fi
-! PARSED=$(getopt --options="h" --longoptions="data-source:,user-id:,workdir:,stage:,help" --name "$0" -- "$@")
+! PARSED=$(getopt --options="h" --longoptions="data-source:,user-id:,workdir:,stage:,test-mode:,cleanup-after:,help" --name "$0" -- "$@")
 if [[ ${PIPESTATUS[0]} -ne 0 ]]; then
     exit 1
 fi
@@ -51,6 +51,14 @@ while true; do
             ;;
         --stage)
             param_stage="$2"
+            shift 2
+            ;;
+        --test-mode)
+            param_test_mode="$2"
+            shift 2
+            ;;
+        --cleanup-after)
+            param_cleanup_after="$2"
             shift 2
             ;;
         -h|--help)
@@ -93,10 +101,36 @@ if [[ -z "${param_stage}" ]]; then
     exit 1
 fi
 
+if [[ -z "${param_test_mode}" || ("${param_test_mode}" != "true" && "${param_test_mode}" != "false") ]]; then
+    echo "test mode must be set with --test-mode and must be 'true' or 'false'" 1>&2
+    exit 1
+fi
+
+if [[ -z "${param_cleanup_after}" || ("${param_cleanup_after}" != "true" && "${param_cleanup_after}" != "false") ]]; then
+    echo "cleanup must be set with --cleanup-after and must be true or false" 1>&2
+    exit 1
+fi
+
 data_source="${param_data_source}"
 user_id="${param_user_id}"
 workdir="${param_workdir}"
 stage="${param_stage}"
+test_mode="${param_test_mode}"
+cleanup_after="${param_cleanup_after}"
+
+
+### cleanup
+function cleanup {
+    if [[ "${cleanup_after}" == "true" ]]; then
+        rm -f variant-reqs.json
+        rm -f aws-invoke-SysGetVariantRequirements.json
+        rm -f base-batch.json
+        rm -f variant-batch-results.json
+        rm -f aws-invoke-VariantCallBatchCreate.json
+    fi
+}
+
+trap cleanup EXIT
 
 
 ### run
@@ -137,7 +171,12 @@ if [[ -f variant-batch-results.json ]]; then
     exit 1
 fi
 
-aws lambda invoke --invocation-type RequestResponse --function-name "precisely-backend-${stage}-SysGetVariantRequirements" --payload '"ready"' --region "${AWS_REGION}" variant-reqs.json > aws-invoke-SysGetVariantRequirements.json
+if [[ "${test_mode}" == "true" ]]; then
+    cp "${basedir}/tests/samples/variant-reqs.json" .
+    cp "${basedir}/tests/samples/aws-invoke-SysGetVariantRequirements.json" .
+else
+    aws lambda invoke --invocation-type RequestResponse --function-name "precisely-backend-${stage}-SysGetVariantRequirements" --payload '"ready"' --region "${AWS_REGION}" variant-reqs.json > aws-invoke-SysGetVariantRequirements.json
+fi
 
 if [[ $(jq '.StatusCode' aws-invoke-SysGetVariantRequirements.json) != "200" ]]; then
     echo "SysGetVariantRequirements invocation failed" 1>&2
@@ -155,7 +194,12 @@ fi
        --arg sample_id ${sample_id} \
        '[.[] | . + {sampleType: $data_source, userId: $user_id, sampleId: $sample_id}]' > base-batch.json
 
-aws lambda invoke --invocation-type RequestResponse --function-name "precisely-backend-${stage}-VariantCallBatchCreate" --payload file://base-batch.json --region "${AWS_REGION}" variant-batch-results.json > aws-invoke-VariantCallBatchCreate.json
+if [[ "${test_mode}" == "true" ]]; then
+    cp "${basedir}/tests/samples/variant-batch-results.json" .
+    cp "${basedir}/tests/samples/aws-invoke-VariantCallBatchCreate.json" .
+else
+    aws lambda invoke --invocation-type RequestResponse --function-name "precisely-backend-${stage}-VariantCallBatchCreate" --payload file://base-batch.json --region "${AWS_REGION}" variant-batch-results.json > aws-invoke-VariantCallBatchCreate.json
+fi
 
 if [[ $(jq '.StatusCode' aws-invoke-VariantCallBatchCreate.json) != "200" ]]; then
     echo "VariantCallBatchCreate invocation failed" 1>&2
@@ -167,9 +211,3 @@ if [[ ! -z "${variant_call_batch_create_errors}" ]]; then
     echo "errors from call to VariantCallBatchCreate: ${variant_call_batch_create_errors}" 1>&2
     exit 1
 fi
-
-rm -f variant-reqs.json
-rm -f aws-invoke-SysGetVariantRequirements.json
-rm -f base-batch.json
-rm -f variant-batch-results.json
-rm -f aws-invoke-VariantCallBatchCreate.json
