@@ -10,6 +10,7 @@ basedir=$(dirname "$(readlinkf $0)")
 ### configuration
 export S3_BUCKET_BIOINFORMATICS_UPLOAD=test-precisely-bioinformatics-upload
 export S3_BUCKET_BIOINFORMATICS_VCF=test-precisely-bioinformatics-vcf
+export AWS_REGION=us-east-1
 export AWS_S3_ENDPOINT_URL=http://localhost:9000
 export AWS_ACCESS_KEY_ID=access-key
 export AWS_SECRET_ACCESS_KEY=secret-key
@@ -103,7 +104,7 @@ function test_overall_functionality {
         PARAM_DATA_SOURCE=23andme \
         PARAM_UPLOAD_PATH=${hash} \
         PARAM_USER_ID=test-user-1 \
-        "${basedir}/../run-user-import.sh" --test-mode=true --cleanup-after=true 1>&2 2>/dev/null
+        "${basedir}/../run-user-import.sh" --test-mode=true --cleanup-after=true 1>&2
     [[ $? == 0 ]] || add_error "initial run failed"
     awss3 ls s3://${S3_BUCKET_BIOINFORMATICS_VCF}/test-user-1/23andme/${hash} || \
         add_error "did not create user directory at destination"
@@ -118,12 +119,14 @@ function test_overall_functionality {
     awss3 ls s3://${S3_BUCKET_BIOINFORMATICS_VCF}/test-user-1/23andme/${hash}/headers/imputed-chr1.txt || \
         add_error "did not copy in raw converted VCF file header"
     # Try rerunning and make sure it does not upload again.
-    eval \
-        PARAM_DATA_SOURCE=23andme \
-        PARAM_UPLOAD_PATH=a5cef5de111d61d4e8f57f0ab6166a1d8279cdc419f414383d8505efe74704f0 \
-        PARAM_USER_ID=test-user-1 \
-        "${basedir}/../run-user-import.sh" --test-mode=true --cleanup-after=true 1>&2 2>/dev/null
+    err=$(
+        eval \
+            PARAM_DATA_SOURCE=23andme \
+            PARAM_UPLOAD_PATH=a5cef5de111d61d4e8f57f0ab6166a1d8279cdc419f414383d8505efe74704f0 \
+            PARAM_USER_ID=test-user-1 \
+            "${basedir}/../run-user-import.sh" --test-mode=true --cleanup-after=true 2>&1)
     [[ $? != 0 ]] || add_error "second upload on same user ID succeeded"
+    [[ "${err}" == "test-user-1 already exists in S3 (check before conversion and imputation)" ]] || add_error "error message on duplicate upload in run-user-import.sh not expected"
     after
 }
 
@@ -131,12 +134,14 @@ function test_v36_rejection {
     say_test_name
     before
     local hash=b76a6dae4094f31a59cee93a2a3aacf3d56bb32d0dcb4fa8bd9e24e4308b2348
-    eval \
-        PARAM_DATA_SOURCE=23andme \
-        PARAM_UPLOAD_PATH=${hash} \
-        PARAM_USER_ID=test-user-1 \
-        "${basedir}/../run-user-import.sh" --test-mode=true --cleanup-after=true 1>&2 2>/dev/null
+    err=$(
+        eval \
+            PARAM_DATA_SOURCE=23andme \
+            PARAM_UPLOAD_PATH=${hash} \
+            PARAM_USER_ID=test-user-1 \
+            "${basedir}/../run-user-import.sh" --test-mode=true --cleanup-after=true 2>&1)
     [[ $? != 0 ]] || add_error "accepted v36 genotype instead of rejecting"
+    [[ "${err}" == "unsupported genome version" ]] || add_error "error message on genome version in run-user-import.sh not expected"
     after
 }
 
