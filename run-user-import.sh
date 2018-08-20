@@ -64,7 +64,7 @@ while true; do
             shift 2
             ;;
         -h|--help)
-            echo "usage: run-user-import.sh FIXME"
+            echo "usage: run-user-import.sh --data-source=... --upload-path=... --user-id=... --test-mode=... --cleanup-after=..."
             exit 0
             ;;
         --)

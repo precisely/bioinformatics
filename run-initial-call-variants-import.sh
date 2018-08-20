@@ -54,7 +54,7 @@ while true; do
             shift 2
             ;;
         -h|--help)
-            echo "usage: run-initial-call-variants-import.sh FIXME"
+            echo "usage: run-initial-call-variants-import.sh --data-source=... --user-id=... --workdir=... --stage=..."
             exit 0
             ;;
         --)
@@ -100,9 +100,9 @@ stage="${param_stage}"
 
 
 ### run
-# check if the workdir exists
+# if the workdir already exists, use it; else download the user's data as needed
 if [[ -z "${workdir}" || ! -d "${workdir}" ]]; then
-    echo "FIXME: Implement this code path" 1>&2
+    echo "working directory missing" 1>&2
     exit 1
 fi
 
@@ -137,22 +137,39 @@ if [[ -f variant-batch-results.json ]]; then
     exit 1
 fi
 
-aws lambda invoke --invocation-type RequestResponse --function-name "precisely-backend-${stage}-SysGetVariantRequirements" --payload '"ready"' --region "${AWS_REGION}" variant-reqs.json
+aws lambda invoke --invocation-type RequestResponse --function-name "precisely-backend-${stage}-SysGetVariantRequirements" --payload '"ready"' --region "${AWS_REGION}" variant-reqs.json > aws-invoke-SysGetVariantRequirements.json
 
-# FIXME: Check for errors in the status?
-# FIXME: Check for errors in variant-reqs.json.
+if [[ $(jq '.StatusCode' aws-invoke-SysGetVariantRequirements.json) != "200" ]]; then
+    echo "SysGetVariantRequirements invocation failed" 1>&2
+    exit 1
+fi
 
-# It makes more sense to just invoke the Python variant extractor here.
+if [[ -f base-batch.json ]]; then
+    echo "base-batch.json file already exists" 1>&2
+    exit 1
+fi
+
 "${basedir}/python/extract-variant.py" variant-reqs.json ./imputed | \
     jq --arg data_source ${data_source} \
        --arg user_id ${user_id} \
        --arg sample_id ${sample_id} \
        '[.[] | . + {sampleType: $data_source, userId: $user_id, sampleId: $sample_id}]' > base-batch.json
 
-aws lambda invoke --invocation-type RequestResponse --function-name "precisely-backend-${stage}-VariantCallBatchCreate" --payload file://base-batch.json --region "${AWS_REGION}" variant-batch-results.json
+aws lambda invoke --invocation-type RequestResponse --function-name "precisely-backend-${stage}-VariantCallBatchCreate" --payload file://base-batch.json --region "${AWS_REGION}" variant-batch-results.json > aws-invoke-VariantCallBatchCreate.json
 
-# FIXME: Check for errors in the status?
-# FIXME: Check for errors in variant-reqs.json
+if [[ $(jq '.StatusCode' aws-invoke-VariantCallBatchCreate.json) != "200" ]]; then
+    echo "VariantCallBatchCreate invocation failed" 1>&2
+    exit 1
+fi
 
-#rm -f variant-reqs.json
-#rm -f variant-batch-results.json
+variant_call_batch_create_errors=$(jq -r '.[] | .error | select(. != null)' variant-batch-results.json)
+if [[ ! -z "${variant_call_batch_create_errors}" ]]; then
+    echo "errors from call to VariantCallBatchCreate: ${variant_call_batch_create_errors}" 1>&2
+    exit 1
+fi
+
+rm -f variant-reqs.json
+rm -f aws-invoke-SysGetVariantRequirements.json
+rm -f base-batch.json
+rm -f variant-batch-results.json
+rm -f aws-invoke-VariantCallBatchCreate.json

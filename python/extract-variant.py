@@ -90,7 +90,7 @@ for ref, starts in reqs_by_file.iteritems():
                 "altBases": list(row.alt),
                 "refBases": row.ref,
                 # TODO: Get "filter" working; it does not validate with "PASS". Also, why must it be an array?
-                #"filter": [row.filter]
+                #"filter": [row.filter],
                 "genotype": read_genotypes(row)
             })
 
