@@ -51,9 +51,11 @@ RUN apt-get install -y \
   gawk \
   git-core \
   htop \
+  jq \
   less \
   rlwrap \
   silversearcher-ag \
+  sqlite3 \
   time \
   unzip \
   vim \
