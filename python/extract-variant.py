@@ -46,13 +46,6 @@ if expected_imputed_files != found_imputed_files:
 
 
 ### helper functions
-def read_bases(bases_str):
-    l = list(bases_str)
-    if len(l) > 1:
-        return l
-    else:
-        return l[0]
-
 def read_genotypes(row):
     formats = row.format.split(":")
     data_encoded = row[0].split(":")
@@ -91,12 +84,14 @@ for ref, starts in reqs_by_file.iteritems():
             # TODO: Include genotypeLikelihood; it parses like read_genotypes
             # but uses "GP" key.
             res.append({
+                "refVersion": "37p13",
                 "refName": ref,
                 "start": start,
-                "altBases": read_bases(row.alt),
-                "refBases": read_bases(row.ref),
-                "genotype": read_genotypes(row),
-                "filter": row.filter
+                "altBases": list(row.alt),
+                "refBases": row.ref,
+                # TODO: Get "filter" working; it does not validate with "PASS". Also, why must it be an array?
+                #"filter": [row.filter]
+                "genotype": read_genotypes(row)
             })
 
 print(json.dumps(res))

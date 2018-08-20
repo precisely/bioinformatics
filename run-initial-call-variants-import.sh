@@ -132,22 +132,26 @@ if [[ -f variant-reqs.json ]]; then
     exit 1
 fi
 
-#aws lambda invoke --invocation-type RequestResponse --function-name "precisely-backend-${stage}-SysGetVariantRequirements" --payload '"ready"' --region "${AWS_REGION}" variant-reqs.json
+if [[ -f variant-batch-results.json ]]; then
+    echo "variant-batch-results.json file already exists" 1>&2
+    exit 1
+fi
 
+aws lambda invoke --invocation-type RequestResponse --function-name "precisely-backend-${stage}-SysGetVariantRequirements" --payload '"ready"' --region "${AWS_REGION}" variant-reqs.json
+
+# FIXME: Check for errors in the status?
 # FIXME: Check for errors in variant-reqs.json.
 
 # It makes more sense to just invoke the Python variant extractor here.
-# FIXME: Undo this.
-#REQS_FILE=variant-reqs.json
-REQS_FILE=/precisely/app/tests/sample-variant-reqs-2.json
-"${basedir}/python/extract-variant.py" "${REQS_FILE}" ./imputed | \
+"${basedir}/python/extract-variant.py" variant-reqs.json ./imputed | \
     jq --arg data_source ${data_source} \
        --arg user_id ${user_id} \
        --arg sample_id ${sample_id} \
-       '[.[] | . + {sampleType: $data_source, userId: $user_id, sampleId: $sample_id}]' # > base-batch.json
+       '[.[] | . + {sampleType: $data_source, userId: $user_id, sampleId: $sample_id}]' > base-batch.json
 
 aws lambda invoke --invocation-type RequestResponse --function-name "precisely-backend-${stage}-VariantCallBatchCreate" --payload file://base-batch.json --region "${AWS_REGION}" variant-batch-results.json
 
+# FIXME: Check for errors in the status?
 # FIXME: Check for errors in variant-reqs.json
 
 #rm -f variant-reqs.json
