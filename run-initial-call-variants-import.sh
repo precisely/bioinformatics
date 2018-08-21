@@ -30,7 +30,7 @@ if [[ ${PIPESTATUS[0]} -ne 4 ]]; then
     echo "enhanced getopt not available" 1>&2
     exit 1
 fi
-! PARSED=$(getopt --options="h" --longoptions="data-source:,user-id:,workdir:,stage:,test-mode:,cleanup-after:,help" --name "$0" -- "$@")
+! PARSED=$(getopt --options="h" --longoptions="data-source:,user-id:,workdir:,stage:,test-mock-lambda:,cleanup-after:,help" --name "$0" -- "$@")
 if [[ ${PIPESTATUS[0]} -ne 0 ]]; then
     exit 1
 fi
@@ -53,8 +53,8 @@ while true; do
             param_stage="$2"
             shift 2
             ;;
-        --test-mode)
-            param_test_mode="$2"
+        --test-mock-lambda)
+            param_test_mock_lambda="$2"
             shift 2
             ;;
         --cleanup-after)
@@ -62,7 +62,7 @@ while true; do
             shift 2
             ;;
         -h|--help)
-            echo "usage: run-initial-call-variants-import.sh --data-source=... --user-id=... --workdir=... --stage=..."
+            echo "usage: run-initial-call-variants-import.sh --data-source=... --user-id=... --workdir=... --stage=... --test-mock-lambda=... --cleanup-after=..."
             exit 0
             ;;
         --)
@@ -101,8 +101,8 @@ if [[ -z "${param_stage}" ]]; then
     exit 1
 fi
 
-if [[ -z "${param_test_mode}" || ("${param_test_mode}" != "true" && "${param_test_mode}" != "false") ]]; then
-    echo "test mode must be set with --test-mode and must be 'true' or 'false'" 1>&2
+if [[ -z "${param_test_mock_lambda}" || ("${param_test_mock_lambda}" != "true" && "${param_test_mock_lambda}" != "false") ]]; then
+    echo "test mode for mock AWS Lambda use must be set with --test-mock-lambda and must be 'true' or 'false'" 1>&2
     exit 1
 fi
 
@@ -115,7 +115,7 @@ data_source="${param_data_source}"
 user_id="${param_user_id}"
 workdir="${param_workdir}"
 stage="${param_stage}"
-test_mode="${param_test_mode}"
+test_mock_lambda="${param_test_mock_lambda}"
 cleanup_after="${param_cleanup_after}"
 
 
@@ -171,9 +171,9 @@ if [[ -f variant-batch-results.json ]]; then
     exit 1
 fi
 
-if [[ "${test_mode}" == "true" ]]; then
-    cp "${basedir}/tests/samples/variant-reqs.json" .
-    cp "${basedir}/tests/samples/aws-invoke-SysGetVariantRequirements.json" .
+if [[ "${test_mock_lambda}" == "true" ]]; then
+    cp "${basedir}/tests/mocks/variant-reqs.json" .
+    cp "${basedir}/tests/mocks/aws-invoke-SysGetVariantRequirements.json" .
 else
     aws lambda invoke --invocation-type RequestResponse --function-name "precisely-backend-${stage}-SysGetVariantRequirements" --payload '"ready"' --region "${AWS_REGION}" variant-reqs.json > aws-invoke-SysGetVariantRequirements.json
 fi
@@ -194,9 +194,9 @@ fi
        --arg sample_id ${sample_id} \
        '[.[] | . + {sampleType: $data_source, userId: $user_id, sampleId: $sample_id}]' > base-batch.json
 
-if [[ "${test_mode}" == "true" ]]; then
-    cp "${basedir}/tests/samples/variant-batch-results.json" .
-    cp "${basedir}/tests/samples/aws-invoke-VariantCallBatchCreate.json" .
+if [[ "${test_mock_lambda}" == "true" ]]; then
+    cp "${basedir}/tests/mocks/variant-batch-results.json" .
+    cp "${basedir}/tests/mocks/aws-invoke-VariantCallBatchCreate.json" .
 else
     aws lambda invoke --invocation-type RequestResponse --function-name "precisely-backend-${stage}-VariantCallBatchCreate" --payload file://base-batch.json --region "${AWS_REGION}" variant-batch-results.json > aws-invoke-VariantCallBatchCreate.json
 fi

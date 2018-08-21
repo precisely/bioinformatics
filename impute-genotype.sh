@@ -10,7 +10,7 @@ path_sample_test_run=/precisely/data/samples/2018-08-16-imputation-run-abeeler-m
 
 ### parameters
 if [[ "$#" -eq 0 ]]; then
-    echo "usage: impute-genotype.sh <input-vcf-path> <output-imputed-vcf-path> <num-chromosome> <num-cores>? <test-mode>?" 1>&2
+    echo "usage: impute-genotype.sh <input-vcf-path> <output-imputed-vcf-path> <num-chromosome> <num-cores>? <test-mock-vcf>?" 1>&2
     exit 1
 fi
 
@@ -18,7 +18,7 @@ input_vcf_path="$1"
 output_imputed_vcf_path="$2"
 num_chromosome="$3"
 num_cores="$4"
-test_mode="$5"
+test_mock_vcf="$5"
 
 if [[ -z "${input_vcf_path}" ]]; then
     echo "input VCF file path required" 1>&2
@@ -44,8 +44,8 @@ if [[ -z "${num_cores}" ]]; then
     num_cores=2
 fi
 
-if [[ -z "${test_mode}" ]]; then
-    test_mode=false
+if [[ -z "${test_mock_vcf}" ]]; then
+    test_mock_vcf=false
 fi
 
 
@@ -58,7 +58,7 @@ beagle_leash=/precisely/beagle-leash/inst/beagle-leash/bin/beagle-leash
 if [[ -e "${output_imputed_vcf_path}*" ]]; then
     echo "${output_imputed_vcf_path} already exists, no imputation attempted"
 else
-    if [[ "${test_mode}" == "true" ]]; then
+    if [[ "${test_mock_vcf}" == "true" ]]; then
         cp "${path_sample_test_run}/imputed/chr${num_chromosome}.vcf.bgz" "${output_imputed_vcf_path}.bgz"
         cp "${path_sample_test_run}/imputed/chr${num_chromosome}.vcf.bgz.tbi" "${output_imputed_vcf_path}.bgz.tbi"
     else

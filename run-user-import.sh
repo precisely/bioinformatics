@@ -41,7 +41,7 @@ if [[ ${PIPESTATUS[0]} -ne 4 ]]; then
     echo "enhanced getopt not available" 1>&2
     exit 1
 fi
-! PARSED=$(getopt --options="h" --longoptions="data-source:,upload-path:,user-id:,test-mode:,cleanup-after:,help" --name "$0" -- "$@")
+! PARSED=$(getopt --options="h" --longoptions="data-source:,upload-path:,user-id:,test-mock-vcf:,test-mock-lambda:,cleanup-after:,help" --name "$0" -- "$@")
 if [[ ${PIPESTATUS[0]} -ne 0 ]]; then
     exit 1
 fi
@@ -60,8 +60,12 @@ while true; do
             param_user_id="$2"
             shift 2
             ;;
-        --test-mode)
-            param_test_mode="$2"
+        --test-mock-vcf)
+            param_test_mock_vcf="$2"
+            shift 2
+            ;;
+        --test-mock-lambda)
+            param_test_mock_lambda="$2"
             shift 2
             ;;
         --cleanup-after)
@@ -69,7 +73,7 @@ while true; do
             shift 2
             ;;
         -h|--help)
-            echo "usage: run-user-import.sh --data-source=... --upload-path=... --user-id=... --test-mode=... --cleanup-after=..."
+            echo "usage: run-user-import.sh --data-source=... --upload-path=... --user-id=... --test-mock-vcf=... --test-mock-lambda=... --cleanup-after=..."
             exit 0
             ;;
         --)
@@ -107,8 +111,13 @@ if [[ -z "${param_user_id}" ]]; then
     exit 1
 fi
 
-if [[ -z "${param_test_mode}" || ("${param_test_mode}" != "true" && "${param_test_mode}" != "false") ]]; then
-    echo "test mode must be set with --test-mode and must be 'true' or 'false'" 1>&2
+if [[ -z "${param_test_mock_vcf}" || ("${param_test_mock_vcf}" != "true" && "${param_test_mock_vcf}" != "false") ]]; then
+    echo "test mode for mock VCF use must be set with --test-mock-vcf and must be 'true' or 'false'" 1>&2
+    exit 1
+fi
+
+if [[ -z "${param_test_mock_lambda}" || ("${param_test_mock_lambda}" != "true" && "${param_test_mock_lambda}" != "false") ]]; then
+    echo "test mode for mock AWS Lambda use must be set with --test-mock-lambda and must be 'true' or 'false'" 1>&2
     exit 1
 fi
 
@@ -120,7 +129,8 @@ fi
 data_source="${param_data_source}"
 upload_path="${param_upload_path}"
 user_id="${param_user_id}"
-test_mode="${param_test_mode}"
+test_mock_vcf="${param_test_mock_vcf}"
+test_mock_lambda="${param_test_mock_lambda}"
 cleanup_after="${param_cleanup_after}"
 
 
@@ -169,7 +179,7 @@ mv "../${input_file}" .
 mkdir headers
 mkdir imputed
 
-"${basedir}/convert-${data_source}-to-vcf.sh" "${input_file}" raw.vcf.gz ${test_mode}
+"${basedir}/convert-${data_source}-to-vcf.sh" "${input_file}" raw.vcf.gz ${test_mock_vcf}
 
 "${basedir}/extract-vcf-headers.sh" raw.vcf.gz > "headers/${data_source}.txt"
 
@@ -177,7 +187,7 @@ mkdir imputed
 num_cores=3
 for chr in {1..22} X Y MT; do
     imputed_filename="imputed/chr${chr}.vcf"
-    "${basedir}/impute-genotype.sh" raw.vcf.gz "${imputed_filename}" ${chr} ${num_cores} ${test_mode}
+    "${basedir}/impute-genotype.sh" raw.vcf.gz "${imputed_filename}" ${chr} ${num_cores} ${test_mock_vcf}
     "${basedir}/extract-vcf-headers.sh" "${imputed_filename}.bgz" > "headers/imputed-chr${chr}.txt"
 done
 
@@ -198,7 +208,7 @@ popd > /dev/null
     --workdir="${workdir}" \
     --data-source="${data_source}" \
     --stage="${STAGE}" \
-    --test-mode="${test_mode}" \
+    --test-mock-lambda="${test_mock_lambda}" \
     --cleanup-after="${cleanup_after}"
 
 # if we are not cleaning up afterwards, print the path to the working directory:

@@ -11,13 +11,13 @@ path_sample_test_run=/precisely/data/samples/2018-08-16-imputation-run-abeeler-m
 
 ### parameters
 if [[ "$#" -eq 0 ]]; then
-    echo "usage: convert-23andme-to-vcf.sh <input-23andme-file-path> <output-vcf-path> <test-mode>?" 1>&2
+    echo "usage: convert-23andme-to-vcf.sh <input-23andme-file-path> <output-vcf-path> <test-mock-vcf>?" 1>&2
     exit 1
 fi
 
 input_23andme_file_path="$1"
 output_vcf_path="$2"
-test_mode="$3"
+test_mock_vcf="$3"
 
 if [[ -z "${input_23andme_file_path}" ]]; then
     echo "input 23andMe genome file path required" 1>&2
@@ -29,8 +29,8 @@ if [[ -z "${output_vcf_path}" ]]; then
     exit 1
 fi
 
-if [[ -z "${test_mode}" ]]; then
-    test_mode=false
+if [[ -z "${test_mock_vcf}" ]]; then
+    test_mock_vcf=false
 fi
 
 
@@ -50,7 +50,7 @@ sample_id=$(sha256sum "${input_23andme_file_path}" | awk '{print $1}')
 if [[ -e "${output_vcf_path}" ]]; then
     echo "${output_vcf_path} already exists, no conversion attempted"
 else
-    if [[ "${test_mode}" == "true" ]]; then
+    if [[ "${test_mock_vcf}" == "true" ]]; then
         cp "${path_sample_test_run}/raw.vcf.gz" "${output_vcf_path}"
     else
         bcftools convert \
