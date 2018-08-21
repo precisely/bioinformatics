@@ -122,7 +122,7 @@ cleanup_after="${param_cleanup_after}"
 ### cleanup
 function cleanup {
     if [[ "${cleanup_after}" == "true" ]]; then
-        rm -f variant-reqs.json
+        rm -f variant-reqs-ready.json
         rm -f aws-invoke-SysGetVariantRequirements.json
         rm -f base-batch.json
         rm -f variant-batch-results.json
@@ -161,8 +161,8 @@ sample_id=${hashes[0]}
 
 pushd "${sample_id}" > /dev/null
 
-if [[ -f variant-reqs.json ]]; then
-    echo "variant-reqs.json file already exists" 1>&2
+if [[ -f variant-reqs-ready.json ]]; then
+    echo "variant-reqs-ready.json file already exists" 1>&2
     exit 1
 fi
 
@@ -172,10 +172,10 @@ if [[ -f variant-batch-results.json ]]; then
 fi
 
 if [[ "${test_mock_lambda}" == "true" ]]; then
-    cp "${basedir}/tests/mocks/variant-reqs.json" .
+    cp "${basedir}/tests/mocks/variant-reqs-ready.json" .
     cp "${basedir}/tests/mocks/aws-invoke-SysGetVariantRequirements.json" .
 else
-    aws lambda invoke --invocation-type RequestResponse --function-name "precisely-backend-${stage}-SysGetVariantRequirements" --payload '"ready"' --region "${AWS_REGION}" variant-reqs.json > aws-invoke-SysGetVariantRequirements.json
+    aws lambda invoke --invocation-type RequestResponse --function-name "precisely-backend-${stage}-SysGetVariantRequirements" --payload '"ready"' --region "${AWS_REGION}" variant-reqs-ready.json > aws-invoke-SysGetVariantRequirements.json
 fi
 
 if [[ $(jq '.StatusCode' aws-invoke-SysGetVariantRequirements.json) != "200" ]]; then
@@ -188,7 +188,7 @@ if [[ -f base-batch.json ]]; then
     exit 1
 fi
 
-"${basedir}/python/extract-variant.py" variant-reqs.json ./imputed | \
+"${basedir}/python/extract-variant.py" variant-reqs-ready.json ./imputed | \
     jq --arg data_source ${data_source} \
        --arg user_id ${user_id} \
        --arg sample_id ${sample_id} \
