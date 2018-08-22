@@ -23,11 +23,6 @@ if [[ -z "${S3_BUCKET_BIOINFORMATICS_VCF}" ]]; then
     exit 1
 fi
 
-if [[ -z "${STAGE}" ]]; then
-    echo "STAGE environment variable required" 1>&2
-    exit 1
-fi
-
 # TODO: Figure out what to do with this.
 # if [[ -z "${S3_BUCKET_BIOINFORMATICS_ERROR}" ]]; then
 #     echo "S3_BUCKET_BIOINFORMATICS_ERROR environment variable required" 1>&2
@@ -41,7 +36,7 @@ if [[ ${PIPESTATUS[0]} -ne 4 ]]; then
     echo "enhanced getopt not available" 1>&2
     exit 1
 fi
-! PARSED=$(getopt --options="h" --longoptions="data-source:,upload-path:,user-id:,test-mock-vcf:,test-mock-lambda:,cleanup-after:,help" --name "$0" -- "$@")
+! PARSED=$(getopt --options="h" --longoptions="data-source:,upload-path:,user-id:,stage:,test-mock-vcf:,test-mock-lambda:,cleanup-after:,help" --name "$0" -- "$@")
 if [[ ${PIPESTATUS[0]} -ne 0 ]]; then
     exit 1
 fi
@@ -60,6 +55,10 @@ while true; do
             param_user_id="$2"
             shift 2
             ;;
+        --stage)
+            param_stage="$2"
+            shift 2
+            ;;
         --test-mock-vcf)
             param_test_mock_vcf="$2"
             shift 2
@@ -73,7 +72,7 @@ while true; do
             shift 2
             ;;
         -h|--help)
-            echo "usage: run-user-import.sh --data-source=... --upload-path=... --user-id=... --test-mock-vcf=... --test-mock-lambda=... --cleanup-after=..."
+            echo "usage: run-user-import.sh --data-source=... --upload-path=... --user-id=... --stage=... --test-mock-vcf=... --test-mock-lambda=... --cleanup-after=..."
             exit 0
             ;;
         --)
@@ -90,6 +89,7 @@ done
 [[ -z "${param_data_source}" ]] && param_data_source="${PARAM_DATA_SOURCE}"
 [[ -z "${param_upload_path}" ]] && param_upload_path="${PARAM_UPLOAD_PATH}"
 [[ -z "${param_user_id}" ]] && param_user_id="${PARAM_USER_ID}"
+[[ -z "${param_stage}" ]] && param_workdir="${PARAM_STAGE}"
 
 if [[ -z "${param_data_source}" ]]; then
     echo "data source must be set with PARAM_DATA_SOURCE or --data-source" 1>&2
@@ -111,6 +111,11 @@ if [[ -z "${param_user_id}" ]]; then
     exit 1
 fi
 
+if [[ -z "${param_stage}" ]]; then
+    echo "stage must be set with PARAM_STAGE environment variable or --stage" 1>&2
+    exit 1
+fi
+
 if [[ -z "${param_test_mock_vcf}" || ("${param_test_mock_vcf}" != "true" && "${param_test_mock_vcf}" != "false") ]]; then
     echo "test mode for mock VCF use must be set with --test-mock-vcf and must be 'true' or 'false'" 1>&2
     exit 1
@@ -129,6 +134,7 @@ fi
 data_source="${param_data_source}"
 upload_path="${param_upload_path}"
 user_id="${param_user_id}"
+stage="${param_stage}"
 test_mock_vcf="${param_test_mock_vcf}"
 test_mock_lambda="${param_test_mock_lambda}"
 cleanup_after="${param_cleanup_after}"
@@ -207,7 +213,7 @@ popd > /dev/null
     --user-id="${user_id}" \
     --workdir="${workdir}" \
     --data-source="${data_source}" \
-    --stage="${STAGE}" \
+    --stage="${stage}" \
     --test-mock-lambda="${test_mock_lambda}" \
     --cleanup-after="${cleanup_after}"
 
