@@ -40,7 +40,7 @@ expected_imputed_files = set([
     "chrX.vcf.bgz", "chrX.vcf.bgz.tbi", "chrY.vcf.bgz", "chrY.vcf.bgz.tbi",
     "chrMT.vcf.bgz", "chrMT.vcf.bgz.tbi"])
 found_imputed_files = set(os.listdir(imputed_chromosomes_path))
-if expected_imputed_files != found_imputed_files:
+if not found_imputed_files.issubset(expected_imputed_files):
     print("{} does not seem to contain imputed genotype files".format(imputed_chromosomes_path), file=sys.stderr)
     sys.exit(1)
 

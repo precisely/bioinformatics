@@ -140,17 +140,26 @@ for user_id in "${user_ids[@]}"; do
     mkdir "${user_id}"
     pushd "${user_id}" > /dev/null
     sample_ids=($(aws s3api --endpoint-url="${AWS_S3_ENDPOINT_URL}" list-objects --bucket="${S3_BUCKET_BIOINFORMATICS_VCF}" --delimiter=/ --prefix="${user_id}/${data_source}/" --no-paginate | \
-                      jq -r '.CommonPrefixes | .[] | .Prefix | split("/")[2]'))
+                      jq -r '.CommonPrefixes | .[]? | .Prefix | split("/")[2]'))
     for sample_id in "${sample_ids[@]}"; do
         mkdir -p "${sample_id}"
         pushd "${sample_id}" > /dev/null
         # copy in the chromosome files containing the new variants to import
         for ref in "${required_refs[@]}"; do
-            aws s3 --endpoint-url="${AWS_S3_ENDPOINT_URL}" cp --recursive --exclude="*" --include="${ref}.vcf.bgz*" "s3://${S3_BUCKET_BIOINFORMATICS_VCF}/${user_id}/${data_source}/${sample_id}/imputed" .
+            aws s3 --endpoint-url="${AWS_S3_ENDPOINT_URL}" cp --recursive --exclude="*" --include="${ref}.vcf.bgz*" "s3://${S3_BUCKET_BIOINFORMATICS_VCF}/${user_id}/${data_source}/${sample_id}/imputed" . > /dev/null
         done
-        # FIXME: Use extract-variant.py here..?
-        # ...
+        "${basedir}/python/extract-variant.py" "${workdir}/variant-reqs-new.json" . | \
+            jq --arg data_source ${data_source} \
+               --arg user_id ${user_id} \
+               --arg sample_id ${sample_id} \
+               '[.[] | . + {sampleType: $data_source, userId: $user_id, sampleId: $sample_id}]' > "${workdir}/new-call-variants-${user_id}.json"
         popd > /dev/null
     done
     popd > /dev/null
 done
+
+# concatenate the resulting per-user files together
+jq -s add new-call-variants-*.json > new-batch.json
+
+# FIXME: Rest is the same as the end of run-initial-call-variants-import.sh
+# Refactor that so it's shared.
