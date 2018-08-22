@@ -46,11 +46,22 @@ if expected_imputed_files != found_imputed_files:
 
 
 ### helper functions
-def read_genotypes(row):
+def read_row_data(row):
     formats = row.format.split(":")
     data_encoded = row[0].split(":")
     data = dict(zip(formats, data_encoded))
+    return data
+
+def read_genotypes(row):
+    data = read_row_data(row)
     return [int(g) for g in data["GT"].split("|")]
+
+def read_genotype_likelihood(row):
+    data = read_row_data(row)
+    return [float(g) for g in data["GP"].split(",")]
+
+def read_imputed(row):
+    return "IMP" in row.info
 
 
 ### run
@@ -81,16 +92,15 @@ for ref, starts in reqs_by_file.iteritems():
     chromosome = ref.replace("chr", "")
     for start in starts:
         for row in idx.fetch(chromosome, start-1, start, parser=pysam.asVCF()):
-            # TODO: Include genotypeLikelihood; it parses like read_genotypes
-            # but uses "GP" key.
             res.append({
                 "refVersion": "37p13",
                 "refName": ref,
                 "start": start,
                 "altBases": list(row.alt),
                 "refBases": row.ref,
-                # TODO: Get "filter" working; it does not validate with "PASS". Also, why must it be an array?
-                #"filter": [row.filter],
+                "filter": row.filter,
+                "imputed": read_imputed(row),
+                "genotypeLikelihood": read_genotype_likelihood(row),
                 "genotype": read_genotypes(row)
             })
 
