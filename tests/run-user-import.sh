@@ -18,7 +18,7 @@ export AWS_SECRET_ACCESS_KEY=secret-key
 
 ### helper
 function awss3 {
-    aws s3 --endpoint-url=${AWS_S3_ENDPOINT_URL} $* > /dev/null
+    aws s3 --endpoint-url="${AWS_S3_ENDPOINT_URL}" $* > /dev/null
 }
 
 
