@@ -69,7 +69,7 @@ while true; do
 done
 
 [[ -z "${param_data_source}" ]] && param_data_source="${PARAM_DATA_SOURCE}"
-[[ -z "${param_stage}" ]] && param_workdir="${PARAM_STAGE}"
+[[ -z "${param_stage}" ]] && param_stage="${PARAM_STAGE}"
 
 if [[ -z "${param_data_source}" ]]; then
     echo "data source must be set with PARAM_DATA_SOURCE or --data-source" 1>&2
