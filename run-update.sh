@@ -184,4 +184,17 @@ if [[ ! -z "${variant_call_batch_create_errors}" ]]; then
     exit 1
 fi
 
-# FIXME: Update the list of "new" call variants to "ready".
+# update the list of "new" call variants to "ready"
+jq '[.[] | {status: "ready", refVersion: .refVersion, start: .start, refName: .refName}]' variant-reqs-new.json > variant-reqs-update.json
+
+if [[ "${test_mock_lambda}" == "true" ]]; then
+    cp "${basedir}/tests/mocks/variant-reqs-update.json" .
+    cp "${basedir}/tests/mocks/aws-invoke-SysUpdateVariantRequirementStatuses.json" .
+else
+    aws lambda invoke --invocation-type RequestResponse --function-name "precisely-backend-${stage}-SysUpdateVariantRequirementStatuses" --payload file://variant-reqs-update.json --region "${AWS_REGION}" variant-reqs-update-results.json > aws-invoke-SysUpdateVariantRequirementStatuses.json
+fi
+
+if [[ $(jq '.StatusCode' aws-invoke-SysUpdateVariantRequirementStatuses.json) != "200" ]]; then
+    echo "SysUpdateVariantRequirementStatuses invocation failed" 1>&2
+    exit 1
+fi
