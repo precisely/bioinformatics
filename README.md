@@ -42,9 +42,20 @@ In development (link) mode, you can now connect to the container and use it:
 
 ## Running
 
-The `run.sh` script is the entry point. It takes two parameters: an input 23andMe genome file, and a sample ID (an arbitrary string).
+This has become fairly complicated. It has two main entry points:
 
-Right now, it's hard-coded to run a simplified (only chromosome 21) imputation pass and produce some output files. Please read it to understand what it does, it's fairly short and straightforward.
+- `run-user-import.sh` imports initial data for a new user, including VCF conversion, imputation, and DynamoDB load
+- `run-update.sh` updates call variants in DynamoDB when reports have new call variant needs
+
+
+## Tests
+
+The test suite is rather incomplete, but both entry points do have tests:
+
+- `tests/run-user-import.sh`
+- `tests/run-update.sh`
+
+They run completely offline, and manage their own Minio environment, so do not run a separate Minio instance on port 9000 when running these tests.
 
 
 ## Reference information
