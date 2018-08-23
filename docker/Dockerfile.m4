@@ -51,9 +51,11 @@ RUN apt-get install -y \
   gawk \
   git-core \
   htop \
+  jq \
   less \
   rlwrap \
   silversearcher-ag \
+  sqlite3 \
   time \
   unzip \
   vim \
@@ -159,7 +161,8 @@ WORKDIR /precisely/data/samples
 #RUN wget --tries=3 https://my.pgp-hms.org/user_file/download/2024
 # The following are standardized for testing purposes, and provided on our own
 # S3 bucket:
-RUN aws s3 sync "s3://precisely-bio-dbs/samples/23andme" .
+RUN aws s3 cp --recursive "s3://precisely-bio-dbs/samples/23andme" 23andme
+RUN aws s3 cp --recursive "s3://precisely-bio-dbs/samples/2018-08-16-imputation-run-abeeler-miniaturized" 2018-08-16-imputation-run-abeeler-miniaturized
 # uncompress as needed
 RUN \
   for file in `ls`; do \
@@ -171,7 +174,7 @@ RUN \
 
 # install beagle-leash (which seems to also install Beagle)
 WORKDIR /precisely
-RUN git clone https://bitbucket.org/taltman1/beagle-leash.git
+RUN git clone https://bitbucket.org/altmananalytics/beagle-leash.git
 WORKDIR /precisely/beagle-leash
 RUN make install-nodata
 # The beagle-leash install step does bad things with .bashrc which require

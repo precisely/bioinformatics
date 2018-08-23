@@ -8,7 +8,7 @@ basedir=$(dirname "$(readlinkf $0)")
 
 
 ### parameter handling
-if [ "$#" -eq 0 ]; then
+if [[ "$#" -eq 0 ]]; then
     echo "usage: docker-build.sh <mode> <image-tag> <aws-profile>" 1>&2
     exit 1
 fi
