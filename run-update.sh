@@ -13,6 +13,11 @@ if [[ -z "${AWS_S3_ENDPOINT_URL}" ]]; then
     exit 1
 fi
 
+if [[ -z "${AWS_REGION}" ]]; then
+    echo "AWS_REGION environment variable required" 1>&2
+    exit 1
+fi
+
 if [[ -z "${S3_BUCKET_BIOINFORMATICS_UPLOAD}" ]]; then
     echo "S3_BUCKET_BIOINFORMATICS_UPLOAD environment variable required" 1>&2
     exit 1
@@ -131,7 +136,6 @@ fi
 
 required_refs=($(jq -r '[.[] | .refName] | unique | .[]' variant-reqs-new.json))
 
-# FIXME: This needs a test-mock-* switch...
 # TODO: Does this need to avoid pagination?
 user_ids=($(aws s3api --endpoint-url="${AWS_S3_ENDPOINT_URL}" list-objects --bucket="${S3_BUCKET_BIOINFORMATICS_VCF}" --delimiter=/ --no-paginate | \
                 jq -r '.CommonPrefixes | .[] | .Prefix | split("/")[0]'))
@@ -161,5 +165,23 @@ done
 # concatenate the resulting per-user files together
 jq -s add new-call-variants-*.json > new-batch.json
 
-# FIXME: Rest is the same as the end of run-initial-call-variants-import.sh
-# Refactor that so it's shared.
+# call the right Lambda to create call variant entries for the given users
+if [[ "${test_mock_lambda}" == "true" ]]; then
+    cp "${basedir}/tests/mocks/variant-batch-results-2.json" ./variant-batch-results.json
+    cp "${basedir}/tests/mocks/aws-invoke-VariantCallBatchCreate.json" .
+else
+    aws lambda invoke --invocation-type RequestResponse --function-name "precisely-backend-${stage}-VariantCallBatchCreate" --payload file://new-batch.json --region "${AWS_REGION}" variant-batch-results.json > aws-invoke-VariantCallBatchCreate.json
+fi
+
+if [[ $(jq '.StatusCode' aws-invoke-VariantCallBatchCreate.json) != "200" ]]; then
+    echo "VariantCallBatchCreate invocation failed" 1>&2
+    exit 1
+fi
+
+variant_call_batch_create_errors=$(jq -r '.[] | .error | select(. != null)' variant-batch-results.json)
+if [[ ! -z "${variant_call_batch_create_errors}" ]]; then
+    echo "errors from call to VariantCallBatchCreate: ${variant_call_batch_create_errors}" 1>&2
+    exit 1
+fi
+
+# FIXME: Update the list of "new" call variants to "ready".

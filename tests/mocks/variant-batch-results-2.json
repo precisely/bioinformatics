@@ -1,0 +1,242 @@
+[
+    {
+        "data": {
+            "accession": "NC_000004.11",
+            "altBases": [
+                "C"
+            ],
+            "createdAt": "2018-08-22T23:17:39.901Z",
+            "end": 37801,
+            "filter": "PASS",
+            "genotype": [
+                1,
+                1
+            ],
+            "genotypeLikelihood": [
+                0.21,
+                0.5,
+                0.29
+            ],
+            "imputed": true,
+            "refBases": "CT",
+            "refName": "chr4",
+            "refVersion": "37p13",
+            "sampleId": "a5cef5de111d61d4e8f57f0ab6166a1d8279cdc419f414383d8505efe74704f0",
+            "sampleType": "23andme",
+            "start": 37800,
+            "userId": "abeeler1",
+            "variantId": "chr4:37p13:37800:37801:23andme:a5cef5de111d61d4e8f57f0ab6166a1d8279cdc419f414383d8505efe74704f0",
+            "zygosity": "homozygous"
+        }
+    },
+    {
+        "data": {
+            "accession": "NC_000004.11",
+            "altBases": [
+                "A"
+            ],
+            "createdAt": "2018-08-22T23:17:39.944Z",
+            "end": 30053,
+            "filter": "PASS",
+            "genotype": [
+                0,
+                0
+            ],
+            "genotypeLikelihood": [
+                0.99,
+                0.01,
+                0
+            ],
+            "imputed": true,
+            "refBases": "AC",
+            "refName": "chr4",
+            "refVersion": "37p13",
+            "sampleId": "a5cef5de111d61d4e8f57f0ab6166a1d8279cdc419f414383d8505efe74704f0",
+            "sampleType": "23andme",
+            "start": 30051,
+            "userId": "abeeler1",
+            "variantId": "chr4:37p13:30051:30053:23andme:a5cef5de111d61d4e8f57f0ab6166a1d8279cdc419f414383d8505efe74704f0",
+            "zygosity": "homozygous"
+        }
+    },
+    {
+        "data": {
+            "accession": "NC_000001.10",
+            "altBases": [
+                "A"
+            ],
+            "createdAt": "2018-08-22T23:17:39.947Z",
+            "end": 247793,
+            "filter": "PASS",
+            "genotype": [
+                0,
+                0
+            ],
+            "genotypeLikelihood": [
+                1,
+                0,
+                0
+            ],
+            "imputed": true,
+            "refBases": "C",
+            "refName": "chr1",
+            "refVersion": "37p13",
+            "sampleId": "a5cef5de111d61d4e8f57f0ab6166a1d8279cdc419f414383d8505efe74704f0",
+            "sampleType": "23andme",
+            "start": 247792,
+            "userId": "abeeler1",
+            "variantId": "chr1:37p13:247792:247793:23andme:a5cef5de111d61d4e8f57f0ab6166a1d8279cdc419f414383d8505efe74704f0",
+            "zygosity": "homozygous"
+        }
+    },
+    {
+        "data": {
+            "accession": "NC_000001.10",
+            "altBases": [
+                "T"
+            ],
+            "createdAt": "2018-08-22T23:17:39.962Z",
+            "end": 15821,
+            "filter": "PASS",
+            "genotype": [
+                0,
+                0
+            ],
+            "genotypeLikelihood": [
+                0.61,
+                0.34,
+                0.05
+            ],
+            "imputed": true,
+            "refBases": "G",
+            "refName": "chr1",
+            "refVersion": "37p13",
+            "sampleId": "a5cef5de111d61d4e8f57f0ab6166a1d8279cdc419f414383d8505efe74704f0",
+            "sampleType": "23andme",
+            "start": 15820,
+            "userId": "abeeler1",
+            "variantId": "chr1:37p13:15820:15821:23andme:a5cef5de111d61d4e8f57f0ab6166a1d8279cdc419f414383d8505efe74704f0",
+            "zygosity": "homozygous"
+        }
+    },
+    {
+        "data": {
+            "accession": "NC_000004.11",
+            "altBases": [
+                "C"
+            ],
+            "createdAt": "2018-08-22T23:17:39.964Z",
+            "end": 37801,
+            "filter": "PASS",
+            "genotype": [
+                1,
+                1
+            ],
+            "genotypeLikelihood": [
+                0.21,
+                0.5,
+                0.29
+            ],
+            "imputed": true,
+            "refBases": "CT",
+            "refName": "chr4",
+            "refVersion": "37p13",
+            "sampleId": "cafe1234",
+            "sampleType": "23andme",
+            "start": 37800,
+            "userId": "abeeler2",
+            "variantId": "chr4:37p13:37800:37801:23andme:cafe1234",
+            "zygosity": "homozygous"
+        }
+    },
+    {
+        "data": {
+            "accession": "NC_000004.11",
+            "altBases": [
+                "A"
+            ],
+            "createdAt": "2018-08-22T23:17:39.967Z",
+            "end": 30053,
+            "filter": "PASS",
+            "genotype": [
+                0,
+                0
+            ],
+            "genotypeLikelihood": [
+                0.99,
+                0.01,
+                0
+            ],
+            "imputed": true,
+            "refBases": "AC",
+            "refName": "chr4",
+            "refVersion": "37p13",
+            "sampleId": "cafe1234",
+            "sampleType": "23andme",
+            "start": 30051,
+            "userId": "abeeler2",
+            "variantId": "chr4:37p13:30051:30053:23andme:cafe1234",
+            "zygosity": "homozygous"
+        }
+    },
+    {
+        "data": {
+            "accession": "NC_000001.10",
+            "altBases": [
+                "A"
+            ],
+            "createdAt": "2018-08-22T23:17:39.969Z",
+            "end": 247793,
+            "filter": "PASS",
+            "genotype": [
+                0,
+                0
+            ],
+            "genotypeLikelihood": [
+                1,
+                0,
+                0
+            ],
+            "imputed": true,
+            "refBases": "C",
+            "refName": "chr1",
+            "refVersion": "37p13",
+            "sampleId": "cafe1234",
+            "sampleType": "23andme",
+            "start": 247792,
+            "userId": "abeeler2",
+            "variantId": "chr1:37p13:247792:247793:23andme:cafe1234",
+            "zygosity": "homozygous"
+        }
+    },
+    {
+        "data": {
+            "accession": "NC_000001.10",
+            "altBases": [
+                "T"
+            ],
+            "createdAt": "2018-08-22T23:17:39.972Z",
+            "end": 15821,
+            "filter": "PASS",
+            "genotype": [
+                0,
+                0
+            ],
+            "genotypeLikelihood": [
+                0.61,
+                0.34,
+                0.05
+            ],
+            "imputed": true,
+            "refBases": "G",
+            "refName": "chr1",
+            "refVersion": "37p13",
+            "sampleId": "cafe1234",
+            "sampleType": "23andme",
+            "start": 15820,
+            "userId": "abeeler2",
+            "variantId": "chr1:37p13:15820:15821:23andme:cafe1234",
+            "zygosity": "homozygous"
+        }
+    }
+]
