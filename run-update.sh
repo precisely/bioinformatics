@@ -188,7 +188,7 @@ fi
 jq '[.[] | {status: "ready", refVersion: .refVersion, start: .start, refName: .refName}]' variant-reqs-new.json > variant-reqs-update.json
 
 if [[ "${test_mock_lambda}" == "true" ]]; then
-    cp "${basedir}/tests/mocks/variant-reqs-update.json" .
+    cp "${basedir}/tests/mocks/variant-reqs-update-results.json" .
     cp "${basedir}/tests/mocks/aws-invoke-SysUpdateVariantRequirementStatuses.json" .
 else
     aws lambda invoke --invocation-type RequestResponse --function-name "precisely-backend-${stage}-SysUpdateVariantRequirementStatuses" --payload file://variant-reqs-update.json --region "${AWS_REGION}" variant-reqs-update-results.json > aws-invoke-SysUpdateVariantRequirementStatuses.json
@@ -197,4 +197,10 @@ fi
 if [[ $(jq '.StatusCode' aws-invoke-SysUpdateVariantRequirementStatuses.json) != "200" ]]; then
     echo "SysUpdateVariantRequirementStatuses invocation failed" 1>&2
     exit 1
+fi
+
+# if we are not cleaning up afterwards, print the path to the working directory:
+# it may come in handy
+if [[ "${cleanup_after}" == "false" ]]; then
+    echo "${workdir}"
 fi
