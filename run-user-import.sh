@@ -189,8 +189,7 @@ mkdir imputed
 
 "${basedir}/extract-vcf-headers.sh" raw.vcf.gz > "headers/${data_source}.txt"
 
-# TODO: How many cores for imputation?
-num_cores=3
+num_cores=4
 for chr in {1..22} X Y MT; do
     imputed_filename="imputed/chr${chr}.vcf"
     "${basedir}/impute-genotype.sh" raw.vcf.gz "${imputed_filename}" ${chr} ${num_cores} ${test_mock_vcf}
