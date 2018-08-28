@@ -226,13 +226,11 @@ RUN sudo pip install -r requirements.txt
 RUN rm requirements.txt
 
 m4_ifelse(mode, [[[link]]], [[[m4_dnl
-# go; this container is meant to be connected to using tmux
-CMD ["sh"]
+# No special handling for link mode at the moment.
 ]]], [[[m4_dnl
 # Copy the current directory into the app; make sure it contains code intended
 # for deployment!
 COPY . /precisely/app
-
-# run the app entry point script
-CMD ["./run.sh"]
 ]]])m4_dnl
+
+CMD ["sh"]
