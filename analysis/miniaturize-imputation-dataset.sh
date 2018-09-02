@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
-set -e
-set -o pipefail
+set -Eeuo pipefail
 
 readlinkf() { perl -MCwd -e 'print Cwd::abs_path glob shift' "$1"; }
 basedir=$(dirname "$(readlinkf $0)")
