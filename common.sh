@@ -1,49 +1,95 @@
 ### output helpers
+if [[ $(command -v gdate) ]]; then
+    datecmd=gdate
+else
+    if [[ $(uname -s) == "Darwin" ]]; then
+        echo "GNU Date required on macOS; install coreutils" >&2
+        exit 1
+    fi
+    datecmd=date
+fi
+
 timestamp() {
-    date +"%Y-%m-%d %H:%M:%S.%N"
+    local d=$("${datecmd}" -u --rfc-3339=ns)
+    echo ${d/ /T}
+}
+
+make_message() {
+    local text=$*
+    # parse the input as JSON, if it parses, great: use the result, in compact
+    # form
+    local transformed # must assign separately to preserve $? value
+    transformed=$(jq -ca '.' <<< "${text}" 2>/dev/null)
+    if [[ $? != 0 ]]; then
+        # force escapes
+        transformed=$(jq -caR '.' <<< "${text}" 2>/dev/null)
+    fi
+    echo "${transformed}"
 }
 
 log() {
-    echo $(timestamp) "[${script}]" $* >&1
+    local message=$(make_message $*)
+    local output="{\"timestamp\":\"$(timestamp)\",\"script\":\"${script}\",\"message\":${message}}"
+    echo "${output}" >&1
 }
 
 error() {
-    echo $(timestamp) "[${script}] [ERROR]" $* >&2
+    local message=$(make_message $*)
+    local output="{\"timestamp\":\"$(timestamp)\",\"script\":\"${script}\",\"level\":\"error\",\"message\":${message}}"
+    echo "${output}" >&2
 }
 
 warn() {
-    echo $(timestamp) "[${script}] [WARN]" $* >&3
+    local message=$(make_message $*)
+    local output="{\"timestamp\":\"$(timestamp)\",\"script\":\"${script}\",\"level\":\"warn\",\"message\":${message}}"
+    echo "${output}" >&3
 }
 
 info() {
-    echo $(timestamp) "[${script}] [INFO]" $* >&4
+    local message=$(make_message $*)
+    local output="{\"timestamp\":\"$(timestamp)\",\"script\":\"${script}\",\"level\":\"info\",\"message\":${message}}"
+    echo "${output}" >&4
 }
 
 debug() {
-    echo $(timestamp) "[${script}] [DEBUG]" $* >&5
+    local message=$(make_message $*)
+    local output="{\"timestamp\":\"$(timestamp)\",\"script\":\"${script}\",\"level\":\"debug\",\"message\":${message}}"
+    echo "${output}" >&5
 }
 
 for fd in 3 4 5; do
     eval "exec ${fd}>&1"
 done
 
-with_log() {
-    # XXX: The slightly off-putting regex in the awk expression here tries to
-    # match the logging format. If the line to log already seems to contain a
-    # timestamp and a source, then do not inject it a second time.
+
+transform_as_needed() {
+    local cmd=$1
+    local input
+    local output
+    while read -r input; do
+        if [[ $(jq '.timestamp and .message' <<< "${input}" 2>/dev/null) == "true" ]]; then
+            # input parses as JSON and has needed fields, so inject script info if
+            # needed and proceed
+            output=$(jq -c --arg cmd "${cmd}" '. | if (.script) then . else . + {script: $cmd} end' <<< "${input}" 2>/dev/null)
+        else
+            # input does not parse as JSON, so turn it into valid JSON and proceed
+            local transformed=$(jq -caR '.' <<< "${input}" 2>/dev/null)
+            output="{\"timestamp\":\"$(timestamp)\",\"script\":\"${cmd}\",\"message\":${transformed}}"
+        fi
+        echo "${output}"
+    done
+}
+
+with_output_to_log() {
     # XXX: This preserves the streams, i.e., stderr remains stderr and stdout
     # remains stdout. The pattern is: open an extra stream (8, because 9 is
     # already used elsewhere in the code, and 3-5 are taken by logging),
     # redirect stderr to 1 and 1 to 8, pipe to stderr command, redirect 8 back
     # to 1, pipe to stdout command.
     local cmd=$(basename $1)
-    local awkexp='{
-      if ($0 ~ /[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9:\.]{12,} \[.+\]/) { print $0 }
-      else { printf "%s [%s] %s\n", timestamp, cmd, $0 }
-    }'
     exec 8>&1
-    ( $* 2>&1 1>&8 8>&- | awk -v cmd=${cmd} -v timestamp="$(timestamp)" "${awkexp}" ) 8>&1 1>&2 |
-        awk -v cmd=${cmd} -v timestamp="$(timestamp)" "${awkexp}"
+    ( $* 2>&1 1>&8 8>&- | transform_as_needed "${cmd}" ) 8>&1 1>&2 |
+        transform_as_needed "${cmd}"
 }
 
 
