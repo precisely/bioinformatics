@@ -5,6 +5,10 @@ set -o pipefail
 
 readlinkf() { perl -MCwd -e 'print Cwd::abs_path glob shift' "$1"; }
 basedir=$(dirname "$(readlinkf $0)")
+script=$(basename "${BASH_SOURCE[${#BASH_SOURCE[@]}-1]}")
+
+
+. "${basedir}/common-tests.sh"
 
 
 ### configuration
@@ -14,9 +18,6 @@ export AWS_REGION=us-east-1
 export AWS_S3_ENDPOINT_URL=http://localhost:9000
 export AWS_ACCESS_KEY_ID=access-key
 export AWS_SECRET_ACCESS_KEY=secret-key
-
-
-. "${basedir}/common.sh"
 
 
 ### helpers

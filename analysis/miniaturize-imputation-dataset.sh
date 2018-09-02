@@ -5,6 +5,7 @@ set -o pipefail
 
 readlinkf() { perl -MCwd -e 'print Cwd::abs_path glob shift' "$1"; }
 basedir=$(dirname "$(readlinkf $0)")
+script=$(basename "${BASH_SOURCE[${#BASH_SOURCE[@]}-1]}")
 
 
 # This script takes an imputed dataset and miniaturizes it by throwing away most
