@@ -23,7 +23,7 @@ trap minio_stop EXIT
 
 ### output helpers
 function say {
-    printf " ---> $1\n" 1>&2
+    printf " ---> $1\n" >&2
 }
 
 function say_test_name {

@@ -9,7 +9,7 @@ path_sample_test_run=/precisely/data/samples/2018-08-16-imputation-run-abeeler-m
 
 ### parameters
 if [[ "$#" -eq 0 ]]; then
-    echo "usage: impute-genotype.sh <input-vcf-path> <output-imputed-vcf-path> <num-chromosome> <num-cores>? <test-mock-vcf>?" 1>&2
+    echo "usage: impute-genotype.sh <input-vcf-path> <output-imputed-vcf-path> <num-chromosome> <num-cores>? <test-mock-vcf>?" >&2
     exit 1
 fi
 
@@ -20,22 +20,22 @@ num_cores="$4"
 test_mock_vcf="$5"
 
 if [[ -z "${input_vcf_path}" ]]; then
-    echo "input VCF file path required" 1>&2
+    echo "input VCF file path required" >&2
     exit 1
 fi
 
 if [[ ! -f "${input_vcf_path}" ]]; then
-    echo "input VCF file path does not exist" 1>&2
+    echo "input VCF file path does not exist" >&2
     exit 1
 fi
 
 if [[ -z "${output_imputed_vcf_path}" ]]; then
-    echo "output imputed VCF file path required" 1>&2
+    echo "output imputed VCF file path required" >&2
     exit 1
 fi
 
 if [[ -z "${num_chromosome}" ]]; then
-    echo "chromosome to impute is required (1..22, X, Y, MT)" 1>&2
+    echo "chromosome to impute is required (1..22, X, Y, MT)" >&2
     exit 1
 fi
 
@@ -72,7 +72,7 @@ else
             "${beagle_leash}" "${input_vcf_path}" "${output_imputed_vcf_path}-tmp.gz" ${num_cores}
             # remove entries from the output file which do not match the required chromosome
             if [[ ! -f "${output_imputed_vcf_path}-tmp.gz" ]]; then
-                echo "${output_imputed_vcf_path}-tmp.gz missing!" 1>&2
+                echo "${output_imputed_vcf_path}-tmp.gz missing!" >&2
                 exit 1
             fi
             zcat "${output_imputed_vcf_path}-tmp.gz" | \

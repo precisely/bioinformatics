@@ -5,19 +5,19 @@ set -Eeuo pipefail
 
 ### parameters
 if [[ "$#" -eq 0 ]]; then
-    echo "usage: extract-vcf-headers.sh <input-vcf-path>" 1>&2
+    echo "usage: extract-vcf-headers.sh <input-vcf-path>" >&2
     exit 1
 fi
 
 input_vcf_path="$1"
 
 if [[ -z "${input_vcf_path}" ]]; then
-    echo "input VCF file path required" 1>&2
+    echo "input VCF file path required" >&2
     exit 1
 fi
 
 if [[ ! -f "${input_vcf_path}" ]]; then
-    echo "input VCF file path does not exist" 1>&2
+    echo "input VCF file path does not exist" >&2
     exit 1
 fi
 

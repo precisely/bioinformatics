@@ -12,23 +12,23 @@ script=$(basename "${BASH_SOURCE[${#BASH_SOURCE[@]}-1]}")
 
 ### configuration
 if [[ -z "${AWS_S3_ENDPOINT_URL}" ]]; then
-    echo "AWS_S3_ENDPOINT_URL environment variable required" 1>&2
+    echo "AWS_S3_ENDPOINT_URL environment variable required" >&2
     exit 1
 fi
 
 if [[ -z "${S3_BUCKET_BIOINFORMATICS_UPLOAD}" ]]; then
-    echo "S3_BUCKET_BIOINFORMATICS_UPLOAD environment variable required" 1>&2
+    echo "S3_BUCKET_BIOINFORMATICS_UPLOAD environment variable required" >&2
     exit 1
 fi
 
 if [[ -z "${S3_BUCKET_BIOINFORMATICS_VCF}" ]]; then
-    echo "S3_BUCKET_BIOINFORMATICS_VCF environment variable required" 1>&2
+    echo "S3_BUCKET_BIOINFORMATICS_VCF environment variable required" >&2
     exit 1
 fi
 
 # TODO: Figure out what to do with this.
 # if [[ -z "${S3_BUCKET_BIOINFORMATICS_ERROR}" ]]; then
-#     echo "S3_BUCKET_BIOINFORMATICS_ERROR environment variable required" 1>&2
+#     echo "S3_BUCKET_BIOINFORMATICS_ERROR environment variable required" >&2
 #     exit 1
 # fi
 
@@ -36,7 +36,7 @@ fi
 ### parameters
 ! getopt --test > /dev/null
 if [[ ${PIPESTATUS[0]} -ne 4 ]]; then
-    echo "enhanced getopt not available" 1>&2
+    echo "enhanced getopt not available" >&2
     exit 1
 fi
 ! PARSED=$(getopt --options="h" --longoptions="data-source:,upload-path:,user-id:,stage:,test-mock-vcf:,test-mock-lambda:,cleanup-after:,help" --name "$0" -- "$@")
@@ -83,7 +83,7 @@ while true; do
             break
             ;;
         *)
-            echo "something's wrong" 1>&2
+            echo "something's wrong" >&2
             exit 1
             ;;
     esac
@@ -95,42 +95,42 @@ done
 [[ -z "${param_stage}" ]] && param_stage="${PARAM_STAGE}"
 
 if [[ -z "${param_data_source}" ]]; then
-    echo "data source must be set with PARAM_DATA_SOURCE or --data-source" 1>&2
+    echo "data source must be set with PARAM_DATA_SOURCE or --data-source" >&2
     exit 1
 fi
 
 if [[ "${param_data_source}" != "23andme" ]]; then
-    echo "only 23andme supported at the moment" 1>&2
+    echo "only 23andme supported at the moment" >&2
     exit 1
 fi
 
 if [[ -z "${param_upload_path}" ]]; then
-    echo "upload path must be set with PARAM_UPLOAD_PATH or --upload-path" 1>&2
+    echo "upload path must be set with PARAM_UPLOAD_PATH or --upload-path" >&2
     exit 1
 fi
 
 if [[ -z "${param_user_id}" ]]; then
-    echo "user ID must be set with PARAM_USER_ID environment variable or --user-id" 1>&2
+    echo "user ID must be set with PARAM_USER_ID environment variable or --user-id" >&2
     exit 1
 fi
 
 if [[ -z "${param_stage}" ]]; then
-    echo "stage must be set with PARAM_STAGE environment variable or --stage" 1>&2
+    echo "stage must be set with PARAM_STAGE environment variable or --stage" >&2
     exit 1
 fi
 
 if [[ -z "${param_test_mock_vcf}" || ("${param_test_mock_vcf}" != "true" && "${param_test_mock_vcf}" != "false") ]]; then
-    echo "test mode for mock VCF use must be set with --test-mock-vcf and must be 'true' or 'false'" 1>&2
+    echo "test mode for mock VCF use must be set with --test-mock-vcf and must be 'true' or 'false'" >&2
     exit 1
 fi
 
 if [[ -z "${param_test_mock_lambda}" || ("${param_test_mock_lambda}" != "true" && "${param_test_mock_lambda}" != "false") ]]; then
-    echo "test mode for mock AWS Lambda use must be set with --test-mock-lambda and must be 'true' or 'false'" 1>&2
+    echo "test mode for mock AWS Lambda use must be set with --test-mock-lambda and must be 'true' or 'false'" >&2
     exit 1
 fi
 
 if [[ -z "${param_cleanup_after}" || ("${param_cleanup_after}" != "true" && "${param_cleanup_after}" != "false") ]]; then
-    echo "cleanup must be set with --cleanup-after and must be true or false" 1>&2
+    echo "cleanup must be set with --cleanup-after and must be true or false" >&2
     exit 1
 fi
 
@@ -157,7 +157,7 @@ trap cleanup EXIT
 function avoid_dest_overwrite {
     local phase=$1
     if [[ ! -z $(aws s3 --endpoint-url "${AWS_S3_ENDPOINT_URL}" ls "s3://${S3_BUCKET_BIOINFORMATICS_VCF}/${user_id}") ]]; then
-        echo "${user_id} already exists in S3 (${phase})" 1>&2
+        echo "${user_id} already exists in S3 (${phase})" >&2
         exit 1
     fi
 }

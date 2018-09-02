@@ -10,7 +10,7 @@ path_sample_test_run=/precisely/data/samples/2018-08-16-imputation-run-abeeler-m
 
 ### parameters
 if [[ "$#" -eq 0 ]]; then
-    echo "usage: convert-23andme-to-vcf.sh <input-23andme-file-path> <output-vcf-path> <test-mock-vcf>?" 1>&2
+    echo "usage: convert-23andme-to-vcf.sh <input-23andme-file-path> <output-vcf-path> <test-mock-vcf>?" >&2
     exit 1
 fi
 
@@ -19,12 +19,12 @@ output_vcf_path="$2"
 test_mock_vcf="$3"
 
 if [[ -z "${input_23andme_file_path}" ]]; then
-    echo "input 23andMe genome file path required" 1>&2
+    echo "input 23andMe genome file path required" >&2
     exit 1
 fi
 
 if [[ -z "${output_vcf_path}" ]]; then
-    echo "output VCF file path required" 1>&2
+    echo "output VCF file path required" >&2
     exit 1
 fi
 
@@ -39,7 +39,7 @@ fi
 if [[ $(grep '.*#' "${input_23andme_file_path}" |
             grep 'We are using reference human assembly build' |
             sed 's/.*build \([[:digit:]]\+\).*/\1/') -ne 37 ]]; then
-    echo "unsupported genome version" 1>&2
+    echo "unsupported genome version" >&2
     exit 1
 fi
 

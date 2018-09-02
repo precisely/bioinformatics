@@ -9,7 +9,7 @@ script=$(basename "${BASH_SOURCE[${#BASH_SOURCE[@]}-1]}")
 
 ### parameters
 if [[ "$#" -eq 0 ]]; then
-    echo "usage: docker-create.sh <mode> <image-tag> <container-name> <app-source-path>" 1>&2
+    echo "usage: docker-create.sh <mode> <image-tag> <container-name> <app-source-path>" >&2
     exit 1
 fi
 
@@ -19,23 +19,23 @@ container_name="$3"
 app_source_path="$4"
 
 if [[ "${mode}" != "link" && "${mode}" != "build" ]]; then
-    echo "only 'link' and 'build' modes supported" 1>&2
+    echo "only 'link' and 'build' modes supported" >&2
     exit 1
 fi
 
 if [[ -z "${image_tag}" ]]; then
-    echo "image tag required" 1>&2
+    echo "image tag required" >&2
     exit 1
 fi
 
 if [[ -z "${container_name}" ]]; then
-    echo "container name required" 1>&2
+    echo "container name required" >&2
     exit 1
 fi
 
 if [[ "${mode}" == "link" ]]; then
     if [[ -z "${app_source_path}" ]]; then
-        echo "app source path required in link mode" 1>&2
+        echo "app source path required in link mode" >&2
         exit 1
     else
         app_source_path=$(readlinkf "${app_source_path}")

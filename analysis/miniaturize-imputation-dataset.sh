@@ -13,7 +13,7 @@ script=$(basename "${BASH_SOURCE[${#BASH_SOURCE[@]}-1]}")
 
 ### parameters
 if [[ "$#" -eq 0 ]]; then
-    echo "usage: miniaturize-imputation-dataset.sh <imputed-vcf-path> <output-vcf-path>" 1>&2
+    echo "usage: miniaturize-imputation-dataset.sh <imputed-vcf-path> <output-vcf-path>" >&2
     exit 1
 fi
 
@@ -21,22 +21,22 @@ imputed_vcf_path="$1"
 output_vcf_path="$2"
 
 if [[ -z "${imputed_vcf_path}" ]]; then
-    echo "imputed VCF directory path required" 1>&2
+    echo "imputed VCF directory path required" >&2
     exit 1
 fi
 
 if [[ ! -d "${imputed_vcf_path}" ]]; then
-    echo "imputed VCF directory path does not exit" 1>&2
+    echo "imputed VCF directory path does not exit" >&2
     exit 1
 fi
 
 if [[ -z "${output_vcf_path}" ]]; then
-    echo "output VCF directory path required" 1>&2
+    echo "output VCF directory path required" >&2
     exit 1
 fi
 
 if [[ -e "${output_vcf_path}" ]]; then
-    echo "output VCF directory already exists" 1>&2
+    echo "output VCF directory already exists" >&2
     exit 1
 fi
 

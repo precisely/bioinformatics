@@ -9,7 +9,7 @@ script=$(basename "${BASH_SOURCE[${#BASH_SOURCE[@]}-1]}")
 
 ### parameters
 if [[ "$#" -eq 0 ]]; then
-    echo "usage: vcf-sqlite-load.sh <input-vcf-path> <output-sqlite-path>" 1>&2
+    echo "usage: vcf-sqlite-load.sh <input-vcf-path> <output-sqlite-path>" >&2
     exit 1
 fi
 
@@ -17,17 +17,17 @@ input_vcf_path="$1"
 output_sqlite_path="$2"
 
 if [[ -z "${input_vcf_path}" ]]; then
-    echo "input VCF file path required" 1>&2
+    echo "input VCF file path required" >&2
     exit 1
 fi
 
 if [[ ! -f "${input_vcf_path}" ]]; then
-    echo "input VCF file does not exist" 1>&2
+    echo "input VCF file does not exist" >&2
     exit 1
 fi
 
 if [[ -z "${output_sqlite_path}" ]]; then
-    echo "output SQLite file path required" 1>&2
+    echo "output SQLite file path required" >&2
     exit 1
 fi
 

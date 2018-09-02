@@ -9,17 +9,17 @@ script=$(basename "${BASH_SOURCE[${#BASH_SOURCE[@]}-1]}")
 
 ### configuration
 if [[ -z "${AWS_S3_ENDPOINT_URL}" ]]; then
-    echo "AWS_S3_ENDPOINT_URL environment variable required" 1>&2
+    echo "AWS_S3_ENDPOINT_URL environment variable required" >&2
     exit 1
 fi
 
 if [[ -z "${AWS_REGION}" ]]; then
-    echo "AWS_REGION environment variable required" 1>&2
+    echo "AWS_REGION environment variable required" >&2
     exit 1
 fi
 
 if [[ -z "${S3_BUCKET_BIOINFORMATICS_VCF}" ]]; then
-    echo "S3_BUCKET_BIOINFORMATICS_VCF environment variable required" 1>&2
+    echo "S3_BUCKET_BIOINFORMATICS_VCF environment variable required" >&2
     exit 1
 fi
 
@@ -27,7 +27,7 @@ fi
 ### parameters
 ! getopt --test > /dev/null
 if [[ ${PIPESTATUS[0]} -ne 4 ]]; then
-    echo "enhanced getopt not available" 1>&2
+    echo "enhanced getopt not available" >&2
     exit 1
 fi
 ! PARSED=$(getopt --options="h" --longoptions="data-source:,user-id:,workdir:,stage:,test-mock-lambda:,cleanup-after:,help" --name "$0" -- "$@")
@@ -70,7 +70,7 @@ while true; do
             break
             ;;
         *)
-            echo "something's wrong" 1>&2
+            echo "something's wrong" >&2
             exit 1
             ;;
     esac
@@ -82,32 +82,32 @@ done
 [[ -z "${param_stage}" ]] && param_stage="${PARAM_STAGE}"
 
 if [[ -z "${param_data_source}" ]]; then
-    echo "data source must be set with PARAM_DATA_SOURCE or --data-source" 1>&2
+    echo "data source must be set with PARAM_DATA_SOURCE or --data-source" >&2
     exit 1
 fi
 
 if [[ "${param_data_source}" != "23andme" ]]; then
-    echo "only 23andme supported at the moment" 1>&2
+    echo "only 23andme supported at the moment" >&2
     exit 1
 fi
 
 if [[ -z "${param_user_id}" ]]; then
-    echo "user ID must be set with PARAM_USER_ID environment variable or --user-id" 1>&2
+    echo "user ID must be set with PARAM_USER_ID environment variable or --user-id" >&2
     exit 1
 fi
 
 if [[ -z "${param_stage}" ]]; then
-    echo "stage must be set with PARAM_STAGE environment variable or --stage" 1>&2
+    echo "stage must be set with PARAM_STAGE environment variable or --stage" >&2
     exit 1
 fi
 
 if [[ -z "${param_test_mock_lambda}" || ("${param_test_mock_lambda}" != "true" && "${param_test_mock_lambda}" != "false") ]]; then
-    echo "test mode for mock AWS Lambda use must be set with --test-mock-lambda and must be 'true' or 'false'" 1>&2
+    echo "test mode for mock AWS Lambda use must be set with --test-mock-lambda and must be 'true' or 'false'" >&2
     exit 1
 fi
 
 if [[ -z "${param_cleanup_after}" || ("${param_cleanup_after}" != "true" && "${param_cleanup_after}" != "false") ]]; then
-    echo "cleanup must be set with --cleanup-after and must be true or false" 1>&2
+    echo "cleanup must be set with --cleanup-after and must be true or false" >&2
     exit 1
 fi
 
@@ -136,14 +136,14 @@ trap cleanup EXIT
 ### run
 # if the workdir already exists, use it; else download the user's data as needed
 if [[ -z "${workdir}" || ! -d "${workdir}" ]]; then
-    echo "working directory missing" 1>&2
+    echo "working directory missing" >&2
     exit 1
 fi
 
 real_workdir="${workdir}/${user_id}/${data_source}"
 
 if [[ ! -d "${real_workdir}" ]]; then
-    echo "something's missing in path ${real_workdir}" 1>&2
+    echo "something's missing in path ${real_workdir}" >&2
     exit 1
 fi
 
@@ -154,7 +154,7 @@ pushd "${real_workdir}" > /dev/null
 # imports.
 hashes=(*)
 if [[ ${#hashes[@]} -gt 1 ]]; then
-    echo "multiple hashes of original uploads not supported" 1>&2
+    echo "multiple hashes of original uploads not supported" >&2
     exit 1
 fi
 sample_id=${hashes[0]}
@@ -162,12 +162,12 @@ sample_id=${hashes[0]}
 pushd "${sample_id}" > /dev/null
 
 if [[ -f variant-reqs-ready.json ]]; then
-    echo "variant-reqs-ready.json file already exists" 1>&2
+    echo "variant-reqs-ready.json file already exists" >&2
     exit 1
 fi
 
 if [[ -f variant-batch-results.json ]]; then
-    echo "variant-batch-results.json file already exists" 1>&2
+    echo "variant-batch-results.json file already exists" >&2
     exit 1
 fi
 
@@ -179,12 +179,12 @@ else
 fi
 
 if [[ $(jq '.StatusCode' aws-invoke-SysGetVariantRequirements.json) != "200" ]]; then
-    echo "SysGetVariantRequirements invocation failed" 1>&2
+    echo "SysGetVariantRequirements invocation failed" >&2
     exit 1
 fi
 
 if [[ -f base-batch.json ]]; then
-    echo "base-batch.json file already exists" 1>&2
+    echo "base-batch.json file already exists" >&2
     exit 1
 fi
 
@@ -202,12 +202,12 @@ else
 fi
 
 if [[ $(jq '.StatusCode' aws-invoke-VariantCallBatchCreate.json) != "200" ]]; then
-    echo "VariantCallBatchCreate invocation failed" 1>&2
+    echo "VariantCallBatchCreate invocation failed" >&2
     exit 1
 fi
 
 variant_call_batch_create_errors=$(jq -r '.[] | .error | select(. != null)' variant-batch-results.json)
 if [[ ! -z "${variant_call_batch_create_errors}" ]]; then
-    echo "errors from call to VariantCallBatchCreate: ${variant_call_batch_create_errors}" 1>&2
+    echo "errors from call to VariantCallBatchCreate: ${variant_call_batch_create_errors}" >&2
     exit 1
 fi
