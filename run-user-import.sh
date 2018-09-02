@@ -222,6 +222,8 @@ popd > /dev/null
 
 # if we are not cleaning up afterwards, print the path to the working directory:
 # it may come in handy
-if [[ "${cleanup_after}" == "false" ]]; then
-    echo "${workdir}"
-fi
+# NB: Only do this if file descriptor 9 is available, e.g., with 9>&1 on the
+# invoking command line.
+if command >&9 && [[ "${cleanup_after}" == "false" ]]; then
+    echo "${workdir}" >&9
+fi 2>/dev/null
