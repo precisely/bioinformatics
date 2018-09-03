@@ -54,11 +54,20 @@ def read_row_data(row):
 
 def read_genotypes(row):
     data = read_row_data(row)
-    return [int(g) for g in data["GT"].split("|")]
+    if "GT" not in data:
+        return []
+    else:
+        # XXX: According to https://www.biostars.org/p/86321/#86323, the GT
+        # field may have genotypes separated by either a | or a /.
+        split_char = "|" if "|" in data["GT"] else "/"
+        return [int(g) for g in data["GT"].split(split_char)]
 
 def read_genotype_likelihood(row):
     data = read_row_data(row)
-    return [float(g) for g in data["GP"].split(",")]
+    if "GP" not in data:
+        return None
+    else:
+        return [float(g) for g in data["GP"].split(",")]
 
 def read_imputed(row):
     return "IMP" in row.info
@@ -92,7 +101,7 @@ for ref, starts in reqs_by_file.iteritems():
     chromosome = ref.replace("chr", "")
     for start in starts:
         for row in idx.fetch(chromosome, start-1, start, parser=pysam.asVCF()):
-            res.append({
+            current = {
                 "refVersion": "37p13",
                 "refName": ref,
                 "start": start,
@@ -100,8 +109,11 @@ for ref, starts in reqs_by_file.iteritems():
                 "refBases": row.ref,
                 "filter": row.filter,
                 "imputed": read_imputed(row),
-                "genotypeLikelihood": read_genotype_likelihood(row),
                 "genotype": read_genotypes(row)
-            })
+            }
+            likelihood = read_genotype_likelihood(row)
+            if likelihood:
+                current["genotypeLikelihood"] = likelihood
+            res.append(current)
 
 print(json.dumps(res))
