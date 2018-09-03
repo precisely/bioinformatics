@@ -2,6 +2,13 @@
 
 set -Eeo pipefail
 
+readlinkf() { perl -MCwd -e 'print Cwd::abs_path glob shift' "$1"; }
+basedir=$(dirname "$(readlinkf $0)")
+script=$(basename "${BASH_SOURCE[${#BASH_SOURCE[@]}-1]}")
+
+
+. "${basedir}/common.sh"
+
 
 ### configuration
 path_reference_human_genome=/precisely/data/human_g1k_v37.fasta.bgz
@@ -34,12 +41,14 @@ fi
 
 
 ### run
+info $(json_pairs input_23andme_file_path "${input_23andme_file_path}" output_vcf_path "${output_vcf_path}")
+
 # check for genome version 37, others seem to fail (?); this information is
 # stored in a comment
 if [[ $(grep '.*#' "${input_23andme_file_path}" |
             grep 'We are using reference human assembly build' |
             sed 's/.*build \([[:digit:]]\+\).*/\1/') -ne 37 ]]; then
-    echo "unsupported genome version" >&2
+    error "unsupported genome version"
     exit 1
 fi
 
@@ -47,7 +56,7 @@ sample_id=$(sha256sum "${input_23andme_file_path}" | awk '{print $1}')
 
 # convert 23andMe file to VCF
 if [[ -e "${output_vcf_path}" ]]; then
-    echo "${output_vcf_path} already exists, no conversion attempted"
+    warn "${output_vcf_path} already exists, no conversion attempted"
 else
     if [[ "${test_mock_vcf}" == "true" ]]; then
         cp "${path_sample_test_run}/raw.vcf.gz" "${output_vcf_path}"
