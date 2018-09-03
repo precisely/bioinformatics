@@ -11,6 +11,11 @@ script=$(basename "${BASH_SOURCE[${#BASH_SOURCE[@]}-1]}")
 
 
 ### configuration
+if [[ -z "${AWS_REGION}" ]]; then
+    echo "AWS_REGION environment variable required" >&2
+    exit 1
+fi
+
 if [[ -z "${AWS_S3_ENDPOINT_URL}" ]]; then
     echo "AWS_S3_ENDPOINT_URL environment variable required" >&2
     exit 1
@@ -145,7 +150,8 @@ cleanup_after="${param_cleanup_after}"
 
 ### cleanup
 function cleanup {
-    if [[ "${cleanup_after}" == "true" ]]; then
+    if [[ "${cleanup_after}" == "true" && ! -z "${workdir}" ]]; then
+        debug "clean up: removing '${workdir}'"
         [[ ! -z "${workdir}" ]] && rm -rf "${workdir}"
     fi
 }
@@ -154,10 +160,12 @@ trap cleanup EXIT
 
 
 ### run
+info $(json_pairs user_id "${user_id}" data_source "${data_source}" upload_path "${upload_path}")
+
 function avoid_dest_overwrite {
     local phase=$1
     if [[ ! -z $(aws s3 --endpoint-url "${AWS_S3_ENDPOINT_URL}" ls "s3://${S3_BUCKET_BIOINFORMATICS_VCF}/${user_id}") ]]; then
-        echo "${user_id} already exists in S3 (${phase})" >&2
+        error "${user_id} already exists in S3 (${phase})"
         exit 1
     fi
 }
@@ -188,15 +196,19 @@ mv "../${input_file}" .
 mkdir headers
 mkdir imputed
 
-"${basedir}/convert-${data_source}-to-vcf.sh" "${input_file}" raw.vcf.gz ${test_mock_vcf}
+with_output_to_log \
+    "${basedir}/convert-${data_source}-to-vcf.sh" "${input_file}" raw.vcf.gz ${test_mock_vcf}
 
-"${basedir}/extract-vcf-headers.sh" raw.vcf.gz > "headers/${data_source}.txt"
+with_output_to_log \
+    "${basedir}/extract-vcf-headers.sh" raw.vcf.gz > "headers/${data_source}.txt"
 
 num_cores=4
 for chr in {1..22} X Y MT; do
     imputed_filename="imputed/chr${chr}.vcf"
-    "${basedir}/impute-genotype.sh" raw.vcf.gz "${imputed_filename}" ${chr} ${num_cores} ${test_mock_vcf}
-    "${basedir}/extract-vcf-headers.sh" "${imputed_filename}.bgz" > "headers/imputed-chr${chr}.txt"
+    with_output_to_log \
+        "${basedir}/impute-genotype.sh" raw.vcf.gz "${imputed_filename}" ${chr} ${num_cores} ${test_mock_vcf}
+    with_output_to_log \
+        "${basedir}/extract-vcf-headers.sh" "${imputed_filename}.bgz" > "headers/imputed-chr${chr}.txt"
 done
 
 popd > /dev/null
@@ -211,7 +223,8 @@ aws s3 --endpoint-url "${AWS_S3_ENDPOINT_URL}" cp --recursive "${src_dir}" "s3:/
 
 popd > /dev/null
 
-"${basedir}/run-initial-call-variants-import.sh" \
+with_output_to_log \
+    "${basedir}/run-initial-call-variants-import.sh" \
     --user-id="${user_id}" \
     --workdir="${workdir}" \
     --data-source="${data_source}" \

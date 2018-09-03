@@ -112,7 +112,8 @@ cleanup_after="${param_cleanup_after}"
 
 ### cleanup
 function cleanup {
-    if [[ "${cleanup_after}" == "true" ]]; then
+    if [[ "${cleanup_after}" == "true" && ! -z "${workdir}" ]]; then
+        debug "clean up: removing '${workdir}'"
         [[ ! -z "${workdir}" ]] && rm -rf "${workdir}"
     fi
 }
@@ -121,6 +122,8 @@ trap cleanup EXIT
 
 
 ### run
+info $(json_pairs data_source "${data_source}")
+
 workdir="${basedir}/$(date +"%Y-%m-%d.%H-%M-%S.%N")"
 mkdir "${workdir}"
 pushd "${workdir}" > /dev/null
@@ -133,7 +136,7 @@ else
 fi
 
 if [[ $(jq '.StatusCode' aws-invoke-SysGetVariantRequirements.json) != "200" ]]; then
-    echo "SysGetVariantRequirements invocation failed" >&2
+    error "SysGetVariantRequirements invocation failed"
     exit 1
 fi
 
@@ -177,13 +180,13 @@ else
 fi
 
 if [[ $(jq '.StatusCode' aws-invoke-VariantCallBatchCreate.json) != "200" ]]; then
-    echo "VariantCallBatchCreate invocation failed" >&2
+    error "VariantCallBatchCreate invocation failed"
     exit 1
 fi
 
 variant_call_batch_create_errors=$(jq -r '.[] | .error | select(. != null)' variant-batch-results.json)
 if [[ ! -z "${variant_call_batch_create_errors}" ]]; then
-    echo "errors from call to VariantCallBatchCreate: ${variant_call_batch_create_errors}" >&2
+    error "errors from call to VariantCallBatchCreate: ${variant_call_batch_create_errors}"
     exit 1
 fi
 
@@ -198,7 +201,7 @@ else
 fi
 
 if [[ $(jq '.StatusCode' aws-invoke-SysUpdateVariantRequirementStatuses.json) != "200" ]]; then
-    echo "SysUpdateVariantRequirementStatuses invocation failed" >&2
+    error "SysUpdateVariantRequirementStatuses invocation failed"
     exit 1
 fi
 
