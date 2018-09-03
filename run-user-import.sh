@@ -199,16 +199,24 @@ mkdir imputed
 with_output_to_log \
     "${basedir}/convert-${data_source}-to-vcf.sh" "${input_file}" raw.vcf.gz ${test_mock_vcf}
 
-with_output_to_log \
-    "${basedir}/extract-vcf-headers.sh" raw.vcf.gz > "headers/${data_source}.txt"
+"${basedir}/extract-vcf-headers.sh" raw.vcf.gz > "headers/${data_source}.txt"
 
-num_cores=4
-for chr in {1..22} X Y MT; do
-    imputed_filename="imputed/chr${chr}.vcf"
+# let's run 3 batches of 8
+chr_groups=("1,2,3,4,5,6,7,8"
+            "9,10,11,12,13,14,15,16"
+            "17,18,19,20,21,22,X,Y,MT")
+for chrs in "${chr_groups[@]}"; do
+    info "looking at chr_group '${chrs}'"
+    imputed_filename="imputed/chr-tmp.vcf"
     with_output_to_log \
-        "${basedir}/impute-genotype.sh" raw.vcf.gz "${imputed_filename}" ${chr} ${num_cores} ${test_mock_vcf}
-    with_output_to_log \
-        "${basedir}/extract-vcf-headers.sh" "${imputed_filename}.bgz" > "headers/imputed-chr${chr}.txt"
+        "${basedir}/impute-genotype.sh" raw.vcf.gz "${imputed_filename}" "${chrs}" ${test_mock_vcf}
+    for chr in ${chrs//,/ }; do # NB: intentional splitting by space!
+        imputed_chr_filename="imputed/chr${chr}.vcf"
+        awk -v chr="${chr}" '/^#/ || $1 == chr' "${imputed_filename}" | bgzip > "${imputed_chr_filename}.bgz"
+        tabix -p vcf "${imputed_chr_filename}.bgz"
+        "${basedir}/extract-vcf-headers.sh" "${imputed_chr_filename}.bgz" > "headers/imputed-chr${chr}.txt"
+    done
+    rm -f "${imputed_filename}"
 done
 
 popd > /dev/null
