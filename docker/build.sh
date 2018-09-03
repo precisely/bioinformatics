@@ -49,4 +49,6 @@ if [[ -z `docker images -q "${image_tag}"` ]]; then
                --build-arg aws_access_key_id=${aws_access_key_id} \
                --build-arg aws_secret_access_key=${aws_secret_access_key} \
                --file -
+else
+    echo "image ${image_tag} already exists, not building" >&2
 fi
