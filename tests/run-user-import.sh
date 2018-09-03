@@ -44,7 +44,7 @@ function test_overall_functionality {
         PARAM_DATA_SOURCE=23andme \
         PARAM_UPLOAD_PATH=${hash} \
         PARAM_USER_ID=test-user-1 \
-        "${basedir}/../run-user-import.sh" --stage=test --test-mock-vcf=true --test-mock-lambda=true --cleanup-after=true 2>&1 1>/dev/null
+        "${basedir}/../run-user-import.sh" --stage=test --test-mock-vcf=true --test-mock-lambda=true --cleanup-after=true 2>&1 >/dev/null
     [[ $? == 0 ]] || add_error "initial run failed"
     awss3 ls s3://${S3_BUCKET_BIOINFORMATICS_VCF}/test-user-1/23andme/${hash} || \
         add_error "did not create user directory at destination"
@@ -65,7 +65,7 @@ function test_overall_functionality {
             PARAM_DATA_SOURCE=23andme \
             PARAM_UPLOAD_PATH=a5cef5de111d61d4e8f57f0ab6166a1d8279cdc419f414383d8505efe74704f0 \
             PARAM_USER_ID=test-user-1 \
-            "${basedir}/../run-user-import.sh" --stage=test --test-mock-vcf=true --test-mock-lambda=true --cleanup-after=true 2>&1 1>/dev/null)
+            "${basedir}/../run-user-import.sh" --stage=test --test-mock-vcf=true --test-mock-lambda=true --cleanup-after=true 2>&1 >/dev/null)
     [[ $? != 0 ]] || add_error "second upload on same user ID succeeded"
     [[ "${err}" =~ "test-user-1 already exists in S3 (check before conversion and imputation)" ]] || add_error "error message on duplicate upload in run-user-import.sh not expected"
     after
@@ -81,7 +81,7 @@ function test_v36_rejection {
             PARAM_DATA_SOURCE=23andme \
             PARAM_UPLOAD_PATH=${hash} \
             PARAM_USER_ID=test-user-1 \
-            "${basedir}/../run-user-import.sh" --stage=test --test-mock-vcf=true --test-mock-lambda=true --cleanup-after=true 2>&1 1>/dev/null)
+            "${basedir}/../run-user-import.sh" --stage=test --test-mock-vcf=true --test-mock-lambda=true --cleanup-after=true 2>&1 >/dev/null)
     [[ $? != 0 ]] || add_error "accepted v36 genotype instead of rejecting"
     [[ "${err}" =~ "unsupported genome version" ]] || add_error "error message on genome version in run-user-import.sh not expected"
     after

@@ -38,7 +38,7 @@ function test_overall_functionality {
     before
     script_workdir=$(
         eval \
-            "${basedir}/../run-update.sh" --data-source=23andme --stage=test --test-mock-lambda=true --cleanup-after=false 2>&1 9>&1 1>/dev/null)
+            "${basedir}/../run-update.sh" --data-source=23andme --stage=test --test-mock-lambda=true --cleanup-after=false 2>&1 9>&1 >/dev/null)
     abeeler1=${script_workdir}/abeeler1/a5cef5de111d61d4e8f57f0ab6166a1d8279cdc419f414383d8505efe74704f0
     [[ -f "${abeeler1}/chr1.vcf.bgz" &&
            -f "${abeeler1}/chr1.vcf.bgz.tbi" &&
