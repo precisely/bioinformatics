@@ -193,13 +193,10 @@ mkdir "${sha256sum}"
 pushd "${sha256sum}" > /dev/null
 mv "../${input_file}" .
 
-mkdir headers
 mkdir imputed
 
 with_output_to_log \
     "${basedir}/convert-${data_source}-to-vcf.sh" "${input_file}" raw.vcf.gz ${test_mock_vcf}
-
-"${basedir}/extract-vcf-headers.sh" raw.vcf.gz > "headers/${data_source}.txt"
 
 # let's run 3 batches of 8
 chr_groups=("1,2,3,4,5,6,7,8"
@@ -214,7 +211,6 @@ for chrs in "${chr_groups[@]}"; do
         imputed_chr_filename="imputed/chr${chr}.vcf"
         awk -v chr="${chr}" '/^#/ || $1 == chr' "${imputed_filename}" | bgzip > "${imputed_chr_filename}.bgz"
         tabix -p vcf "${imputed_chr_filename}.bgz"
-        "${basedir}/extract-vcf-headers.sh" "${imputed_chr_filename}.bgz" > "headers/imputed-chr${chr}.txt"
     done
     rm -f "${imputed_filename}"
 done
