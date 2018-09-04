@@ -58,10 +58,10 @@ while true; do
     esac
 done
 
-[[ -z "${param_bucket_keys}" ]] && param_data_source="${S3_BUCKET_KEYS}"
+[[ -z "${param_bucket_keys}" ]] && param_bucket_keys="${S3_BUCKET_KEYS}"
 
 if [[ -z "${param_bucket_keys}" ]]; then
-    echo "S3 bucket containing public keys to copy in must be set with PARAM_BUCKET_KEYS or --bucket-keys" >&2
+    echo "S3 bucket containing public keys to copy in must be set with S3_BUCKET_KEYS or --bucket-keys" >&2
     exit 1
 fi
 
