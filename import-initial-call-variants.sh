@@ -62,7 +62,7 @@ while true; do
             shift 2
             ;;
         -h|--help)
-            echo "usage: run-initial-call-variants-import.sh --data-source=... --user-id=... --workdir=... --stage=... --test-mock-lambda=... --cleanup-after=..."
+            echo "usage: import-initial-call-variants.sh --data-source=... --user-id=... --workdir=... --stage=... --test-mock-lambda=... --cleanup-after=..."
             exit 0
             ;;
         --)

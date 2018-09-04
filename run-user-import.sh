@@ -228,7 +228,7 @@ aws s3 --endpoint-url "${AWS_S3_ENDPOINT_URL}" cp --recursive "${src_dir}" "s3:/
 popd > /dev/null
 
 with_output_to_log \
-    "${basedir}/run-initial-call-variants-import.sh" \
+    "${basedir}/import-initial-call-variants.sh" \
     --user-id="${user_id}" \
     --workdir="${workdir}" \
     --data-source="${data_source}" \
