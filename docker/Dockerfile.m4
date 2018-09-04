@@ -40,6 +40,8 @@ RUN apt-get install -y \
   libtool \
   man-db \
   manpages \
+  openssh-client \
+  openssh-server \
   pkgconf \
   sudo
 
@@ -53,6 +55,7 @@ RUN apt-get install -y \
   htop \
   jq \
   less \
+  mosh \
   rlwrap \
   silversearcher-ag \
   sqlite3 \
@@ -73,6 +76,9 @@ RUN apt-get install -y \
   bcftools \
   samtools \
   tabix
+
+# use an obscure port for ssh for dumb security (6601 is the 6th Carmichael number)
+RUN sed -i 's/\#Port 22/Port 6601/' /etc/ssh/sshd_config
 
 # node requires a dedicated APT source on Debian; this is a dependency for LocalStack
 RUN curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
@@ -98,7 +104,7 @@ WORKDIR /home/docker
 RUN curl -L -o .tmux.conf https://raw.githubusercontent.com/gcv/dotfiles/ddcd10e97939595911e2c2bfc5690a487ebac00a/public/tmux.conf
 RUN chown docker:docker .tmux.conf
 # make bash suck slightly less
-RUN echo $'\n\
+RUN echo '\n\
 export PATH=${HOME}/.local/bin:${PATH}\n\n\
 alias v="ls -la"\n\
 alias ..="cd .."\n\
