@@ -25,9 +25,9 @@ function before {
     awss3 mb s3://${S3_BUCKET_BIOINFORMATICS_UPLOAD}
     awss3 mb s3://${S3_BUCKET_BIOINFORMATICS_VCF}
     # v36 genotype
-    cp /precisely/data/samples/genome_Joseph_Bedell_Full_20110113135135.txt "${minio_workdir}/${S3_BUCKET_BIOINFORMATICS_UPLOAD}/b76a6dae4094f31a59cee93a2a3aacf3d56bb32d0dcb4fa8bd9e24e4308b2348"
+    cp /precisely/data/samples/23andme/genome_v36_Joseph_Bedell_Full_20110113135135.txt "${minio_workdir}/${S3_BUCKET_BIOINFORMATICS_UPLOAD}/b76a6dae4094f31a59cee93a2a3aacf3d56bb32d0dcb4fa8bd9e24e4308b2348"
     # normal v37 genotype
-    cp /precisely/data/samples/genome_Andrew_Beeler_Full_20160320135452.txt "${minio_workdir}/${S3_BUCKET_BIOINFORMATICS_UPLOAD}/a5cef5de111d61d4e8f57f0ab6166a1d8279cdc419f414383d8505efe74704f0"
+    cp /precisely/data/samples/23andme/genome_v37_Andrew_Beeler_Full_20160320135452.txt "${minio_workdir}/${S3_BUCKET_BIOINFORMATICS_UPLOAD}/a5cef5de111d61d4e8f57f0ab6166a1d8279cdc419f414383d8505efe74704f0"
 }
 
 function after {

@@ -124,7 +124,7 @@ trap cleanup EXIT
 ### run
 info $(json_pairs data_source "${data_source}")
 
-workdir="${basedir}/$(date +"%Y-%m-%d.%H-%M-%S.%N")"
+workdir="${basedir}/$(timestamp)"
 mkdir "${workdir}"
 pushd "${workdir}" > /dev/null
 

@@ -173,7 +173,7 @@ function avoid_dest_overwrite {
 # Do not do any expensive work if the destination path exists in S3.
 avoid_dest_overwrite "check before conversion and imputation"
 
-workdir="${basedir}/$(date +"%Y-%m-%d.%H-%M-%S.%N")"
+workdir="${basedir}/$(timestamp)"
 mkdir "${workdir}"
 pushd "${workdir}" > /dev/null
 
