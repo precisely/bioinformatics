@@ -58,6 +58,94 @@ The test suite is rather incomplete, but both entry points do have tests:
 They run completely offline, and manage their own Minio environment, so do not run a separate Minio instance on port 9000 when running these tests.
 
 
+## Pushing to ECR
+
+The container should be pushed to Amazon's Elastic Container Registry (ECR). The repository we use is `dev/precisely-bioinformatics`. In spite of its name, it should be the same across all environments — it is merely housed in the `dev` account. Its URI is `416000760642.dkr.ecr.us-east-1.amazonaws.com/dev/precisely-bioinformatics`.
+
+A good process of making a new image is this:
+
+```
+export ecruri=416000760642.dkr.ecr.us-east-1.amazonaws.com/dev/precisely-bioinformatics
+export version=2018-09-04-rev4
+docker/build.sh build ${ecruri}:${version} default
+docker tag ${ecruri}:${version} ${ecruri}:latest
+```
+
+Then obtain a Docker login session for the ECR:
+
+```
+$(aws ecr get-login --no-include-email)
+docker push ${ecruri}
+```
+
+Please note that it may be advantageous to do this on an EC2 instance, as it substantially speeds up the process of copying data into ECR.
+
+
+## Remote access
+
+The containers are remotely accessible by SSH. (For convenience, Mosh and tmux are also installed.) This enables remote debugging as well as exploratory work on fairly high-powered machines.
+
+In order to use remote access, first upload an SSH _public_ key (_do not_ upload a private key from a public-key pair, _only_ upload the public key!) to a shared S3 bucket: `precisely-ssh-public-keys`. Please give it a unique and easily identifiable name, and do not touch anyone else's public key saved in there.
+
+Then, when you launch a container, you need to use a script especially set up to enable SSH on it: `run-remote-access.sh`. This script supports two modes of operation: purely enabling remote access without running extra tasks, and running tasks while keeping remote access available. In the former case, the container will be available for several minutes before exiting and stopping itself _or_ as long as a file called `/precisely/app/KEEP-RUNNING` exists (just `touch` it to keep the container alive indefinitely, and delete it to have the container eventually turn itself off). In the latter case, the container will run a task normally, but will keep an SSH daemon available — importantly, the container will unceremoniously terminate once the task completes.
+
+To launch a container which does nothing more than makes itself available and waits for connections:
+
+```
+aws ecs run-task \
+  --cluster cv-BioinformaticsECSCluster \
+  --task-definition cv-BioinformaticsECSTask:5 \
+  --count 1 \
+  --launch-type FARGATE \
+  --network-configuration $'{
+  "awsvpcConfiguration": {
+    "subnets": ["subnet-050b917dbfeaf43ad"],
+    "securityGroups": ["sg-0ca9e7b2d39e79bd6"],
+    "assignPublicIp": "ENABLED"
+  }
+}' \
+  --overrides $'{
+  "containerOverrides": [
+    {
+      "name": "cv-BioinformaticsECSContainer",
+      "command": ["/precisely/app/run-remote-access.sh", "--keep-running=true"]
+    }
+  ]
+}'
+```
+
+Note that you may need to adjust the `subnets` and `securityGroups` IDs to match your environment, not to mention the cluster, task, and container names!
+
+To connect, look up the public IP of the container, and SSH (or Mosh) in normally as the `docker` user. Use port 6601.
+
+To launch a container which runs a task with remote access available:
+
+```
+aws ecs run-task \
+  --cluster cv-BioinformaticsECSCluster \
+  --task-definition cv-BioinformaticsECSTask:5 \
+  --count 1 \
+  --launch-type FARGATE \
+  --network-configuration $'{
+  "awsvpcConfiguration": {
+    "subnets": ["subnet-050b917dbfeaf43ad"],
+    "securityGroups": ["sg-0ca9e7b2d39e79bd6"],
+    "assignPublicIp": "ENABLED"
+  }
+}' \
+  --overrides $'{
+  "containerOverrides": [
+    {
+      "name": "cv-BioinformaticsECSContainer",
+      "command": ["/bin/bash", "-c", "/precisely/app/run-remote-access.sh && e/precisely/app/run-user-import.sh --data-source=23andme --upload-path=genome_Andrew_Beeler_Full_20160320135452.txt --user-id=abeeler9 --stage=cv --test-mock-vcf=false --test-mock-lambda=false --cleanup-after=true"]
+    }
+  ]
+}'
+```
+
+Note the form of the command: it uses the Docker exec form to spawn a shell which then uses the `&&` operator to start SSH _and_ execute another command. As of this writing, this is the only reasonable way to make Docker kick off multiple processes.
+
+
 ## Reference information
 
 ### 23andMe's tab-delimited raw data format
