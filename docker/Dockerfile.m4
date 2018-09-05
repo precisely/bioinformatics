@@ -38,6 +38,7 @@ RUN apt-get install -y \
   automake \
   build-essential \
   libtool \
+  locales \
   man-db \
   manpages \
   openssh-client \
@@ -76,6 +77,9 @@ RUN apt-get install -y \
   bcftools \
   samtools \
   tabix
+
+# fix locales
+RUN sed -i 's/^# *\(en_US.UTF-8\)/\1/' /etc/locale.gen && locale-gen
 
 # use an obscure port for ssh for dumb security (6601 is the 6th Carmichael number)
 RUN sed -i 's/\#Port 22/Port 6601/' /etc/ssh/sshd_config

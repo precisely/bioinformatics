@@ -72,4 +72,6 @@ if [[ "${keep_running}" == "true" ]]; then
         sleep ${sleep_interval_sec}
     done
 
+    info "all sleep intervals concluded and ${keep_running_file} not found; terminating remote access script"
+
 fi
