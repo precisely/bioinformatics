@@ -198,10 +198,8 @@ mkdir imputed
 with_output_to_log \
     "${basedir}/convert-${data_source}-to-vcf.sh" "${input_file}" raw.vcf.gz ${test_mock_vcf}
 
-# let's run 3 batches of 8
-chr_groups=("1,2,3,4,5,6,7,8"
-            "9,10,11,12,13,14,15,16"
-            "17,18,19,20,21,22,X,Y,MT")
+# let's run 1 batches of all
+chr_groups=("1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,X,Y,MT")
 for chrs in "${chr_groups[@]}"; do
     info "looking at chr_group '${chrs}'"
     imputed_filename="imputed/chr-tmp.vcf"
