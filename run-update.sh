@@ -146,6 +146,14 @@ required_refs=($(jq -r '[.[] | .refName] | unique | .[]' variant-reqs-new.json))
 user_ids=($(aws s3api --endpoint-url="${AWS_S3_ENDPOINT_URL}" list-objects --bucket="${S3_BUCKET_BIOINFORMATICS_VCF}" --delimiter=/ --no-paginate | \
                 jq -r '.CommonPrefixes | .[] | .Prefix | split("/")[0]'))
 
+function extract_wrapper {
+    "${basedir}/python/extract-variant.py" "${workdir}/variant-reqs-new.json" . | \
+        jq --arg data_source ${data_source} \
+           --arg user_id ${user_id} \
+           --arg sample_id ${sample_id} \
+           '[.[] | . + {sampleType: $data_source, userId: $user_id, sampleId: $sample_id}]' > "${workdir}/new-call-variants-${user_id}.json"
+}
+
 for user_id in "${user_ids[@]}"; do
     mkdir "${user_id}"
     pushd "${user_id}" > /dev/null
@@ -158,11 +166,7 @@ for user_id in "${user_ids[@]}"; do
         for ref in "${required_refs[@]}"; do
             aws s3 --endpoint-url="${AWS_S3_ENDPOINT_URL}" cp --recursive --exclude="*" --include="${ref}.vcf.bgz*" "s3://${S3_BUCKET_BIOINFORMATICS_VCF}/${user_id}/${data_source}/${sample_id}/imputed" . > /dev/null
         done
-        "${basedir}/python/extract-variant.py" "${workdir}/variant-reqs-new.json" . | \
-            jq --arg data_source ${data_source} \
-               --arg user_id ${user_id} \
-               --arg sample_id ${sample_id} \
-               '[.[] | . + {sampleType: $data_source, userId: $user_id, sampleId: $sample_id}]' > "${workdir}/new-call-variants-${user_id}.json"
+        extract_wrapper
         popd > /dev/null
     done
     popd > /dev/null
