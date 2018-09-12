@@ -100,7 +100,14 @@ for ref, starts in reqs_by_file.iteritems():
     idx = pysam.TabixFile(f)
     chromosome = ref.replace("chr", "")
     for start in starts:
-        for row in idx.fetch(chromosome, start-1, start, parser=pysam.asVCF()):
+        try:
+            rows = idx.fetch(chromosome, start-1, start, parser=pysam.asVCF())
+        except ValueError:
+            # This probably means the requested sequence does not exist in the file.
+            # TODO: Figure out what to do about this.
+            print("missing sequence: {}, chr{}, {}".format(os.path.realpath(imputed_chromosomes_path), chromosome, start), file=sys.stderr)
+            continue
+        for row in rows:
             current = {
                 "refVersion": "37p13",
                 "refName": ref,
