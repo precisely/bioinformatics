@@ -61,9 +61,9 @@ for fd in 3 4 5; do
     eval "exec ${fd}>&1"
 done
 
-
 transform_as_needed() {
-    local cmd=$1
+    local level=$1
+    local cmd=$2
     local input
     local output
     while read -r input; do
@@ -74,7 +74,7 @@ transform_as_needed() {
         else
             # input does not parse as JSON, so turn it into valid JSON and proceed
             local transformed=$(jq -caR '.' <<< "${input}" 2>/dev/null)
-            output="{\"timestamp\":\"$(timestamp)\",\"script\":\"${cmd}\",\"message\":${transformed}}"
+            output="{\"timestamp\":\"$(timestamp)\",\"level\":\"${level}\",\"script\":\"${cmd}\",\"message\":${transformed}}"
         fi
         echo "${output}"
     done
@@ -88,8 +88,8 @@ with_output_to_log() {
     # to 1, pipe to stdout command.
     local cmd=$(basename $1)
     exec 8>&1
-    ( $* 2>&1 1>&8 8>&- | transform_as_needed "${cmd}" ) 8>&1 1>&2 |
-        transform_as_needed "${cmd}"
+    ( $* 2>&1 1>&8 8>&- | transform_as_needed error "${cmd}" ) 8>&1 1>&2 |
+        transform_as_needed info "${cmd}"
 }
 
 
