@@ -166,7 +166,7 @@ for user_id in "${user_ids[@]}"; do
         for ref in "${required_refs[@]}"; do
             aws s3 --endpoint-url="${AWS_S3_ENDPOINT_URL}" cp --recursive --exclude="*" --include="${ref}.vcf.bgz*" "s3://${S3_BUCKET_BIOINFORMATICS_VCF}/${user_id}/${data_source}/${sample_id}/imputed" . > /dev/null
         done
-        extract_wrapper
+        with_output_to_log extract_wrapper
         popd > /dev/null
     done
     popd > /dev/null
