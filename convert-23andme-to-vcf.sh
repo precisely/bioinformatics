@@ -55,8 +55,8 @@ info $(json_pairs input_23andme_file_path "${input_23andme_file_path}" output_vc
 if [[ $(grep '.*#' "${input_23andme_file_path}" |
             grep 'We are using reference human assembly build' |
             sed 's/.*build \([[:digit:]]\+\).*/\1/') -ne 37 ]]; then
-    error "unsupported genome version"
-    exit 1
+    info "unsupported genome version"
+    exit 11
 fi
 
 sample_id=$(sha256sum "${input_23andme_file_path}" | awk '{print $1}')

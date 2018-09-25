@@ -197,8 +197,18 @@ mkdir imputed
 
 # convert the raw user input format (23andMe and the like) to VCF
 conversion_result_file=raw-conversion-results.txt
-with_output_to_log \
-    "${basedir}/convert-${data_source}-to-vcf.sh" "${input_file}" raw.vcf.gz ${test_mock_vcf} "${conversion_result_file}"
+set +e
+"${basedir}/convert-${data_source}-to-vcf.sh" "${input_file}" raw.vcf.gz ${test_mock_vcf} "${conversion_result_file}"
+conversion_err=$?
+if [[ "${conversion_err}" == 11 ]]; then
+    info "input file is unsupported"
+    # FIXME: update UserState to "error"
+    exit 0
+elif [[ "${conversion_err}" != 0 ]]; then
+    error "conversion failed"
+    exit 1
+fi
+set -e
 # post-process and print VCF conversion result run
 function print_vcf_conversion_results {
     awk -f "${basedir}/collapse-repeating-lines.awk" "${conversion_result_file}"
@@ -211,15 +221,17 @@ conversion_result_num_output_lines=$(zgrep -v '^#' raw.vcf.gz | wc -l)
 # if the VCF output has no non-comment output lines, this is bad input
 if [[ ${conversion_result_num_output_lines} == 0 ]]; then
     info "output VCF file has no non-comment lines, the input was probably bad"
-    # FIXME: update UserState
+    # FIXME: update UserState to "error"
     exit 0
 fi
 # if the process skipped too many rows, also consider it bad input
 if [[ $(( ${conversion_result_num_rows_skipped} / ${conversion_result_num_rows_total} )) > 0.20 ]]; then
     info "output VCF file has too many skipped lines, the input was probably bad"
-    # FIXME: update UserState
+    # FIXME: update UserState to "error"
     exit 0
 fi
+
+# FIXME: update UserState to "processing"
 
 # let's run 1 batch of all
 chr_groups=("1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,X,Y,MT")
@@ -256,6 +268,8 @@ with_output_to_log \
     --stage="${stage}" \
     --test-mock-lambda="${test_mock_lambda}" \
     --cleanup-after="${cleanup_after}"
+
+# FIXME: update UserState to "ready"
 
 # if we are not cleaning up afterwards, print the path to the working directory:
 # it may come in handy
