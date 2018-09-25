@@ -55,6 +55,10 @@ keep_running="${param_keep_running}"
 
 
 ### run
+# XXX: Work around a sudo error which occurs when the hostname does not resolve
+# to anything in /etc/hosts.
+echo $(hostname -I | cut -d\  -f1) $(hostname) | sudo tee -a /etc/hosts 1>&2 2>/dev/null
+
 info "starting ssh"
 with_output_to_log sudo /etc/init.d/ssh start
 
