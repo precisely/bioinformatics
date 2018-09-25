@@ -162,16 +162,13 @@ trap cleanup EXIT
 ### run
 info $(json_pairs user_id "${user_id}" data_source "${data_source}" upload_path "${upload_path}")
 
-function avoid_dest_overwrite {
-    local phase=$1
-    if [[ ! -z $(aws s3 --endpoint-url "${AWS_S3_ENDPOINT_URL}" ls "s3://${S3_BUCKET_BIOINFORMATICS_VCF}/${user_id}") ]]; then
-        error "${user_id} already exists in S3 (${phase})"
-        exit 1
-    fi
-}
-
 # Do not do any expensive work if the destination path exists in S3.
-avoid_dest_overwrite "check before conversion and imputation"
+info "checking for duplicate before conversion and imputation"
+if [[ ! -z $(aws s3 --endpoint-url "${AWS_S3_ENDPOINT_URL}" ls "s3://${S3_BUCKET_BIOINFORMATICS_VCF}/${upload_path}") ]]; then
+    info "target ${S3_BUCKET_BIOINFORMATICS_VCF}/${upload_path} already exists"
+    # FIXME: set UserState to "error", "duplicate"
+    exit 0
+fi
 
 workdir="${basedir}/$(timestamp)"
 mkdir "${workdir}"
@@ -253,7 +250,10 @@ popd > /dev/null
 popd > /dev/null
 
 # Once again, check that the destination does not exist in case another process raced this one.
-avoid_dest_overwrite "check after imputation and before final copy into S3"
+if [[ ! -z $(aws s3 --endpoint-url "${AWS_S3_ENDPOINT_URL}" ls "s3://${S3_BUCKET_BIOINFORMATICS_VCF}/${upload_path}") ]]; then
+    error "target ${S3_BUCKET_BIOINFORMATICS_VCF}/${upload_path} already exists, did another process race this one?"
+    exit 1
+fi
 
 src_dir=$(readlinkf "${user_id}")
 aws s3 --endpoint-url "${AWS_S3_ENDPOINT_URL}" cp --recursive "${src_dir}" "s3://${S3_BUCKET_BIOINFORMATICS_VCF}/${user_id}" --exclude "**/${input_file}" > /dev/null
