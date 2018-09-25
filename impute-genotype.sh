@@ -102,6 +102,10 @@ else
             exit 1
         fi
 
+        # clean up after beagle-leash in /tmp, because it fills up the disk
+        # which is bad on 10GB Fargate containers
+        rm -rf /tmp/beagle-leash-*
+
         # remove entries from the output file which do not match the requested chromosomes
         zcat "${output_imputed_vcf_path}-tmp.gz" | \
             awk -v chr_raw="${chromosomes}" '
