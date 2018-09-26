@@ -192,7 +192,7 @@ fi
     jq --arg data_source ${data_source} \
        --arg user_id ${user_id} \
        --arg sample_id ${sample_id} \
-       '[.[] | . + {sampleType: $data_source, userId: $user_id, sampleId: $sample_id}]' > base-batch.json
+       '[.[] | . + {sampleSource: $data_source, userId: $user_id, sampleId: $sample_id}]' > base-batch.json
 
 if [[ "${test_mock_lambda}" == "true" ]]; then
     cp "${basedir}/tests/mocks/variant-batch-results-1.json" ./variant-batch-results.json

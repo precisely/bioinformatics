@@ -151,7 +151,7 @@ function extract_wrapper {
         jq --arg data_source ${data_source} \
            --arg user_id ${user_id} \
            --arg sample_id ${sample_id} \
-           '[.[] | . + {sampleType: $data_source, userId: $user_id, sampleId: $sample_id}]' > "${workdir}/new-call-variants-${user_id}.json"
+           '[.[] | . + {sampleSource: $data_source, userId: $user_id, sampleId: $sample_id}]' > "${workdir}/new-call-variants-${user_id}.json"
 }
 
 for user_id in "${user_ids[@]}"; do
