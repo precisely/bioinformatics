@@ -159,14 +159,36 @@ function cleanup {
 trap cleanup EXIT
 
 
+### helper for user status updating Lambda invocation
+function user_status_lambda {
+    local status=$1
+    local status_message=$2
+    local payload="{\"userId\": \"${user_id}\", \"id\": \"${sample_id}\", \"type\": \"genetics\", \"source\": \"${data_source}\", \"status\": \"${status}\", \"statusMessage\": \"${status_message}\"}"
+    echo " ---> ${payload}"
+    if [[ "${test_mock_lambda}" == "true" ]]; then
+        # TODO: Add test support.
+        error "not supported yet"
+    else
+        aws lambda invoke --invocation-type RequestResponse --function-name "precisely-backend-${stage}-UserSampleUpdate" --payload "${payload}" --region "${AWS_REGION}" /dev/null > aws-invoke-UserSampleUpdate.json
+        if [[ $(jq '.StatusCode' aws-invoke-UserSampleUpdate.json) != "200" ]]; then
+            error "UserSampleUpdate invocation failed"
+            exit 1
+        fi
+        rm -f aws-invoke-UserSampleUpdate.json
+    fi
+}
+
+
 ### run
 info $(json_pairs user_id "${user_id}" data_source "${data_source}" upload_path "${upload_path}")
+
+sample_id=$(awk -F '/' '{print $3}' <<< "${upload_path}")
 
 # Do not do any expensive work if the destination path exists in S3.
 info "checking for duplicate before conversion and imputation"
 if [[ ! -z $(aws s3 --endpoint-url "${AWS_S3_ENDPOINT_URL}" ls "s3://${S3_BUCKET_BIOINFORMATICS_VCF}/${upload_path}") ]]; then
     info "target ${S3_BUCKET_BIOINFORMATICS_VCF}/${upload_path} already exists"
-    # FIXME: set UserState to "error", "duplicate"
+    user_status_lambda "error" "duplicate file upload detected"
     exit 0
 fi
 
@@ -186,6 +208,13 @@ aws s3 --endpoint-url "${AWS_S3_ENDPOINT_URL}" \
     cp "s3://${S3_BUCKET_BIOINFORMATICS_UPLOAD}/${upload_path}" "${input_file}" > /dev/null
 
 sha256sum=$(sha256sum "${input_file}" | awk '{print $1}')
+
+# sanity check the checksum, it should match the incoming file path
+if [[ "${sha256sum}" != "${sample_id}" ]]; then
+    error "mismatch: sha256sum=${sha256sum}, sample_id=${sample_id}"
+    exit 1
+fi
+
 mkdir "${sha256sum}"
 pushd "${sha256sum}" > /dev/null
 mv "../${input_file}" .
@@ -198,8 +227,8 @@ set +e
 "${basedir}/convert-${data_source}-to-vcf.sh" "${input_file}" raw.vcf.gz ${test_mock_vcf} "${conversion_result_file}"
 conversion_err=$?
 if [[ "${conversion_err}" == 11 ]]; then
-    info "input file is unsupported"
-    # FIXME: update UserState to "error"
+    info "input file is not supported"
+    user_status_lambda "error" "input file type is not supported"
     exit 0
 elif [[ "${conversion_err}" != 0 ]]; then
     error "conversion failed"
@@ -218,17 +247,17 @@ conversion_result_num_output_lines=$(zgrep -v '^#' raw.vcf.gz | wc -l)
 # if the VCF output has no non-comment output lines, this is bad input
 if [[ ${conversion_result_num_output_lines} == 0 ]]; then
     info "output VCF file has no non-comment lines, the input was probably bad"
-    # FIXME: update UserState to "error"
+    user_status_lambda "error" "bad input file (no non-comment lines)"
     exit 0
 fi
 # if the process skipped too many rows, also consider it bad input
 if [[ $(( ${conversion_result_num_rows_skipped} / ${conversion_result_num_rows_total} )) > 0.20 ]]; then
     info "output VCF file has too many skipped lines, the input was probably bad"
-    # FIXME: update UserState to "error"
+    user_status_lambda "error" "bad input file (too many skipped lines)"
     exit 0
 fi
 
-# FIXME: update UserState to "processing"
+user_status_lambda "processing" "upload looks good, performing imputation"
 
 # let's run 3 batches of 8
 chr_groups=("1,2,3,4,5,6,7,8"
@@ -271,7 +300,7 @@ with_output_to_log \
     --test-mock-lambda="${test_mock_lambda}" \
     --cleanup-after="${cleanup_after}"
 
-# FIXME: update UserState to "ready"
+user_status_lambda "ready" "finished"
 
 # if we are not cleaning up afterwards, print the path to the working directory:
 # it may come in handy
