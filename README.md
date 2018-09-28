@@ -146,6 +146,11 @@ aws ecs run-task \
 Note the form of the command: it uses the Docker exec form to spawn a shell which then uses the `&&` operator to start SSH _and_ execute another command. As of this writing, this is the only reasonable way to make Docker kick off multiple processes.
 
 
+### S3 bucket: `precisely-ssh-public-keys`
+
+This bucket exists in the `dev` environment, but needs to be accessed by every other environment. When adding an environment, be sure to [change the bucket policy](https://s3.console.aws.amazon.com/s3/buckets/precisely-ssh-public-keys/?region=us-east-1&tab=permissions) and include the new AWS account to the principal list of the bucket.
+
+
 ## Reference information
 
 ### 23andMe's tab-delimited raw data format
