@@ -46,8 +46,8 @@ if [[ -z `docker images -q "${image_tag}"` ]]; then
     m4 -P -Dmode=${mode} "${basedir}/Dockerfile.m4" | \
         docker build "${basedir}/.." \
                --tag "${image_tag}" \
-               --build-arg aws_access_key_id=${aws_access_key_id} \
-               --build-arg aws_secret_access_key=${aws_secret_access_key} \
+               --build-arg AWS_ACCESS_KEY_ID=${aws_access_key_id} \
+               --build-arg AWS_SECRET_ACCESS_KEY=${aws_secret_access_key} \
                --file -
 else
     echo "image ${image_tag} already exists, not building" >&2
