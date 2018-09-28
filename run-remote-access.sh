@@ -65,6 +65,14 @@ with_output_to_log sudo /etc/init.d/ssh start
 info "copying in public keys"
 with_output_to_log "${basedir}/ssh-copy-public-keys.sh" --bucket-keys=precisely-ssh-public-keys
 
+set +e
+info "writing aws information to a log file"
+aws configure get aws_access_key_id > "${basedir}/aws-configure-get-aws_access_key_id"
+echo ${AWS_ACCESS_KEY_ID} > "${basedir}/aws-envvar"
+env > "${basedir}/aws-full-env"
+info "finished writing aws information to a log file"
+set -e
+
 if [[ "${keep_running}" == "true" ]]; then
 
     info "initial sleep interval: ${sleep_interval_sec}sec"
