@@ -164,7 +164,6 @@ function user_status_lambda {
     local status=$1
     local status_message=$2
     local payload="{\"userId\": \"${user_id}\", \"id\": \"${sample_id}\", \"type\": \"genetics\", \"source\": \"${data_source}\", \"status\": \"${status}\", \"statusMessage\": \"${status_message}\"}"
-    echo " ---> ${payload}"
     if [[ "${test_mock_lambda}" == "true" ]]; then
         # TODO: Add test support.
         error "not supported yet"

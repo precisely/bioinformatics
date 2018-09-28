@@ -175,7 +175,11 @@ if [[ "${test_mock_lambda}" == "true" ]]; then
     cp "${basedir}/tests/mocks/variant-reqs-ready.json" .
     cp "${basedir}/tests/mocks/aws-invoke-SysGetVariantRequirements.json" .
 else
-    aws lambda invoke --invocation-type RequestResponse --function-name "precisely-backend-${stage}-SysGetVariantRequirements" --payload '"ready"' --region "${AWS_REGION}" variant-reqs-ready.json > aws-invoke-SysGetVariantRequirements.json
+    # TODO: This actually retrieves _all_ status system variant requirements,
+    # not just "ready" ones. That's what the 'null' payload means. The output
+    # filename is currently confusing, but too much work to change without
+    # breaking even more tests.
+    aws lambda invoke --invocation-type RequestResponse --function-name "precisely-backend-${stage}-SysGetVariantRequirements" --payload 'null' --region "${AWS_REGION}" variant-reqs-ready.json > aws-invoke-SysGetVariantRequirements.json
 fi
 
 if [[ $(jq '.StatusCode' aws-invoke-SysGetVariantRequirements.json) != "200" ]]; then
