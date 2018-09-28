@@ -160,7 +160,7 @@ trap cleanup EXIT
 
 
 ### helper for user status updating Lambda invocation
-function user_status_lambda {
+function user_sample_status_lambda {
     local status=$1
     local status_message=$2
     local payload="{\"userId\": \"${user_id}\", \"id\": \"${sample_id}\", \"type\": \"genetics\", \"source\": \"${data_source}\", \"status\": \"${status}\", \"statusMessage\": \"${status_message}\"}"
@@ -187,7 +187,7 @@ sample_id=$(awk -F '/' '{print $3}' <<< "${upload_path}")
 info "checking for duplicate before conversion and imputation"
 if [[ ! -z $(aws s3 --endpoint-url "${AWS_S3_ENDPOINT_URL}" ls "s3://${S3_BUCKET_BIOINFORMATICS_VCF}/${upload_path}") ]]; then
     info "target ${S3_BUCKET_BIOINFORMATICS_VCF}/${upload_path} already exists"
-    user_status_lambda "error" "duplicate file upload detected"
+    user_sample_status_lambda "error" "duplicate file upload detected"
     exit 0
 fi
 
@@ -227,7 +227,7 @@ set +e
 conversion_err=$?
 if [[ "${conversion_err}" == 11 ]]; then
     info "input file is not supported"
-    user_status_lambda "error" "input file type is not supported"
+    user_sample_status_lambda "error" "input file type is not supported"
     exit 0
 elif [[ "${conversion_err}" != 0 ]]; then
     error "conversion failed"
@@ -246,17 +246,17 @@ conversion_result_num_output_lines=$(zgrep -v '^#' raw.vcf.gz | wc -l)
 # if the VCF output has no non-comment output lines, this is bad input
 if [[ ${conversion_result_num_output_lines} == 0 ]]; then
     info "output VCF file has no non-comment lines, the input was probably bad"
-    user_status_lambda "error" "bad input file (no non-comment lines)"
+    user_sample_status_lambda "error" "bad input file (no non-comment lines)"
     exit 0
 fi
 # if the process skipped too many rows, also consider it bad input
 if [[ $(( ${conversion_result_num_rows_skipped} / ${conversion_result_num_rows_total} )) > 0.20 ]]; then
     info "output VCF file has too many skipped lines, the input was probably bad"
-    user_status_lambda "error" "bad input file (too many skipped lines)"
+    user_sample_status_lambda "error" "bad input file (too many skipped lines)"
     exit 0
 fi
 
-user_status_lambda "processing" "upload looks good, performing imputation"
+user_sample_status_lambda "processing" "upload looks good, performing imputation"
 
 # let's run 3 batches of 8
 chr_groups=("1,2,3,4,5,6,7,8"
@@ -299,7 +299,7 @@ with_output_to_log \
     --test-mock-lambda="${test_mock_lambda}" \
     --cleanup-after="${cleanup_after}"
 
-user_status_lambda "ready" "finished"
+user_sample_status_lambda "ready" "finished"
 
 # if we are not cleaning up afterwards, print the path to the working directory:
 # it may come in handy

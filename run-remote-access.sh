@@ -59,20 +59,20 @@ keep_running="${param_keep_running}"
 # to anything in /etc/hosts.
 sudo bash -c 'echo $(hostname -I | cut -d\  -f1) $(hostname) >> /etc/hosts' 1>&2 2>/dev/null
 
+info "saving credentials environment variable AWS_CONTAINER_CREDENTIALS_RELATIVE_URI"
+echo "export AWS_CONTAINER_CREDENTIALS_RELATIVE_URI=$AWS_CONTAINER_CREDENTIALS_RELATIVE_URI" >> /home/docker/.bashrc
+
+set +e
+info "setting bash prompt to include IAM role"
+iam_role=$(curl -s 169.254.170.2$AWS_CONTAINER_CREDENTIALS_RELATIVE_URI | jq -r '.RoleArn' | awk -F ":" '{print $6}')
+echo "export PS1=\"\[\e[1;91m\]${iam_role}\[\e[0m\] \$PS1\"" >> /home/docker/.bashrc
+set -e
+
 info "starting ssh"
 with_output_to_log sudo /etc/init.d/ssh start
 
 info "copying in public keys"
 with_output_to_log "${basedir}/ssh-copy-public-keys.sh" --bucket-keys=precisely-ssh-public-keys
-
-info "writing container environment variables to ${basedir}/env"
-env > "${basedir}/env"
-
-set +e
-info "setting bash prompt to include IAM role"
-iam_role=$(curl -s 169.254.170.2$AWS_CONTAINER_CREDENTIALS_RELATIVE_URI | jq -r '.RoleArn' | awk -F ":" '{print $6}')
-echo "export PS1=\"\[\e[1;91m\]${iam_role}\[\e[0m\] $PS1\"" >> /home/docker/.bashrc
-set -e
 
 if [[ "${keep_running}" == "true" ]]; then
 
