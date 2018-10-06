@@ -178,6 +178,25 @@ function user_sample_status_lambda {
 }
 
 
+### helper for sending emails
+function send_email_lambda {
+    local subject=$1
+    local text=$2
+    local payload="{\"to\": \"${user_id}\", \"subject\": \"${subject}\", \"text\": \"${text}\"}"
+    if [[ "${test_mock_lambda}" == "true" ]]; then
+        # TODO: Add test support.
+        error "not supported yet"
+    else
+        aws lambda invoke --invocation-type RequestResponse --function-name "precisely-backend-${stage}-SendEmail" --payload "${payload}" --region "${AWS_REGION}" /dev/null > aws-invoke-SendEmail.json
+        if [[ $(jq '.StatusCode' aws-invoke-SendEmail.json) != "200" ]]; then
+            error "SendEmail invocation failed"
+            exit 1
+        fi
+        rm -f aws-invoke-SendEmail.json
+    fi
+}
+
+
 ### run
 info $(json_pairs user_id "${user_id}" data_source "${data_source}" upload_path "${upload_path}")
 
@@ -188,6 +207,9 @@ info "checking for duplicate before conversion and imputation"
 if [[ ! -z $(aws s3 --endpoint-url "${AWS_S3_ENDPOINT_URL}" ls "s3://${S3_BUCKET_BIOINFORMATICS_VCF}/${upload_path}") ]]; then
     info "target ${S3_BUCKET_BIOINFORMATICS_VCF}/${upload_path} already exists"
     user_sample_status_lambda "error" "duplicate file upload detected"
+    send_email_lambda \
+        "Precise.ly: An error has occurred with your uploaded data" \
+        "The file you uploaded has already been processed. Please contact Precise.ly support."
     exit 0
 fi
 
@@ -228,6 +250,9 @@ conversion_err=$?
 if [[ "${conversion_err}" == 11 ]]; then
     info "input file is not supported"
     user_sample_status_lambda "error" "input file type is not supported"
+    send_email_lambda \
+        "Precise.ly: An error has occurred with your uploaded data" \
+        "The file you uploaded is of an unrecognized type.\nPlease upload a file from a supported genotype provider."
     exit 0
 elif [[ "${conversion_err}" != 0 ]]; then
     error "conversion failed"
@@ -247,12 +272,18 @@ conversion_result_num_output_lines=$(zgrep -v '^#' raw.vcf.gz | wc -l)
 if [[ ${conversion_result_num_output_lines} == 0 ]]; then
     info "output VCF file has no non-comment lines, the input was probably bad"
     user_sample_status_lambda "error" "bad input file (no non-comment lines)"
+    send_email_lambda \
+        "Precise.ly: An error has occurred with your uploaded data" \
+        "The file you uploaded has no valid genotype data."
     exit 0
 fi
 # if the process skipped too many rows, also consider it bad input
 if [[ $(( ${conversion_result_num_rows_skipped} / ${conversion_result_num_rows_total} )) > 0.20 ]]; then
     info "output VCF file has too many skipped lines, the input was probably bad"
     user_sample_status_lambda "error" "bad input file (too many skipped lines)"
+    send_email_lambda \
+        "Precise.ly: An error has occurred with your uploaded data" \
+        "The file you uploaded contains potentially invalid genotype data."
     exit 0
 fi
 
@@ -300,6 +331,9 @@ with_output_to_log \
     --cleanup-after="${cleanup_after}"
 
 user_sample_status_lambda "ready" "finished"
+send_email_lambda \
+    "Precise.ly: Your report is now available" \
+    "Thank you for uploading your genotype data.\nPlease visit the Precise.ly web site to view your report."
 
 # if we are not cleaning up afterwards, print the path to the working directory:
 # it may come in handy
