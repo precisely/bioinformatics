@@ -108,19 +108,23 @@ for ref, starts in reqs_by_file.iteritems():
             print("missing sequence: {}, chr{}, {}".format(os.path.realpath(imputed_chromosomes_path), chromosome, start), file=sys.stderr)
             continue
         for row in rows:
-            current = {
-                "refVersion": "37p13",
-                "refName": ref,
-                "start": start,
-                "altBases": list(row.alt),
-                "refBases": row.ref,
-                "filter": row.filter,
-                "imputed": read_imputed(row),
-                "genotype": read_genotypes(row)
-            }
-            likelihood = read_genotype_likelihood(row)
-            if likelihood:
-                current["genotypeLikelihood"] = likelihood
-            res.append(current)
+            try:
+                current = {
+                    "refVersion": "37p13",
+                    "refName": ref,
+                    "start": start,
+                    "altBases": list(row.alt),
+                    "refBases": row.ref,
+                    "filter": row.filter,
+                    "imputed": read_imputed(row),
+                    "genotype": read_genotypes(row)
+                }
+                likelihood = read_genotype_likelihood(row)
+                if likelihood:
+                    current["genotypeLikelihood"] = likelihood
+                res.append(current)
+            except Exception as err:
+                print("something broke: ref: {}, row: '{}', error: {}".format(ref, row, err),
+                      file=sys.stderr)
 
 print(json.dumps(res))
