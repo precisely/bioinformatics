@@ -242,6 +242,28 @@ mv "../${input_file}" .
 
 mkdir imputed
 
+# deal with zip file uploads
+# a zip archive is only permitted to have one containing file
+# XXX: This mucks up checksums as the unique identifying feature of a user
+# upload, because we are now relying on the checksum of the archive, but may in
+# fact be processing a file contained in the archive.
+rx_zip_input_file="^Zip archive data.*"
+if [[ $(file -b "${input_file}") =~ ${rx_zip_input_file} ]]; then
+    readarray -t archive_files < <(zipinfo -1 "${input_file}")
+    if [[ ${#archive_files[@]} -ne 1 ]]; then
+        info "zip file detected but does not contain exactly one input file, refer to ${upload_path} if debugging required"
+        user_sample_status_lambda "error" "uploaded zip archive contains multiple or zero input files"
+        send_email_lambda \
+            "Precise.ly: An error has occurred with your uploaded data" \
+            "The file you uploaded seems to be an archive containing multiple other files, or no files at all.\nPlease upload exactly one genotype file."
+        exit 0
+    else
+        info "zip file detected; extracting content '${archive_files[0]}' and renaming it to ${input_file}"
+        unzip -qq "${input_file}" "${archive_files[0]}"
+        mv "${archive_files[0]}" "${input_file}"
+    fi
+fi
+
 # convert the raw user input format (23andMe and the like) to VCF
 conversion_result_file=raw-conversion-results.txt
 set +e
