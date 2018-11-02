@@ -57,6 +57,10 @@ def read_genotypes(row):
     if "GT" not in data:
         return []
     else:
+        # XXX: There occur situations when the genotype field contains a ".",
+        # which we cannot parse.
+        if "." == data["GT"]:
+            return []
         # XXX: According to https://www.biostars.org/p/86321/#86323, the GT
         # field may have genotypes separated by either a | or a /.
         split_char = "|" if "|" in data["GT"] else "/"
