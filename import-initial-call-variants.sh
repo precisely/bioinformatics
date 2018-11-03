@@ -202,6 +202,7 @@ if [[ "${test_mock_lambda}" == "true" ]]; then
     cp "${basedir}/tests/mocks/variant-batch-results-1.json" ./variant-batch-results.json
     cp "${basedir}/tests/mocks/aws-invoke-VariantCallBatchCreate.json" .
 else
+    # TODO: Split into pieces before calling?
     aws lambda invoke --invocation-type RequestResponse --function-name "precisely-backend-${stage}-VariantCallBatchCreate" --payload file://base-batch.json --region "${AWS_REGION}" variant-batch-results.json > aws-invoke-VariantCallBatchCreate.json
 fi
 
