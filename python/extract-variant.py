@@ -82,7 +82,7 @@ def read_alt_bases(row):
     # XXX: There occur situations when the alt bases field contains a ".",
     # which we cannot parse.
     if "." == alts_string:
-        return []
+        return None
     # alt bases are comma-separated strings
     return [ab.strip() for ab in alts_string.split(",")]
 
@@ -127,7 +127,6 @@ for ref, starts in reqs_by_file.iteritems():
                     "refVersion": "37p13",
                     "refName": ref,
                     "start": start,
-                    "altBases": read_alt_bases(row),
                     "refBases": row.ref,
                     "filter": row.filter,
                     "imputed": read_imputed(row),
@@ -136,6 +135,9 @@ for ref, starts in reqs_by_file.iteritems():
                 likelihood = read_genotype_likelihood(row)
                 if likelihood:
                     current["genotypeLikelihood"] = likelihood
+                altBases = read_alt_bases(row)
+                if altBases:
+                    current["altBases"] = altBases
                 res.append(current)
             except Exception as err:
                 print("something broke: ref: {}, row: '{}', error: {}".format(ref, row, err),
