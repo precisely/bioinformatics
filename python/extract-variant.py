@@ -76,6 +76,10 @@ def read_genotype_likelihood(row):
 def read_imputed(row):
     return "IMP" in row.info
 
+def read_alt_bases(row):
+    # alt bases are comma-separated strings
+    return [ab.strip() for ab in row.alt.split(",")]
+
 
 ### run
 # TODO: This should use a streaming JSON parser instead of reading the entire file
@@ -117,7 +121,7 @@ for ref, starts in reqs_by_file.iteritems():
                     "refVersion": "37p13",
                     "refName": ref,
                     "start": start,
-                    "altBases": list(row.alt),
+                    "altBases": read_alt_bases(row),
                     "refBases": row.ref,
                     "filter": row.filter,
                     "imputed": read_imputed(row),
