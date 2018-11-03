@@ -78,8 +78,13 @@ def read_imputed(row):
     return "IMP" in row.info
 
 def read_alt_bases(row):
+    alts_string = row.alt
+    # XXX: There occur situations when the alt bases field contains a ".",
+    # which we cannot parse.
+    if "." == alts_string:
+        return []
     # alt bases are comma-separated strings
-    return [ab.strip() for ab in row.alt.split(",")]
+    return [ab.strip() for ab in alts_string.split(",")]
 
 
 ### run
