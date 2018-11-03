@@ -71,7 +71,8 @@ def read_genotype_likelihood(row):
     if "GP" not in data:
         return None
     else:
-        return [float(g) for g in data["GP"].split(",")]
+        # FIXME: See ticket #341. This should not discard elements!
+        return [float(g) for g in data["GP"].split(",")][0:3]
 
 def read_imputed(row):
     return "IMP" in row.info
