@@ -181,8 +181,10 @@ function user_sample_status_lambda {
 ### helper for sending emails
 function send_email_lambda {
     local subject=$1
-    local text=$2
-    local payload="{\"to\": \"${user_id}\", \"subject\": \"${subject}\", \"text\": \"${text}\"}"
+    local line1=$2
+    local line2=$3
+    local link=$4
+    local payload="{\"to\": \"${user_id}\", \"subject\": \"${subject}\", \"line1\": \"${line1}\", \"line2\": \"${line2}\", \"link\": \"${link}\"}"
     if [[ "${test_mock_lambda}" == "true" ]]; then
         # TODO: Add test support.
         error "not supported yet"
@@ -209,7 +211,9 @@ if [[ ! -z $(aws s3 --endpoint-url "${AWS_S3_ENDPOINT_URL}" ls "s3://${S3_BUCKET
     user_sample_status_lambda "error" "duplicate file upload detected"
     send_email_lambda \
         "Precise.ly: An error has occurred with your uploaded data" \
-        "The file you uploaded has already been processed. Please contact Precise.ly support."
+        "The file you uploaded has already been processed." \
+        "Please contact Precise.ly support." \
+        "Precise.ly"
     exit 0
 fi
 
@@ -255,7 +259,9 @@ if [[ $(file -b "${input_file}") =~ ${rx_zip_input_file} ]]; then
         user_sample_status_lambda "error" "uploaded zip archive contains multiple or zero input files"
         send_email_lambda \
             "Precise.ly: An error has occurred with your uploaded data" \
-            "The file you uploaded seems to be an archive containing multiple other files, or no files at all.\nPlease upload exactly one genotype file."
+            "The file you uploaded seems to be an archive containing multiple other files, or no files at all." \
+            "Please upload exactly one genotype file." \
+            "Precise.ly"
         exit 0
     else
         info "zip file detected; extracting content '${archive_files[0]}' and renaming it to ${input_file}"
@@ -274,7 +280,9 @@ if [[ "${conversion_err}" == 11 ]]; then
     user_sample_status_lambda "error" "input file type is not supported"
     send_email_lambda \
         "Precise.ly: An error has occurred with your uploaded data" \
-        "The file you uploaded is of an unrecognized type.\nPlease upload a file from a supported genotype provider."
+        "The file you uploaded is of an unrecognized type." \
+        "Please upload a file from a supported genotype provider." \
+        "Precise.ly"
     exit 0
 elif [[ "${conversion_err}" != 0 ]]; then
     error "conversion failed"
@@ -296,7 +304,9 @@ if [[ ${conversion_result_num_output_lines} == 0 ]]; then
     user_sample_status_lambda "error" "bad input file (no non-comment lines)"
     send_email_lambda \
         "Precise.ly: An error has occurred with your uploaded data" \
-        "The file you uploaded has no valid genotype data."
+        "The file you uploaded has no valid genotype data." \
+        "Please contact Precise.ly support." \
+        "Precise.ly"
     exit 0
 fi
 # if the process skipped too many rows, also consider it bad input
@@ -305,7 +315,9 @@ if [[ $(( ${conversion_result_num_rows_skipped} / ${conversion_result_num_rows_t
     user_sample_status_lambda "error" "bad input file (too many skipped lines)"
     send_email_lambda \
         "Precise.ly: An error has occurred with your uploaded data" \
-        "The file you uploaded contains potentially invalid genotype data."
+        "The file you uploaded contains potentially invalid genotype data." \
+        "Please contact Precise.ly support." \
+        "Precise.ly"
     exit 0
 fi
 
@@ -355,7 +367,9 @@ with_output_to_log \
 user_sample_status_lambda "ready" "finished"
 send_email_lambda \
     "Precise.ly: Your report is now available" \
-    "Thank you for uploading your genotype data.\nPlease visit the Precise.ly web site to view your report."
+    "Your upload completed successfully and your report has been personalized." \
+    "Please follow the link below to view your report." \
+    "View your report on Precise.ly"
 
 # if we are not cleaning up afterwards, print the path to the working directory:
 # it may come in handy
