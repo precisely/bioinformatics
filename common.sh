@@ -90,6 +90,7 @@ with_output_to_log() {
     exec 8>&1
     ( $* 2>&1 1>&8 8>&- | transform_as_needed error "${cmd}" ) 8>&1 1>&2 |
         transform_as_needed info "${cmd}"
+    return ${PIPESTATUS[0]}
 }
 
 
