@@ -66,13 +66,12 @@ def read_genotypes(row):
         split_char = "|" if "|" in data["GT"] else "/"
         return [int(g) for g in data["GT"].split(split_char)]
 
-def read_genotype_likelihood(row):
+def read_genotype_likelihoods(row):
     data = read_row_data(row)
     if "GP" not in data:
         return None
     else:
-        # FIXME: See ticket #341. This should not discard elements!
-        return [float(g) for g in data["GP"].split(",")][0:3]
+        return [float(g) for g in data["GP"].split(",")]
 
 def read_imputed(row):
     return "IMP" in row.info
@@ -82,8 +81,7 @@ def read_alt_bases(row):
     # XXX: There occur situations when the alt bases field contains a ".",
     # which we cannot parse.
     if "." == alts_string:
-        # FIXME: See ticket #343. This should return an empty list, not just an arbitrary "A"!
-        return ["A"]
+        return []
     # alt bases are comma-separated strings
     return [ab.strip() for ab in alts_string.split(",")]
 
@@ -134,7 +132,7 @@ for ref, starts in reqs_by_file.iteritems():
                     "imputed": read_imputed(row),
                     "genotype": read_genotypes(row)
                 }
-                likelihood = read_genotype_likelihood(row)
+                likelihood = read_genotype_likelihoods(row)
                 if likelihood:
                     current["genotypeLikelihood"] = likelihood
                 res.append(current)
