@@ -131,8 +131,22 @@ for ref, starts in reqs_by_file.iteritems():
         except ValueError:
             # This probably means the requested sequence does not exist in the file.
             # TODO: Figure out what to do about this.
-            print("missing sequence: {}, chr{}, {}".format(os.path.realpath(imputed_chromosomes_path), chromosome, start), file=sys.stderr)
+            print(json.dumps({"level": "warn",
+                              "message": "missing sequence",
+                              "imputed_chromosome_path": os.path.realpath(imputed_chromosomes_path),
+                              "chromosome": chromosome,
+                              "start": start}),
+                  file=sys.stderr)
             continue
+        # detect situations when all entries in rows have (filter != ".")
+        filters = [row.filter for row in rows_for_filters]
+        if len(filters) >= 2 and all(f != "." for f in filters):
+            print(json.dumps({"level": "warn",
+                              "message": "detected multiple variant calls with the same start value and non-null filters",
+                              "ref": ref,
+                              "rows": [str(row) for row in rows_for_strings]}),
+                  file=sys.stderr)
+        # iterate over all rows and extract variant data
         for row in rows:
             try:
                 current = {
@@ -152,7 +166,11 @@ for ref, starts in reqs_by_file.iteritems():
                     current["genotypeLikelihood"] = likelihood
                 res.append(current)
             except Exception as err:
-                print("something broke: ref: {}, row: '{}', error: {}".format(ref, row, err),
+                print(json.dumps({"level": "error",
+                                  "messsage": "something broke in variant extraction",
+                                  "ref": ref,
+                                  "row": str(row),
+                                  "error": str(err)}),
                       file=sys.stderr)
 
 print(json.dumps(res))
