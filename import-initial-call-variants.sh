@@ -7,6 +7,9 @@ basedir=$(dirname "$(readlinkf "$0")")
 script=$(basename "${BASH_SOURCE[${#BASH_SOURCE[@]}-1]}")
 
 
+. "${basedir}/common.sh"
+
+
 ### configuration
 if [[ -z "${AWS_S3_ENDPOINT_URL}" ]]; then
     echo "AWS_S3_ENDPOINT_URL environment variable required" >&2
@@ -192,7 +195,8 @@ if [[ -f base-batch.json ]]; then
     exit 1
 fi
 
-"${basedir}/python/extract-variant.py" variant-reqs-ready.json ./imputed | \
+with_output_to_log \
+    "${basedir}/python/extract-variant.py" variant-reqs-ready.json ./imputed | \
     jq --arg data_source ${data_source} \
        --arg user_id ${user_id} \
        --arg sample_id ${sample_id} \
@@ -213,6 +217,5 @@ fi
 
 variant_call_batch_create_errors=$(jq -r '.[] | .error | select(. != null)' variant-batch-results.json)
 if [[ ! -z "${variant_call_batch_create_errors}" ]]; then
-    echo "errors from call to VariantCallBatchCreate: ${variant_call_batch_create_errors}" >&2
-    exit 1
+    warn "errors from call to VariantCallBatchCreate: ${variant_call_batch_create_errors}"
 fi

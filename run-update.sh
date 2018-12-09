@@ -191,8 +191,7 @@ fi
 
 variant_call_batch_create_errors=$(jq -r '.[] | .error | select(. != null)' variant-batch-results.json)
 if [[ ! -z "${variant_call_batch_create_errors}" ]]; then
-    error "errors from call to VariantCallBatchCreate: ${variant_call_batch_create_errors}"
-    exit 1
+    warn "errors from call to VariantCallBatchCreate: ${variant_call_batch_create_errors}"
 fi
 
 # update the list of "new" call variants to "ready"

@@ -355,6 +355,7 @@ aws s3 --endpoint-url "${AWS_S3_ENDPOINT_URL}" cp --recursive "${src_dir}" "s3:/
 
 popd > /dev/null
 
+set +e
 with_output_to_log \
     "${basedir}/import-initial-call-variants.sh" \
     --user-id="${user_id}" \
@@ -363,13 +364,23 @@ with_output_to_log \
     --stage="${stage}" \
     --test-mock-lambda="${test_mock_lambda}" \
     --cleanup-after="${cleanup_after}"
-
-user_sample_status_lambda "ready" "finished"
-send_email_lambda \
-    "Precise.ly: Your report is now available" \
-    "Your upload completed successfully and your report has been personalized." \
-    "Please follow the link below to view your report." \
-    "View your report on Precise.ly"
+import_err=$?
+if [[ "${import_err}" -eq 0 ]]; then
+    user_sample_status_lambda "ready" "finished"
+    send_email_lambda \
+        "Precise.ly: Your report is now available" \
+        "Your upload completed successfully and your report has been personalized." \
+        "Please follow the link below to view your report." \
+        "View your report on Precise.ly"
+else
+    user_sample_status_lambda "error" "import-initial-call-variants.sh failed"
+    send_email_lambda \
+        "Precise.ly: Your report failed to generate" \
+        "Your upload completed successfully, but something went wrong in the processing of your report." \
+        "We are looking into it, and will be in touch. Please contact Precise.ly support if you have any questions in the meanwhile." \
+        "Precise.ly"
+fi
+set -e
 
 # if we are not cleaning up afterwards, print the path to the working directory:
 # it may come in handy
