@@ -2,6 +2,7 @@
 
 
 from __future__ import print_function
+import itertools
 import json
 import os
 import os.path
@@ -85,6 +86,13 @@ def read_alt_bases(row):
     # alt bases are comma-separated strings
     return [ab.strip() for ab in alts_string.split(",")]
 
+def read_alt_base_dosages(row):
+    data = read_row_data(row)
+    if "DS" not in data:
+        return []
+    else:
+        return [float(g) for g in data["DS"].split(",")]
+
 
 ### run
 # TODO: This should use a streaming JSON parser instead of reading the entire file
@@ -115,6 +123,11 @@ for ref, starts in reqs_by_file.iteritems():
     for start in starts:
         try:
             rows = idx.fetch(chromosome, start-1, start, parser=pysam.asVCF())
+            # XXX: Save the rows iterator for places where it's needed as a
+            # list. Necessary because iterators cannot be consumed repeatedly,
+            # and we need this value as a list.
+            rows, rows_for_filters = itertools.tee(rows)
+            rows, rows_for_strings = itertools.tee(rows)
         except ValueError:
             # This probably means the requested sequence does not exist in the file.
             # TODO: Figure out what to do about this.
@@ -123,15 +136,17 @@ for ref, starts in reqs_by_file.iteritems():
         for row in rows:
             try:
                 current = {
+                    "rsId": row.id,
                     "refVersion": "37p13",
                     "refName": ref,
                     "start": start,
                     "altBases": read_alt_bases(row),
                     "refBases": row.ref,
-                    "filter": row.filter,
-                    "imputed": read_imputed(row),
+                    "altBaseDosage": read_alt_base_dosages(row),
                     "genotype": read_genotypes(row)
                 }
+                imputedOrReadField = "imputed" if read_imputed(row) else "directRead"
+                current[imputedOrReadField] = "FAIL" if "." == row.filter else row.filter
                 likelihood = read_genotype_likelihoods(row)
                 if likelihood:
                     current["genotypeLikelihood"] = likelihood
