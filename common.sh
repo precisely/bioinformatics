@@ -66,15 +66,19 @@ transform_as_needed() {
     local cmd=$2
     local input
     local output
+    local timestamp=$(timestamp)
     while read -r input; do
-        if [[ $(jq '.timestamp and .message' <<< "${input}" 2>/dev/null) == "true" ]]; then
-            # input parses as JSON and has needed fields, so inject script info if
-            # needed and proceed
-            output=$(jq -c --arg cmd "${cmd}" '. | if (.script) then . else . + {script: $cmd} end' <<< "${input}" 2>/dev/null)
+        if [[ $(jq 'has("message")' <<< "${input}" 2>/dev/null) == "true" ]]; then
+            # input parses as JSON and has message field, so inject:
+            # - script info if needed
+            # - level if needed
+            # - timestamp if needed
+            output=$(jq -c --arg cmd "${cmd}" --arg level "${level}" --arg timestamp "${timestamp}" '. | if (.script) then . else . + {script: $cmd} end | if (.level) then . else . + {level: $level} end | if (.timestamp) then . else . + {timestamp: $timestamp} end' <<< "${input}" 2>/dev/null)
         else
-            # input does not parse as JSON, so turn it into valid JSON and proceed
+            # input does not parse as JSON or does not contain a message field:
+            # turn it into valid JSON and proceed
             local transformed=$(jq -caR '.' <<< "${input}" 2>/dev/null)
-            output="{\"timestamp\":\"$(timestamp)\",\"level\":\"${level}\",\"script\":\"${cmd}\",\"message\":${transformed}}"
+            output="{\"timestamp\":\"${timestamp}\",\"level\":\"${level}\",\"script\":\"${cmd}\",\"message\":${transformed}}"
         fi
         echo "${output}"
     done
