@@ -53,6 +53,12 @@ def read_row_data(row):
     data = dict(zip(formats, data_encoded))
     return data
 
+def read_rsid(row):
+    if row.id.startswith("rs"):
+        return row.id
+    else:
+        return None
+
 def read_genotypes(row):
     data = read_row_data(row)
     if "GT" not in data:
@@ -150,7 +156,6 @@ for ref, starts in reqs_by_file.iteritems():
         for row in rows:
             try:
                 current = {
-                    "rsId": row.id,
                     "refVersion": "37p13",
                     "refName": ref,
                     "start": start,
@@ -159,6 +164,9 @@ for ref, starts in reqs_by_file.iteritems():
                     "altBaseDosages": read_alt_base_dosages(row),
                     "genotype": read_genotypes(row)
                 }
+                row_id = read_rsid(row)
+                if row_id:
+                    current["rsId"] = row_id
                 imputedOrReadField = "imputed" if read_imputed(row) else "directRead"
                 current[imputedOrReadField] = "FAIL" if "." == row.filter else row.filter
                 likelihood = read_genotype_likelihoods(row)
