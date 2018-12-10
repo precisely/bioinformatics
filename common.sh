@@ -97,6 +97,17 @@ with_output_to_log() {
     return ${PIPESTATUS[0]}
 }
 
+with_stderr_to_log() {
+    # XXX: This preserves the streams, like with_output_to_log, but only
+    # transforms stderr. stdout is left alone. This is helpful for commands
+    # whose output is important, but may need to write status messages to
+    # stderr. They should explicitly use JSON log format output to do this.
+    local cmd=$(basename $1)
+    exec 8>&1
+    ( $* 2>&1 1>&8 8>&- | transform_as_needed error "${cmd}" ) 8>&1 1>&2
+    return ${PIPESTATUS[0]}
+}
+
 
 ### JSON converter for pairs: turn input like "one two three four" into the
 ### following JSON object: {"one": "two", "three": "four"}. Only works when jq

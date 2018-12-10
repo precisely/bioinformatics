@@ -195,7 +195,7 @@ if [[ -f base-batch.json ]]; then
     exit 1
 fi
 
-with_output_to_log \
+with_stderr_to_log \
     "${basedir}/python/extract-variant.py" variant-reqs-ready.json ./imputed | \
     jq --arg data_source ${data_source} \
        --arg user_id ${user_id} \
