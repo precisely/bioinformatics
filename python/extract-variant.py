@@ -156,14 +156,14 @@ for ref, starts in reqs_by_file.iteritems():
                     "start": start,
                     "altBases": read_alt_bases(row),
                     "refBases": row.ref,
-                    "altBaseDosage": read_alt_base_dosages(row),
+                    "altBaseDosages": read_alt_base_dosages(row),
                     "genotype": read_genotypes(row)
                 }
                 imputedOrReadField = "imputed" if read_imputed(row) else "directRead"
                 current[imputedOrReadField] = "FAIL" if "." == row.filter else row.filter
                 likelihood = read_genotype_likelihoods(row)
                 if likelihood:
-                    current["genotypeLikelihood"] = likelihood
+                    current["genotypeLikelihoods"] = likelihood
                 res.append(current)
             except Exception as err:
                 print(json.dumps({"level": "error",
