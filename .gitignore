@@ -8,3 +8,8 @@ Thumbs.db
 __pycache__/
 *.py[cod]
 *$py.class
+
+# Terraform-specific
+.terraform
+*.tfstate
+*.tfstate.backup
