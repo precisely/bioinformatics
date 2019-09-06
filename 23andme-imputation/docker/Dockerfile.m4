@@ -105,7 +105,7 @@ WORKDIR /home/docker
 
 # configure the internal docker user environment:
 # download a tmux configuration
-RUN curl -L -o .tmux.conf https://raw.githubusercontent.com/gcv/dotfiles/ddcd10e97939595911e2c2bfc5690a487ebac00a/public/tmux.conf
+RUN curl -L -o .tmux.conf https://raw.githubusercontent.com/gcv/dotfiles/39397e9/public/tmux.conf
 RUN chown docker:docker .tmux.conf
 # make bash suck slightly less
 RUN echo '\n\

@@ -47,10 +47,14 @@ fi
 if [[ "${mode}" == "link" ]]; then
     docker create -i -t --name "${container_name}" \
            --net=host \
+           --hostname "${container_name}" \
+           --add-host "${container_name}:127.0.0.1" \
            --volume "${app_source_path}":/precisely/app \
            "${image_tag}"
 else
     docker create -i -t --name "${container_name}" \
            --net=host \
+           --hostname "${container_name}" \
+           --add-host "${container_name}:127.0.0.1" \
            "${image_tag}"
 fi
