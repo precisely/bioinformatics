@@ -66,6 +66,11 @@ resource "aws_iam_group_policy_attachment" "developers-AmazonEC2FullAccess" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2FullAccess"
 }
 
+resource "aws_iam_group_policy_attachment" "developers-EC2InstanceConnect" {
+  group = "${aws_iam_group.developers.name}"
+  policy_arn = "arn:aws:iam::aws:policy/EC2InstanceConnect"
+}
+
 resource "aws_iam_group_policy_attachment" "developers-AmazonS3FullAccess" {
   group = "${aws_iam_group.developers.name}"
   policy_arn = "arn:aws:iam::aws:policy/AmazonS3FullAccess"
@@ -85,5 +90,3 @@ resource "aws_iam_group_policy_attachment" "developers-CloudWatchFullAccess" {
   group = "${aws_iam_group.developers.name}"
   policy_arn = "arn:aws:iam::aws:policy/CloudWatchFullAccess"
 }
-
-# TODO: For developers: add IAM access for ec2-instance-connect:SendSSHPublicKey.
