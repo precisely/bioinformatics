@@ -1,0 +1,59 @@
+---
+- apt_repository:
+    repo: deb http://us.archive.ubuntu.com/ubuntu/ bionic main restricted universe multiverse
+    state: present
+
+- apt_repository:
+    repo: deb http://us.archive.ubuntu.com/ubuntu/ bionic-updates main restricted universe multiverse
+    state: present
+
+- apt_repository:
+    repo: deb http://security.ubuntu.com/ubuntu/ bionic-security main restricted universe multiverse
+    state: present
+
+- name: apt update if not done recently
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+
+- name: apt install dependencies
+  apt:
+    name: "{{ packages }}"
+  vars:
+    packages:
+      - apt-utils
+      - awscli
+      - autoconf
+      - automake
+      - build-essential
+      - cmake
+      - curl
+      - dkms
+      - ec2-instance-connect
+      - git-core
+      - less
+      - libboost-all-dev
+      - libc++-dev
+      - libevent-dev
+      - libncurses5-dev
+      - libreadline-dev
+      - libtool
+      - libutempter-dev
+      - man-db
+      - manpages
+      - module-init-tools
+      - mosh
+      - pkg-config
+      - python
+      - python-pip
+      - python2.7
+      - rlwrap
+      - screen
+      - silversearcher-ag
+      - sudo
+      - tmux
+      - uuid-runtime
+      - vim
+      - zsh
+
+# FIXME: admixture, plink, vcftools, beagle, R and Rstudio

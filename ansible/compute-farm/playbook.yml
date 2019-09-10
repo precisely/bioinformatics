@@ -1,0 +1,10 @@
+---
+- hosts: all
+
+  become: yes
+  become_user: root
+  become_method: sudo
+
+  tasks:
+    - include: ssh.yml
+    - include: dependencies.yml
