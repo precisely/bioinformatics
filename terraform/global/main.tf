@@ -13,6 +13,18 @@ provider "aws" {
 }
 
 
+provider "aws" {
+  region = "us-west-2"
+  alias = "oregon"
+}
+
+
+provider "aws" {
+  region = "ap-southeast-2"
+  alias = "sydney"
+}
+
+
 resource "aws_s3_bucket" "terraform_state_biodev" {
   bucket = "precisely-terraform-state-biodev"
 
