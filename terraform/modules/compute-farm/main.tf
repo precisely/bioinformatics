@@ -26,13 +26,6 @@ variable "lfs_s3_bucket" {
 }
 
 
-### output variables
-
-output "lfs_dns" {
-  value = aws_fsx_lustre_file_system.lfs.dns_name
-}
-
-
 ### generic configuration
 
 data "terraform_remote_state" "global" {
