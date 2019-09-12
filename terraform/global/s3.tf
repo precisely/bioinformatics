@@ -9,6 +9,18 @@ resource "aws_s3_bucket" "biodev_data_norcal" {
 }
 
 
+resource "aws_s3_bucket" "biodev_data_oregon" {
+  bucket = "precisely-bio-data-oregon"
+  provider = "aws.oregon"
+  region = "us-west-2"
+
+  lifecycle {
+    # prevent accidental deletion
+    prevent_destroy = true
+  }
+}
+
+
 resource "aws_s3_bucket" "biodev_data_sydney" {
   bucket = "precisely-bio-data-sydney"
   provider = "aws.sydney"

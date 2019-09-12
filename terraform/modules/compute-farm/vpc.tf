@@ -28,28 +28,22 @@ resource "aws_subnet" "main" {
 }
 
 
-resource "aws_security_group" "out_all" {
-  name = "${var.cluster_name}-out-all"
-  description = "Outbound: allow all"
+resource "aws_security_group" "node" {
+  name = "${var.cluster_name}-node"
+  description = "Compute farm node security group"
 
   vpc_id = "${aws_vpc.main.id}"
 
+  # outbound: allow all
   egress {
     from_port = 0
     to_port = 0
     protocol = "-1"
     cidr_blocks = ["0.0.0.0/0"]
+    self = true
   }
-}
 
-
-resource "aws_security_group" "in_ssh_6601_mosh_60000" {
-  name = "${var.cluster_name}-in-ssh-6601"
-  description = "Inbound: allow SSH (6601) and Mosh"
-
-  vpc_id = "${aws_vpc.main.id}"
-
-  # ssh over TCP port 6601
+  # inbound: ssh over TCP port 6601
   ingress {
     from_port = 6601
     to_port = 6601
@@ -57,7 +51,7 @@ resource "aws_security_group" "in_ssh_6601_mosh_60000" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  # mosh over UDP
+  # inbound: mosh over UDP
   ingress {
     from_port = 60000
     to_port = 61000
@@ -67,16 +61,27 @@ resource "aws_security_group" "in_ssh_6601_mosh_60000" {
 }
 
 
-resource "aws_security_group" "in_lustre" {
-  name = "${var.cluster_name}-in-lustre"
-  description = "Inbound: allow Lustre"
+resource "aws_security_group" "lustre" {
+  name = "${var.cluster_name}-lustre"
+  description = "FSx Lustre security group"
 
   vpc_id = "${aws_vpc.main.id}"
 
+  # outbound: allow all
+  egress {
+    from_port = 0
+    to_port = 0
+    protocol = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+    self = true
+  }
+
+  # inbound: TCP port 988
   ingress {
     from_port = 988
     to_port = 988
     protocol = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
+    self = true
   }
 }
