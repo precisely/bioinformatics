@@ -76,12 +76,12 @@ resource "aws_security_group" "lustre" {
     self = true
   }
 
-  # inbound: TCP port 988
+  # inbound: TCP port 988 for nodes
   ingress {
     from_port = 988
     to_port = 988
     protocol = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
     self = true
+    security_groups = ["${aws_security_group.node.id}"]
   }
 }
