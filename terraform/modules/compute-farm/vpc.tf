@@ -59,29 +59,3 @@ resource "aws_security_group" "node" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
-
-
-resource "aws_security_group" "lustre" {
-  name = "${var.cluster_name}-lustre"
-  description = "FSx Lustre security group"
-
-  vpc_id = "${aws_vpc.main.id}"
-
-  # outbound: allow all
-  egress {
-    from_port = 0
-    to_port = 0
-    protocol = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-    self = true
-  }
-
-  # inbound: TCP port 988 for nodes
-  ingress {
-    from_port = 988
-    to_port = 988
-    protocol = "tcp"
-    self = true
-    security_groups = ["${aws_security_group.node.id}"]
-  }
-}
