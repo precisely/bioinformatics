@@ -43,7 +43,7 @@
 
 
 # resource "aws_security_group" "in_ssh_6601_mosh_60000" {
-#   name = "ssh-6601"
+#   name = "in-ssh-6601"
 #   description = "Inbound: allow SSH (6601) and Mosh"
 #   vpc_id = "${aws_vpc.shared.id}"
 #
@@ -60,6 +60,19 @@
 #     from_port = 60000
 #     to_port = 61000
 #     protocol = "udp"
+#     cidr_blocks = ["0.0.0.0/0"]
+#   }
+# }
+
+
+# resource "aws_security_group" "in_lustre" {
+#   name = "in-lustre"
+#   description = "Inbound: allow Lustre"
+#
+#   ingress {
+#     from_port = 988
+#     to_port = 988
+#     protocol = "tcp"
 #     cidr_blocks = ["0.0.0.0/0"]
 #   }
 # }
