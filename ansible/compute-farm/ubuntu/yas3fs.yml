@@ -8,13 +8,13 @@
 
 - name: Add yas3fs shutdown script
   copy:
-    src: "unmount-yas3fs.init.d"
+    src: "files/unmount-yas3fs.init.d"
     dest: "/root/unmount-yas3fs"
     mode: u+x,g+x,o+x
 
 - name: Add yas3fs shutdown systemd service
   copy:
-    src: "unmount-yas3fs.service"
+    src: "files/unmount-yas3fs.service"
     dest: "/etc/systemd/system/unmount-yas3fs.service"
 
 - name: Enable yas3fs unmount service
