@@ -25,6 +25,12 @@
     {
       "type": "ansible",
       "playbook_file": "../ansible/compute-farm/ubuntu/playbook.yml"
+    },
+    {
+      "type": "shell",
+      "inline": [
+        "find /home/ubuntu -type d -name '~*' | xargs rm -rf"
+      ]
     }
   ]
 }

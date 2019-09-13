@@ -22,9 +22,10 @@
   vars:
     packages:
       - apt-utils
-      - awscli
       - autoconf
       - automake
+      - awscli
+      - beagle
       - build-essential
       - cmake
       - curl
@@ -43,20 +44,34 @@
       - manpages
       - module-init-tools
       - mosh
+      - p7zip
+      - p7zip-full
+      - p7zip-rar
       - pkg-config
+      - plink
       - python
       - python-pip
       - python2.7
       - r-base
       - r-base-dev
+      - rar
       - rlwrap
+      - samtools
       - s3fs
       - screen
       - silversearcher-ag
       - sudo
       - tmux
+      - unrar
       - uuid-runtime
+      - vcftools
       - vim
       - zsh
 
 # FIXME: admixture, plink, vcftools, beagle, R and Rstudio
+- name: pip install dependencies
+  pip:
+    name:
+      - yas3fs
+      - pysam
+
