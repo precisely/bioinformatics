@@ -44,18 +44,32 @@ resource "aws_key_pair" "ssh" {
 }
 
 
+data "template_file" "bootstrap_sh" {
+  template = file("../modules/compute-farm/files/bootstrap.sh")
+  vars = {
+    region = data.terraform_remote_state.global.outputs.biodev_data_s3_regions[var.data_s3_bucket]
+    data_s3_bucket = var.data_s3_bucket
+    data_sns_topic_arn = data.terraform_remote_state.global.outputs.biodev_data_s3_sns_arns[var.data_s3_bucket]
+  }
+}
+
+
 resource "aws_launch_configuration" "compute_farm" {
   image_id = "${data.aws_ami.precisely_cf.id}"
   instance_type = var.instance_type
   key_name = "${aws_key_pair.ssh.key_name}"
   security_groups = ["${aws_security_group.node.id}"]
+  iam_instance_profile = "${aws_iam_instance_profile.cf_node.name}"
   ebs_block_device {
     device_name = "/dev/xvdf"
     volume_type = "gp2"
     volume_size = var.ebs_size_gb
     delete_on_termination = true
   }
-  user_data = "${file("files/bootstrap.sh")}"
+  # lifecycle {
+  #   create_before_destroy = true
+  # }
+  user_data = data.template_file.bootstrap_sh.rendered
 }
 
 
