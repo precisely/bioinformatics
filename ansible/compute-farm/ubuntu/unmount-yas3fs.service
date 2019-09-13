@@ -1,0 +1,11 @@
+[Unit]
+Description=yas3fs clean shutdown
+
+[Service]
+Type=oneshot
+RemainAfterExit=true
+ExecStart=/root/unmount-yas3fs start
+ExecStop=/root/unmount-yas3fs stop
+
+[Install]
+WantedBy=multi-user.target

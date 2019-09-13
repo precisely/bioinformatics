@@ -8,3 +8,4 @@
   tasks:
     - include: ssh.yml
     - include: dependencies.yml
+    - include: yas3fs.yml
