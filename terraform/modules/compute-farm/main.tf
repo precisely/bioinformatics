@@ -9,6 +9,10 @@ variable "instance_type" {
   default = "t2.micro"
 }
 
+variable "availability_zone" {
+  type = string
+}
+
 variable "machine_count" {
   type = number
 }
@@ -17,11 +21,11 @@ variable "ssh_public_key_path" {
   type = string
 }
 
-variable "lfs_size_gb" {
+variable "ebs_size_gb" {
   type = number
 }
 
-variable "lfs_s3_bucket" {
+variable "data_s3_bucket" {
   type = string
 }
 

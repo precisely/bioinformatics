@@ -32,7 +32,7 @@ data "aws_ami" "precisely_cf" {
   most_recent = true
   filter {
     name = "name"
-    values = ["precisely-cf-amzn2-*"]
+    values = ["precisely-cf-ubuntu-*"]
   }
   owners = ["324503128200"] # Precise.ly
 }
@@ -49,6 +49,13 @@ resource "aws_launch_configuration" "compute_farm" {
   instance_type = var.instance_type
   key_name = "${aws_key_pair.ssh.key_name}"
   security_groups = ["${aws_security_group.node.id}"]
+  ebs_block_device {
+    device_name = "/dev/xvdf"
+    volume_type = "gp2"
+    volume_size = var.ebs_size_gb
+    delete_on_termination = true
+  }
+  user_data = "${file("files/bootstrap.sh")}"
 }
 
 

@@ -47,7 +47,10 @@
       - python
       - python-pip
       - python2.7
+      - r-base
+      - r-base-dev
       - rlwrap
+      - s3fs
       - screen
       - silversearcher-ag
       - sudo
