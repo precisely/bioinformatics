@@ -6,7 +6,7 @@
   "builders": [{
     "access_key": "{{user `aws_access_key`}}",
     "secret_key": "{{user `aws_secret_key`}}",
-    "ami_name": "precisely-cf-ubuntu-{{timestamp}}",
+    "ami_name": "precisely-ubuntu-base-{{timestamp}}",
     "instance_type": "t2.micro",
     "region": "us-west-2",
     "ssh_username": "ubuntu",
@@ -24,7 +24,7 @@
   "provisioners": [
     {
       "type": "ansible",
-      "playbook_file": "../ansible/compute-farm/ubuntu/playbook.yml"
+      "playbook_file": "../ansible/ubuntu-base/playbook.yml"
     },
     {
       "type": "shell",

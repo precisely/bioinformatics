@@ -32,7 +32,7 @@ data "aws_ami" "precisely_cf" {
   most_recent = true
   filter {
     name = "name"
-    values = ["precisely-cf-ubuntu-*"]
+    values = ["precisely-cf-*"]
   }
   owners = ["324503128200"] # Precise.ly
 }
