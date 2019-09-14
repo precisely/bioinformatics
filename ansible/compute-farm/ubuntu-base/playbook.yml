@@ -7,5 +7,5 @@
 
   tasks:
     - include: ssh.yml
-    - include: dependencies.yml
+    - include: software.yml
     - include: yas3fs.yml

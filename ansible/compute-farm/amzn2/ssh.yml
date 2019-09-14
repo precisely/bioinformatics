@@ -1,7 +1,0 @@
----
-- name: Move ssh to port 6601
-  lineinfile:
-    path: /etc/ssh/sshd_config
-    regexp: 'Port 22'
-    state: present
-    line: Port 6601

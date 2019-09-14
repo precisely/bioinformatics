@@ -24,6 +24,3 @@ fi
 
 ### run
 packer build "${packer_file}"
-
-# FIXME:
-#aws ec2 copy-image --source-image-id ami-5731123e --source-region us-east-1 --region ap-northeast-1 --name "My server"
