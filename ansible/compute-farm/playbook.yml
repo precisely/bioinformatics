@@ -1,0 +1,15 @@
+---
+- hosts: all
+
+  become: yes
+  become_user: root
+  become_method: sudo
+
+  tasks:
+
+    - include: admixture.yml
+      vars:
+        slug: admixture_linux-1.3.0
+        workspace: "/tmp"
+
+    - include: haskell.yml

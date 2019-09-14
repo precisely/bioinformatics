@@ -1,0 +1,13 @@
+---
+- name: download admixture
+  get_url:
+    url: "http://software.genetics.ucla.edu/admixture/binaries/{{ slug }}.tar.gz"
+    dest: "{{ workspace }}/{{ slug }}"
+
+- name: extract admixture
+  unarchive:
+    remote_src: "{{ workspace }}/{{ slug }}.tar.gz"
+    dest: "{{ workspace }}"
+
+- name: move admixture binary to /usr/local/bin
+  command: "mv {{ workspace }}/{{ slug }}/admixture /usr/local/bin"
