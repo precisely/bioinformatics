@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+set -Eeuo pipefail
+
+readlinkf() { perl -MCwd -MFile::Glob -l -e 'print Cwd::abs_path File::Glob::bsd_glob shift' "$1"; }
+basedir=$(dirname "$(readlinkf "$0")")
+script=$(basename "${BASH_SOURCE[${#BASH_SOURCE[@]}-1]}")
+
+
+### run
+#declare -a regions=($(aws ec2 describe-regions --region us-east-1 --output json | jq -r '.Regions[].RegionName' | tr "\\n" " "))
+declare -a regions=("us-west-1" "us-west-2" "ap-southeast-2")
+for region in "${regions[@]}"; do
+    aws ec2 describe-instances --region "${region}" | \
+        jq '.Reservations[].Instances | [.[] | {region: '\"${region}\"', cluster: (.Tags[] | select(.Key == "Name") | .Value), "instance-id": .InstanceId, ip: .PublicIpAddress, dns: .PublicDnsName}]'
+done
