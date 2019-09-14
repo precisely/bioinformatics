@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-
 set -Eeuo pipefail
 
 readlinkf() { perl -MCwd -MFile::Glob -l -e 'print Cwd::abs_path File::Glob::bsd_glob shift' "$1"; }
