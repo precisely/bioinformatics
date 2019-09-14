@@ -11,6 +11,7 @@
     "region": "us-west-2",
     "ssh_username": "ubuntu",
     "type": "amazon-ebs",
+    "ssh_port": 6601,
     "source_ami_filter": {
       "filters": {
         "virtualization-type": "hvm",

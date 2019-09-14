@@ -1,3 +1,4 @@
 ---
 - name: install Haskell Stack
-  command: "curl -sSL https://get.haskellstack.org/ | sh"
+  shell: |
+    curl -sSL https://get.haskellstack.org/ | sh
