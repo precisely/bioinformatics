@@ -67,6 +67,37 @@ Note the disabled host key checking — not very secure, but helps with sanity o
 
 ## Using the cluster
 
+### Quick reference
+
+Sample set of commands, for running as the `cv` user:
+
+```
+# assuming we start in the bioinformatics/terraform directory:
+$ cd ./cv
+
+# set up the environment - you may want to use direnv to automate this
+$ export AWS_PROFILE=precisely-biodev
+
+# initialize Terraform - only need to do this once
+$ terraform init
+
+# spin up instances
+$ terraform apply
+
+# look up instance hostnames
+$ ../ls-instances
+
+# log into an instance host, assuming no .ssh/config changes
+$ ssh -i ~/.ssh/precisely_aws_biodev -l ubuntu -p 6601 public-hostname
+
+# or, using mosh and with .ssh/config set up
+$ mosh public-hostname
+
+# shut down
+$ terraform destroy
+```
+
+
 ### Getting started
 
 Go into your personal TF directory, and run `terraform init`. This should download all needed TF plugins into the `.terraform` working directory.
