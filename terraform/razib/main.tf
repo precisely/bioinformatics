@@ -1,5 +1,5 @@
 provider "aws" {
-  region = "us-west-2"
+  region = "us-west-1"
 }
 
 
@@ -30,10 +30,10 @@ module "cluster" {
   source = "../modules/compute-farm"
 
   cluster_name = "razib-cf-cluster"
-  availability_zone = "us-west-2a"
+  availability_zone = "us-west-1a"
   instance_type = "m5.16xlarge"
   machine_count = var.machine_count
   ssh_public_key_path = "/Users/razibkhan/.ssh/precisely_aws_biodev.pub"
   ebs_size_gb = var.ebs_size_gb
-  data_s3_bucket = "precisely-bio-data-oregon"
+  data_s3_bucket = "precisely-bio-data-norcal"
 }
