@@ -18,7 +18,7 @@ data "aws_iam_policy_document" "cf_node" {
 
 
 resource "aws_iam_role" "cf_node" {
-  name = "cf_node"
+  name = "${var.cluster_name}-cf-node"
   path = "/"
   assume_role_policy = "${data.aws_iam_policy_document.cf_node.json}"
 }
@@ -73,7 +73,7 @@ data "aws_iam_policy_document" "yas3fs" {
 
 
 resource "aws_iam_policy" "yas3fs" {
-  name = "yas3fs"
+  name = "${var.cluster_name}-yas3fs"
   policy = "${data.aws_iam_policy_document.yas3fs.json}"
 }
 
@@ -85,6 +85,6 @@ resource "aws_iam_role_policy_attachment" "test-attach" {
 
 
 resource "aws_iam_instance_profile" "cf_node" {
-  name = "cf_node"
+  name = "${var.cluster_name}-cf-node"
   role = "${aws_iam_role.cf_node.name}"
 }
