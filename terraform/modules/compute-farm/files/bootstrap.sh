@@ -1,9 +1,14 @@
 #!/usr/bin/env bash
 
 # EBS scratch space configuration
-mkfs -t ext4 /dev/xvdf
+device=/dev/xvdf
+if [[ -e /dev/nvme0n1 ]]; then
+    # Nitro instance: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/nvme-ebs-volumes.html
+    device=/dev/nvme0n1
+fi
+mkfs -t ext4 "$${device}"
 mkdir -p /scratch
-mount /dev/xvdf /scratch
+mount "$${device}" /scratch
 chown ubuntu /scratch
 
 # S3 remote mount
