@@ -1,0 +1,27 @@
+{
+  "builders": [{
+    "type": "docker",
+    "image": "precisely/ubuntu-base",
+    "commit": true,
+    "changes": [
+    ]
+  }],
+  "provisioners": [
+    {
+      "type": "ansible",
+      "playbook_file": "../ansible/compute-farm/playbook.yml"
+    }
+  ],
+  "post-processors": [
+    {
+      "type": "docker-tag",
+      "repository": "precisely/compute-farm",
+      "tag": "latest"
+    },
+    {
+      "type": "docker-tag",
+      "repository": "precisely/compute-farm",
+      "tag": "{{isotime \"2006-01-02T150405\"}}"
+    }
+  ]
+}
