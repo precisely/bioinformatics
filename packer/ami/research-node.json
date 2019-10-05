@@ -6,9 +6,9 @@
   "builders": [{
     "access_key": "{{user `aws_access_key`}}",
     "secret_key": "{{user `aws_secret_key`}}",
-    "ami_name": "precisely-cf-{{isotime \"2006-01-02T150405\"}}",
+    "ami_name": "precisely-research-node-{{isotime \"2006-01-02T150405\"}}",
     "instance_type": "t2.micro",
-    "region": "us-west-2",
+    "region": "us-west-1",
     "ssh_username": "ubuntu",
     "type": "amazon-ebs",
     "ssh_port": 6601,
