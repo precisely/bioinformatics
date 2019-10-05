@@ -4,22 +4,22 @@
     "image": "ubuntu:18.04",
     "commit": true,
     "changes": [
-      "EXPOSE 6601",
-      "USER docker",
-      "WORKDIR /precisely/app"
     ]
   }],
   "provisioners": [
     {
-      "type": "shell",
-      "inline": [
-        "apt-get update",
-        "apt-get -f -y install sudo python python3"
-      ]
+      "type": "ansible",
+      "playbook_file": "../ansible/core.yml"
     },
     {
       "type": "ansible",
-      "playbook_file": "../ansible/ubuntu-base/playbook.yml"
+      "playbook_file": "../ansible/nodes/ubuntu-minimal-base.yml"
+    },
+    {
+      "type": "shell",
+      "inline": [
+        "find / -type d -name '~*' | xargs rm -rf"
+      ]
     }
   ],
   "post-processors": [

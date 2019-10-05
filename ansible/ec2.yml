@@ -1,5 +1,5 @@
 ---
-- name: apt install dependencies
+- name: install ec2-instance-connect
   apt:
     name:
       - ec2-instance-connect

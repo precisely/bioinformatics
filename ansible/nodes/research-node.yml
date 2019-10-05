@@ -6,6 +6,5 @@
   become_method: sudo
 
   tasks:
-    - include: software.yml
-    - include: ssh.yml
-    - include: yas3fs.yml
+
+    - include: ../software/pkgs-research.yml

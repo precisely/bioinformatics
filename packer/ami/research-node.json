@@ -25,11 +25,7 @@
   "provisioners": [
     {
       "type": "ansible",
-      "playbook_file": "../ansible/ec2/playbook.yml"
-    },
-    {
-      "type": "ansible",
-      "playbook_file": "../ansible/compute-farm/playbook.yml"
+      "playbook_file": "../ansible/nodes/research-node.yml"
     },
     {
       "type": "shell",

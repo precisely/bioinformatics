@@ -24,7 +24,11 @@
   "provisioners": [
     {
       "type": "ansible",
-      "playbook_file": "../ansible/ubuntu-base/playbook.yml"
+      "playbook_file": "../ansible/core.yml"
+    },
+    {
+      "type": "ansible",
+      "playbook_file": "../ansible/nodes/ubuntu-base.yml"
     },
     {
       "type": "shell",

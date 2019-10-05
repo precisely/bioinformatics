@@ -1,0 +1,10 @@
+---
+- name: apt install dependencies
+  apt:
+    name:
+      - plink1.9
+
+- include: admixture.yml
+  vars:
+    slug: admixture_linux-1.3.0
+    workspace: "/tmp"

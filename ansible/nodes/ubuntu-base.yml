@@ -1,0 +1,13 @@
+---
+- hosts: all
+
+  become: yes
+  become_user: root
+  become_method: sudo
+
+  tasks:
+
+    - include: ../software/pkgs-userland.yml
+    - include: ../ec2.yml
+    - include: ../ssh.yml
+    - include: ../yas3fs/playbook.yml

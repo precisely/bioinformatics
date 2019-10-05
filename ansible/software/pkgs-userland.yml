@@ -1,0 +1,65 @@
+---
+- apt_repository:
+    repo: deb http://us.archive.ubuntu.com/ubuntu/ bionic main restricted universe multiverse
+    state: present
+
+- apt_repository:
+    repo: deb http://us.archive.ubuntu.com/ubuntu/ bionic-updates main restricted universe multiverse
+    state: present
+
+- apt_repository:
+    repo: deb http://security.ubuntu.com/ubuntu/ bionic-security main restricted universe multiverse
+    state: present
+
+- name: apt update if not done recently
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+
+- name: apt install dependencies
+  apt:
+    name:
+      - apt-utils
+      - autoconf
+      - automake
+      - awscli
+      - build-essential
+      - cmake
+      - curl
+      - dkms
+      - gawk
+      - git-core
+      - htop
+      - jq
+      - less
+      - libboost-all-dev
+      - libc++-dev
+      - libevent-dev
+      - libncurses5-dev
+      - libreadline-dev
+      - libtool
+      - libutempter-dev
+      - man-db
+      - manpages
+      - module-init-tools
+      - mosh
+      - p7zip
+      - p7zip-full
+      - p7zip-rar
+      - pkg-config
+      - python
+      - python-pip
+      - python3
+      - python3-pip
+      - rar
+      - rlwrap
+      - s3fs
+      - screen
+      - silversearcher-ag
+      - sqlite3
+      - sudo
+      - tmux
+      - unrar
+      - uuid-runtime
+      - vim
+      - zsh

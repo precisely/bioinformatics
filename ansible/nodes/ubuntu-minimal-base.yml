@@ -7,4 +7,5 @@
 
   tasks:
 
-    - include: software.yml
+    - include: ../ssh.yml
+    # - include: ../yas3fs/playbook.yml

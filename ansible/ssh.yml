@@ -1,0 +1,13 @@
+---
+- name: install SSH
+  apt:
+    name:
+      - openssh-client
+      - openssh-server
+
+- name: move ssh to port 6601
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: "Port 22"
+    state: present
+    line: Port 6601

@@ -1,7 +1,8 @@
 {
   "builders": [{
     "type": "docker",
-    "image": "precisely/ubuntu-base",
+    "image": "precisely/ubuntu-base:latest",
+    "pull": false,
     "commit": true,
     "changes": [
     ]
@@ -9,18 +10,24 @@
   "provisioners": [
     {
       "type": "ansible",
-      "playbook_file": "../ansible/compute-farm/playbook.yml"
+      "playbook_file": "../ansible/nodes/ancestry.yml"
+    },
+    {
+      "type": "shell",
+      "inline": [
+        "find / -type d -name '~*' | xargs rm -rf"
+      ]
     }
   ],
   "post-processors": [
     {
       "type": "docker-tag",
-      "repository": "precisely/compute-farm",
+      "repository": "precisely/ancestry",
       "tag": "latest"
     },
     {
       "type": "docker-tag",
-      "repository": "precisely/compute-farm",
+      "repository": "precisely/ancestry",
       "tag": "{{isotime \"2006-01-02T150405\"}}"
     }
   ]
