@@ -1,25 +1,44 @@
-#!/usr/bin/env bash
-
-set -Eeuo pipefail
-
-readlinkf() { perl -MCwd -MFile::Glob -l -e 'print Cwd::abs_path File::Glob::bsd_glob shift' "$1"; }
-basedir=$(dirname "$(readlinkf "$0")")
-script=$(basename "${BASH_SOURCE[${#BASH_SOURCE[@]}-1]}")
+#!/usr/bin/env perl
 
 
-### parameter handling
-if [[ "$#" -eq 0 ]]; then
-    echo "usage: build.sh <packer-file>" 1>&2
-    exit 1
-fi
+use strict;
+use warnings;
 
-packer_file="$1"
-
-if [[ -z "${packer_file}" ]]; then
-    echo "packer file required" 1>&2
-    exit 1
-fi
+use Cwd ();
+use File::Basename ();
+use File::Glob ();
+use File::Temp ();
+use Getopt::Long ();
+use IO::Handle;
 
 
-### run
-packer build "${packer_file}"
+sub readlinkf { return Cwd::abs_path(File::Glob::bsd_glob($_[0])); }
+my $script = readlinkf($0);
+my $basedir = File::Basename::dirname($script);
+
+
+$SIG{INT} = sub { print "exiting: $!\n"; };
+
+
+# command line arguments
+my $mode = "build";
+Getopt::Long::GetOptions("mode=s" => \$mode)
+    or die("malformed command line arguments\n");
+
+my $packer_file = $ARGV[0]
+    or die("no packer file provided");
+
+
+# support both M4 and vanilla Packer files
+my $processed_file;
+if ($packer_file =~ /.*\.m4$/) {
+    $processed_file = File::Temp->new(DIR => $basedir);
+    print $processed_file `m4 -P -Dmode=$mode "$packer_file"`;
+    $processed_file->flush();
+}
+else {
+    $processed_file = $packer_file;
+}
+
+# build
+system("packer build \"$processed_file\"");
