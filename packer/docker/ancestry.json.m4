@@ -24,9 +24,20 @@ m4_ifelse(mode, [[[build]]], [[[m4_dnl
     {
       "type": "shell",
       "inline": [
-        # FIXME: This needs to copy stuff.
-        # Easiest way: locate dominating .git and take it from there?
-        # Maybe Packer has a good way to copy things from the building system.
+        "mkdir /app"
+      ]
+    },
+    {
+      "type": "file",
+      "source": "approot_archive",
+      "destination": "/app/app.tar.gz"
+    },
+    {
+      "type": "shell",
+      "inline": [
+        "chdir /app",
+        "tar zxf app.tar.gz",
+        "rm app.tar.gz"
       ]
     },
 ]]])m4_dnl

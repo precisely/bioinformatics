@@ -21,24 +21,61 @@ $SIG{INT} = sub { print "exiting: $!\n"; };
 
 
 # command line arguments
+my $help;
 my $mode = "build";
-Getopt::Long::GetOptions("mode=s" => \$mode)
+my $approot = Cwd::abs_path("$basedir/..");
+Getopt::Long::GetOptions("help" => \$help,
+                         "mode=s" => \$mode,
+                         "approot=s" => \$approot)
     or die("malformed command line arguments\n");
-
+if ($help || $#ARGV == -1) {
+    print(<<'EOF'
+usage: build <flags> packer-file.json(.m4)
+flags: --help           :: print this message
+       --mode=link      :: make a development mode container which expects app code
+                           to be mounted as a volume on /app
+       --mode=build     :: (default) make a deployment mode container which copies
+                           app code into /app
+       --approot=<path> :: (default=$approot) in build mode, copy the contents of
+                           this directory into /app
+EOF
+        );
+    exit(0);
+}
 my $packer_file = $ARGV[0]
     or die("no packer file provided");
+
+
+# "build" (i.e., release) mode has to deal with the state of the local
+# repository checkout.
+my $approot_archive;
+if ("build" eq $mode) {
+    if (! -d "$approot/.git") {
+        die("$approot is not a Git project root");
+    }
+    $approot_archive = File::Temp->new(DIR => $basedir);
+    my $saved_pwd = Cwd::getcwd();
+    Cwd::chdir($approot);
+    `git archive --format=tgz --output="$approot_archive" HEAD`;
+    Cwd::chdir($saved_pwd);
+}
 
 
 # support both M4 and vanilla Packer files
 my $processed_file;
 if ($packer_file =~ /.*\.m4$/) {
     $processed_file = File::Temp->new(DIR => $basedir);
-    print $processed_file `m4 -P -Dmode=$mode "$packer_file"`;
+    my $extras = "";
+    if ("build" eq $mode) {
+        $extras = "-Dapproot_archive=\"$approot_archive\"";
+    }
+    print $processed_file `m4 -P -Dmode=$mode $extras "$packer_file"`;
     $processed_file->flush();
 }
 else {
     $processed_file = $packer_file;
 }
+
 
 # build
 system("packer build \"$processed_file\"");
