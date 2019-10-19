@@ -7,7 +7,7 @@
 
   tasks:
 
-    - include: ../software/pkgs-userland.yml
+    - include: ../software/pkgs-complete.yml
     - include: ../software/ec2.yml
     - include: ../software/ssh.yml
     - include: ../software/yas3fs/playbook.yml

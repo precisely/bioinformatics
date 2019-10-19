@@ -31,6 +31,7 @@
       - git-core
       - htop
       - jq
+      - kmod
       - less
       - libboost-all-dev
       - libc++-dev
