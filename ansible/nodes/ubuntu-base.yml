@@ -8,6 +8,6 @@
   tasks:
 
     - include: ../software/pkgs-userland.yml
-    - include: ../ec2.yml
-    - include: ../ssh.yml
-    - include: ../yas3fs/playbook.yml
+    - include: ../software/ec2.yml
+    - include: ../software/ssh.yml
+    - include: ../software/yas3fs/playbook.yml
