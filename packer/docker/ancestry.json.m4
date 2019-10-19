@@ -6,7 +6,7 @@ m4_define([[[repository]]], [[[precisely/ancestry-link]]])m4_dnl
 {
   "builders": [{
     "type": "docker",
-    "image": "precisely/ubuntu-base:latest",
+    "image": "precisely/ubuntu-minimal-base:latest",
     "pull": false,
     "commit": true,
     "changes": [

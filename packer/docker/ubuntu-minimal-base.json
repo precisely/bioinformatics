@@ -25,12 +25,12 @@
   "post-processors": [
     {
       "type": "docker-tag",
-      "repository": "precisely/ubuntu-base",
+      "repository": "precisely/ubuntu-minimal-base",
       "tag": "latest"
     },
     {
       "type": "docker-tag",
-      "repository": "precisely/ubuntu-base",
+      "repository": "precisely/ubuntu-minimal-base",
       "tag": "{{isotime \"2006-01-02T150405\"}}"
     }
   ]
