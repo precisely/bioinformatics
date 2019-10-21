@@ -1,0 +1,16 @@
+#!/usr/bin/env perl
+
+my $aws_creds = `aws sts get-session-token | jq -r '.Credentials | .AccessKeyId,.SecretAccessKey,.SessionToken'`;
+my ($aws_access_key_id,
+    $aws_secret_access_key,
+    $aws_session_token) = split("\n", $aws_creds);
+
+exec("docker", "run",
+     "-i", "-t", "--rm",
+     "-e", "AWS_ACCESS_KEY_ID=$aws_access_key_id",
+     "-e", "AWS_SECRET_ACCESS_KEY=$aws_secret_access_key",
+     "-e", "AWS_SESSION_TOKEN=$aws_session_token",
+     "--cap-add", "SYS_ADMIN",
+     "--cap-add", "SYSLOG",
+     "--device", "/dev/fuse",
+     @ARGV);
