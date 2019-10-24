@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+# mount S3
+if [[ ! -z "${DATA_S3_BUCKET}" ]]; then
+    goofys "${DATA_S3_BUCKET}" /data-s3
+fi
+
+# run other things
+if [[ -z "$*" ]]; then
+    exec bash
+else
+    exec bash -c "$*"
+fi

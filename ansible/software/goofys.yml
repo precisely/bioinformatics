@@ -1,0 +1,17 @@
+---
+- name: install FUSE
+  apt:
+    name:
+      - fuse
+
+- name: install goofys
+  get_url:
+    url: https://github.com/kahing/goofys/releases/latest/download/goofys
+    dest: /usr/local/bin/goofys
+    mode: '755'
+
+- name: make S3 mount point
+  file:
+    path: /data-s3
+    state: directory
+    mode: '0755'

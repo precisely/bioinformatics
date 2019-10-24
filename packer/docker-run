@@ -1,16 +1,54 @@
 #!/usr/bin/env perl
 
+
+use strict;
+use warnings;
+
+use Cwd ();
+use File::Basename ();
+use File::Glob ();
+use File::Temp ();
+use Getopt::Long ();
+use IO::Handle;
+
+
+sub readlinkf { return Cwd::abs_path(File::Glob::bsd_glob($_[0])); }
+my $script = readlinkf($0);
+my $basedir = File::Basename::dirname($script);
+
+
+# command line arguments
+my $help;
+my $data_s3_bucket = "";
+Getopt::Long::GetOptions("help" => \$help,
+                         "data-s3-bucket=s" => \$data_s3_bucket)
+    or die("malformed commane line arguments\n");
+if ($help) {
+    print(<<'EOF'
+usage: docker-run <flags>
+flags: --data-s3-bucket :: (optional) path to S3 resource to mount on /data-s3 in the
+                           container
+EOF
+        );
+    exit(0);
+}
+
+
+# use current user credentials to set an S3 session token inside the container
 my $aws_creds = `aws sts get-session-token | jq -r '.Credentials | .AccessKeyId,.SecretAccessKey,.SessionToken'`;
 my ($aws_access_key_id,
     $aws_secret_access_key,
     $aws_session_token) = split("\n", $aws_creds);
 
+# run
 exec("docker", "run",
      "-i", "-t", "--rm",
      "-e", "AWS_ACCESS_KEY_ID=$aws_access_key_id",
      "-e", "AWS_SECRET_ACCESS_KEY=$aws_secret_access_key",
      "-e", "AWS_SESSION_TOKEN=$aws_session_token",
+     "-e", "DATA_S3_BUCKET=$data_s3_bucket",
      "--cap-add", "SYS_ADMIN",
      "--cap-add", "SYSLOG",
      "--device", "/dev/fuse",
+     "--entrypoint", "/root/bootstrap",
      @ARGV);
