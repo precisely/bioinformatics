@@ -44,8 +44,8 @@ resource "aws_key_pair" "ssh" {
 }
 
 
-data "template_file" "bootstrap_sh" {
-  template = file("../modules/compute-farm/files/bootstrap.sh")
+data "template_file" "bootstrap" {
+  template = file("../modules/compute-farm/files/bootstrap")
   vars = {
     region = data.terraform_remote_state.global.outputs.biodev_data_s3_regions[var.data_s3_bucket]
     data_s3_bucket = var.data_s3_bucket
@@ -69,7 +69,7 @@ resource "aws_launch_configuration" "compute_farm" {
   # lifecycle {
   #   create_before_destroy = true
   # }
-  user_data = data.template_file.bootstrap_sh.rendered
+  user_data = data.template_file.bootstrap.rendered
 }
 
 
