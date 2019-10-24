@@ -5,6 +5,19 @@
   gather_facts: no
 
   tasks:
+
+    - apt_repository:
+        repo: deb http://us.archive.ubuntu.com/ubuntu/ bionic main restricted universe multiverse
+        state: present
+
+    - apt_repository:
+        repo: deb http://us.archive.ubuntu.com/ubuntu/ bionic-updates main restricted universe multiverse
+        state: present
+
+    - apt_repository:
+        repo: deb http://security.ubuntu.com/ubuntu/ bionic-security main restricted universe multiverse
+        state: present
+
     - name: bootstrap python
       raw: test -e /usr/bin/python3 || (apt-get -y update && apt-get install -y python3-minimal)
 
