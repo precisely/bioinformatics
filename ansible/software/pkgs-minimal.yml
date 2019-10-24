@@ -1,7 +1,7 @@
 ---
 - include: apt.yml
 
-- name: apt install dependencies
+- name: apt install minimal dependencies
   apt:
     name:
       - kmod

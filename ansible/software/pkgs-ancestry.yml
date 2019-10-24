@@ -1,7 +1,7 @@
 ---
 - include: apt.yml
 
-- name: apt install dependencies
+- name: apt install ancestry dependencies
   apt:
     name:
       - plink1.9

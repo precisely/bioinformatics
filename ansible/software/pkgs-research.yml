@@ -1,7 +1,7 @@
 ---
 - include: apt.yml
 
-- name: apt install dependencies
+- name: apt install research dependencies
   apt:
     name:
       - bcftools
@@ -15,7 +15,7 @@
       - tabix
       - vcftools
 
-- name: pip install dependencies
+- name: pip install research dependencies
   pip:
     executable: /usr/bin/pip2
     name:
