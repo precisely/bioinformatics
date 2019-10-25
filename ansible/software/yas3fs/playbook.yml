@@ -18,6 +18,12 @@
     state: present
     line: "user_allow_other"
 
+- name: make S3 mount point
+  file:
+    path: /data-s3
+    state: directory
+    mode: '0777'
+
 - name: add yas3fs shutdown script
   copy:
     src: "files/unmount-yas3fs.init.d"

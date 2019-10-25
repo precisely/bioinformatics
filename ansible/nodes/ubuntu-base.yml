@@ -11,3 +11,4 @@
     - include: ../software/ec2.yml
     - include: ../software/ssh.yml
     - include: ../software/yas3fs/playbook.yml
+    # - include: ../software/goofys.yml
