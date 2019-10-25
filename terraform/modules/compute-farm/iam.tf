@@ -24,7 +24,7 @@ resource "aws_iam_role" "cf_node" {
 }
 
 
-data "aws_iam_policy_document" "yas3fs" {
+data "aws_iam_policy_document" "s3_base" {
   # S3
   statement {
     actions = [
@@ -40,6 +40,27 @@ data "aws_iam_policy_document" "yas3fs" {
       "arn:aws:s3:::${var.data_s3_bucket}/*"
     ]
   }
+  # IAM
+  statement {
+    actions = ["iam:GetUser"]
+    resources = ["*"]
+  }
+}
+
+
+resource "aws_iam_policy" "s3_base" {
+  name = "${var.cluster_name}-s3-base"
+  policy = "${data.aws_iam_policy_document.s3_base.json}"
+}
+
+
+resource "aws_iam_role_policy_attachment" "s3_base" {
+  role = "${aws_iam_role.cf_node.name}"
+  policy_arn = "${aws_iam_policy.s3_base.arn}"
+}
+
+
+data "aws_iam_policy_document" "s3_yas3fs" {
   # SNS
   statement {
     actions = [
@@ -64,23 +85,18 @@ data "aws_iam_policy_document" "yas3fs" {
     ]
     resources = ["arn:aws:sqs:*:${local.account_id}:*"]
   }
-  # IAM
-  statement {
-    actions = ["iam:GetUser"]
-    resources = ["*"]
-  }
 }
 
 
-resource "aws_iam_policy" "yas3fs" {
-  name = "${var.cluster_name}-yas3fs"
-  policy = "${data.aws_iam_policy_document.yas3fs.json}"
+resource "aws_iam_policy" "s3_yas3fs" {
+  name = "${var.cluster_name}-s3-yas3fs"
+  policy = "${data.aws_iam_policy_document.s3_yas3fs.json}"
 }
 
 
-resource "aws_iam_role_policy_attachment" "test-attach" {
+resource "aws_iam_role_policy_attachment" "s3_yas3fs" {
   role = "${aws_iam_role.cf_node.name}"
-  policy_arn = "${aws_iam_policy.yas3fs.arn}"
+  policy_arn = "${aws_iam_policy.s3_yas3fs.arn}"
 }
 
 
