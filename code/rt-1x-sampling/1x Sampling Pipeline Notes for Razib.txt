@@ -1,0 +1,61 @@
+#########################################################################################
+## 1. Merge fastq reads from a pair of fastq files and randomly assign to a set of output files
+#########################################################################################
+# Run Random_Split_Assign_Fastq_0_0_1.py with a pair of fastq files
+# Input: pair of fastq files
+# Output: a set of tsv files with the merged reads randomy assigned to them
+
+# Example
+python Random_Split_Assign_Fastq_0_0_1.py \
+  --fastq_1 SRR9091899_1.fastq.gz \
+  --fastq_2 SRR9091899_2.fastq.gz \
+  --dir_out /fast/users/a1222182/Human/NA12878_2019_Aug/2019_Aug/Low_Pass_Analysis_2019_Aug/Out/Merge_Split_Fastq \
+  --nr_files 10\
+  --gzip \
+  
+# See slurm script Python_Random_Split_Assign_Fastq_Wrapper-Slurm_Array.sh
+
+#########################################################################################
+## 2. Randomise the order of merged reads in these files
+#########################################################################################
+# Input a merged reads file
+# Output a randomised merged reads file
+
+# Example
+shuf \
+    --output /fast/users/a1222182/Human/NA12878_2019_Aug/2019_Aug/Low_Pass_Analysis_2019_Aug/Out/Randomised_Fastq/SRR9091899_1-000-1-Rand.tsv \
+    /fast/users/a1222182/Human/NA12878_2019_Aug/2019_Aug/Low_Pass_Analysis_2019_Aug/Out/Merge_Split_Fastq/SRR9091899_1-000-1.tsv
+    
+# See slurm script Randomise_Merged_Fastq_Files-Slurm_Array.sh
+
+#########################################################################################
+## 3. Split merged reads to 2 files
+#########################################################################################
+# Take the merged reads and split them back in to 2 fastq files
+# Input: a randomised merged reads file
+# Output: a pair of randomised fastq files
+
+# Example
+cat /fast/users/a1222182/Human/NA12878_2019_Aug/2019_Aug/Low_Pass_Analysis_2019_Aug/Out/Randomised_Fastq/SRR9091899_1-000-1-Rand.tsv \
+  | SplitLine  # function in shell script below
+  
+# See slurm script Split_Merged_Fastq_Files-Slurm_Array.sh 
+
+#########################################################################################
+## 4. Extract subsets from fastq file pairs
+#########################################################################################
+# Take the fastq file pairs and extract multiple subsets of specific sizes
+# Imput: pair of randomised fastq files
+# Output: multiple subsets of pairs of randomised fastq files
+
+# Example
+  zcat /fast/users/a1222182/Human/NA12878_2019_Aug/2019_Aug/Low_Pass_Analysis_2019_Aug/Out/Randomised_Fastq/SRR9091899_Rand_1.fastq.gz \
+  | head 0 \
+  | tail 40000000 \
+  | gzip \
+  > /fast/users/a1222182/Human/NA12878_2019_Aug/2019_Aug/Low_Pass_Analysis_2019_Aug/Out/1x_Sampled_Fastq/SRR9091899-1x_00-Rand_1.fastq.gz
+
+
+# See slurm script Extract_Fastq_Subsets-Slurm_Array.sh
+
+

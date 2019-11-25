@@ -1,0 +1,103 @@
+#########################################################################################
+## Notes on calling variants from low pass bam files
+#########################################################################################
+
+#########################################################################################
+## 1. Install GATK,  Samtools and sequenceTools
+#########################################################################################
+# Samtools and GATK should be straightforward
+# Use GATK v4
+# I do not have root so I had to install sequenceTools via conda
+
+#########################################################################################
+## 2. Prepare reference
+#########################################################################################
+# Create a sequence dict and index the reference, but only once
+gatk CreateSequenceDictionary -R ${REF}
+
+samtools faidx ${REF}
+
+# See script Call_Low_Coverage_Variants-Slurm_Array.sh
+
+#########################################################################################
+## 3. Call variants
+#########################################################################################
+# Samtools mpileup reports the base vs the reference for each read, by position
+# pileupCaller then extracts the base for one read at random and reports that
+# I split the analysis by chr and then report all samples for each chr
+# Only SNPs in the SNP panel are reported
+# See stdout file Call_Low_Coverage_Variants-Slurm_Array.sh_18417462_8.out
+# Three output files are generated: samples, snps and calls
+
+# Example:
+  samtools mpileup -R -B -q25 -Q25 \
+      --region ${CHRS[${i}]} \
+      --fasta-ref ${REF} \
+      ${BAMS_2} \
+  | pileupCaller \
+    --mode RandomCalling \
+    --sampleNames ${SAMPLE_IDS_2} \
+    --format EigenStrat \
+    --snpFile ${SNP_FILE} \
+    --eigenstratOutPrefix ${DIR_OUT}/${FILE_OUT_PREFIX}${CHRS[${i}]}
+
+# See script Call_Low_Coverage_Variants-Slurm_Array.sh
+
+# NB If combining with eg targeted HLA sequencing, would exclude that region from this analysis
+
+#########################################################################################
+## 4. Concatenate
+#########################################################################################
+# Concatenate the chr *.geno and *.snp files outputted above
+# Done manually, needs to be automated
+# The *.ind files are all identical, so just choose 1
+
+# Examples
+cat NA12878_10_1x-chr1.geno.txt \
+    NA12878_10_1x-chr2.geno.txt \
+    NA12878_10_1x-chr3.geno.txt \
+    NA12878_10_1x-chr4.geno.txt \
+    NA12878_10_1x-chr5.geno.txt \
+    NA12878_10_1x-chr6.geno.txt \
+    NA12878_10_1x-chr7.geno.txt \
+    NA12878_10_1x-chr8.geno.txt \
+    NA12878_10_1x-chr9.geno.txt \
+    NA12878_10_1x-chr10.geno.txt \
+    NA12878_10_1x-chr11.geno.txt \
+    NA12878_10_1x-chr12.geno.txt \
+    NA12878_10_1x-chr13.geno.txt \
+    NA12878_10_1x-chr14.geno.txt \
+    NA12878_10_1x-chr15.geno.txt \
+    NA12878_10_1x-chr16.geno.txt \
+    NA12878_10_1x-chr17.geno.txt \
+    NA12878_10_1x-chr18.geno.txt \
+    NA12878_10_1x-chr19.geno.txt \
+    NA12878_10_1x-chr20.geno.txt \
+    NA12878_10_1x-chr21.geno.txt \
+    NA12878_10_1x-chr22.geno.txt \
+    > NA12878_10_1x-Autosome.geno.txt
+
+cat NA12878_10_1x-chr1.snp.txt \
+    NA12878_10_1x-chr2.snp.txt \
+    NA12878_10_1x-chr3.snp.txt \
+    NA12878_10_1x-chr4.snp.txt \
+    NA12878_10_1x-chr5.snp.txt \
+    NA12878_10_1x-chr6.snp.txt \
+    NA12878_10_1x-chr7.snp.txt \
+    NA12878_10_1x-chr8.snp.txt \
+    NA12878_10_1x-chr9.snp.txt \
+    NA12878_10_1x-chr10.snp.txt \
+    NA12878_10_1x-chr11.snp.txt \
+    NA12878_10_1x-chr12.snp.txt \
+    NA12878_10_1x-chr13.snp.txt \
+    NA12878_10_1x-chr14.snp.txt \
+    NA12878_10_1x-chr15.snp.txt \
+    NA12878_10_1x-chr16.snp.txt \
+    NA12878_10_1x-chr17.snp.txt \
+    NA12878_10_1x-chr18.snp.txt \
+    NA12878_10_1x-chr19.snp.txt \
+    NA12878_10_1x-chr20.snp.txt \
+    NA12878_10_1x-chr22.snp.txt \
+    > NA12878_10_1x-Autosome.snp.txt
+
+

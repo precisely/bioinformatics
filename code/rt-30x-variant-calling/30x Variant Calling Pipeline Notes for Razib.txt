@@ -1,0 +1,64 @@
+#########################################################################################
+## Notes on calling variants from higher-pass bam files
+#########################################################################################
+
+#########################################################################################
+## 1. Install GATK, Samtools, BCFtools, VCFTools and tabix
+#########################################################################################
+# Should be straightforward
+# Use GATK v4
+
+#########################################################################################
+## 2. Prepare reference
+#########################################################################################
+# Create a sequence dict and index the reference, but only once
+gatk CreateSequenceDictionary -R ${REF}
+
+samtools faidx ${REF}
+
+# See script Call_Variants_GATK4-Slurm_Array.sh
+
+#########################################################################################
+## 3. Call variants
+#########################################################################################
+# Call variants with GATK using bam file, generating a gVCF file
+# The --emit-ref-confidence causes all positions to be reported, not just ones with 
+# Specify intervals of genome to call eg chrMT using -L
+# For complex sets of intervals eg multiple exons in HLA, use a bed file, again with -L
+
+# Example:
+  gatk HaplotypeCaller  \
+    -R $REF \
+    -L chrMT \\
+    -I ${DIR_IN_2}/$BAM_IN \
+    -O ${DIR_OUT}/$VCF_TMP \
+    --emit-ref-confidence GVCF 
+
+# See script Call_Variants_GATK4-Slurm_Array.sh
+
+#########################################################################################
+## 3. Combine GVCFs into a multi-sample dataset
+#########################################################################################
+# I have used legacy code to combine variants
+# Broad now used a db-based tool to do this
+# 
+
+Combine_GVCFs_GATK4-Slurm_Array.sh
+
+# See script Combine_GVCFs_GATK4-Slurm_Array.sh
+
+#########################################################################################
+## 3. Call combined variants
+#########################################################################################
+# Calling of variants across multi-sample datasets
+
+Genotype_GVCFs_GATK4-Slurm_Array.sh
+
+#########################################################################################
+## 4. Index VCF file
+#########################################################################################
+# Used to allow pseudorandom access to the vcf file
+  tabix --preset vcf $VCF
+
+
+

@@ -1,0 +1,22 @@
+- the perl script is pretty simple. Takes two params like so:
+perl runadmixtureOnBatchIndia.pl TestIndividuals IndiaReference092419
+
+First parameter are "test" individuals. These are individuals whose ancestry you want to infer. They are in a plink file together.
+
+The second parameter is the "reference" file. It is in the folder Data.
+
+The script takes the reference & test file, and merges them. Then it figures out how many K to run based on the number of reference populations you have (looks for AA_Ref_ in the name), and runs supervised admixture on the merged file.
+
+Line 34-64 is important, this is where plink merges the files. Usually there will be an error with the initial merge. It tries to reformat the data ("flip strand"). After that, it then removes all the SNPs the are misaligned between the two files. When these two commands are run 99.99% the merge is doable.
+
+These lines are really the logic you need to figure out and optimize better whatever platform/language out to use. The data need to get merged.
+
+I run admixture and do some manipulations so that a CSV comes out with columns which are cluster names and rows which are test individuals. But the raw Q file is still available.
+
+To review
+
+- input a plink reference file and test file (latter comes out of the pipeline)
+- plink merges the two
+- creates a temporary file to run supervised admixture
+- the script figures out how many K's to run, then runs it
+- the script takes the .Q file and formats it better into a .csv

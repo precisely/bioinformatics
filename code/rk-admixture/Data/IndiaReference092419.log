@@ -1,0 +1,30 @@
+PLINK v1.90b6.10 64-bit (17 Jun 2019)
+Options in effect:
+  --bfile IndiaReference092419
+  --make-bed
+  --out IndiaReference092419
+  --remove rem2
+
+Hostname: Razibs-MBP
+Working directory: /Users/razibkhan/Dropbox/plink_mac
+Start time: Tue Sep 24 14:15:28 2019
+
+Random number seed: 1569359728
+16384 MB RAM detected; reserving 8192 MB for main workspace.
+Warning: --make-bed input and output filenames match.  Appending '~' to input
+filenames.
+510916 variants loaded from .bim file.
+875 people (293 males, 77 females, 505 ambiguous) loaded from .fam.
+Ambiguous sex IDs written to IndiaReference092419.nosex .
+--remove: 856 people remaining.
+Warning: At least 10 duplicate IDs in --remove file.
+Using 1 thread (no multithreaded calculations invoked).
+Before main variant filters, 856 founders and 0 nonfounders present.
+Calculating allele frequencies... done.
+Total genotyping rate in remaining samples is 0.988478.
+510916 variants and 856 people pass filters and QC.
+Note: No phenotypes present.
+--make-bed to IndiaReference092419.bed + IndiaReference092419.bim +
+IndiaReference092419.fam ... done.
+
+End time: Tue Sep 24 14:15:29 2019
