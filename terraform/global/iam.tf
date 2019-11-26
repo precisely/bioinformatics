@@ -20,6 +20,11 @@ resource "aws_iam_user" "razib" {
   path = "/"
 }
 
+resource "aws_iam_user" "gareth" {
+  name = "gareth"
+  path = "/"
+}
+
 
 ### group: administrators
 
@@ -57,7 +62,8 @@ resource "aws_iam_group_membership" "developers" {
     "${aws_iam_user.aneil.name}",
     "${aws_iam_user.cv.name}",
     "${aws_iam_user.rick.name}",
-    "${aws_iam_user.razib.name}"
+    "${aws_iam_user.razib.name}",
+    "${aws_iam_user.gareth.name}"
   ]
 }
 
