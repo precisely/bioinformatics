@@ -40,7 +40,7 @@ data "aws_ami" "precisely_cf" {
 
 resource "aws_key_pair" "ssh" {
   key_name = "${var.cluster_name} SSH key"
-  public_key = "${file(var.ssh_public_key_path)}"
+  public_key = file(var.ssh_public_key_path)
 }
 
 
@@ -55,11 +55,11 @@ data "template_file" "bootstrap" {
 
 
 resource "aws_launch_configuration" "compute_farm" {
-  image_id = "${data.aws_ami.precisely_cf.id}"
+  image_id = data.aws_ami.precisely_cf.id
   instance_type = var.instance_type
-  key_name = "${aws_key_pair.ssh.key_name}"
-  security_groups = ["${aws_security_group.node.id}"]
-  iam_instance_profile = "${aws_iam_instance_profile.cf_node.name}"
+  key_name = aws_key_pair.ssh.key_name
+  security_groups = [aws_security_group.node.id]
+  iam_instance_profile = aws_iam_instance_profile.cf_node.name
   ebs_block_device {
     device_name = "/dev/xvdf"
     volume_type = "gp2"
@@ -76,7 +76,7 @@ resource "aws_launch_configuration" "compute_farm" {
 resource "aws_autoscaling_group" "compute_farm" {
   launch_configuration = aws_launch_configuration.compute_farm.name
 
-  vpc_zone_identifier = ["${aws_subnet.main.id}"]
+  vpc_zone_identifier = [aws_subnet.main.id]
 
   min_size = 1
   desired_capacity = var.machine_count

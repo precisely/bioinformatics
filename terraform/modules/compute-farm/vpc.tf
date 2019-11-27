@@ -10,19 +10,19 @@ resource "aws_vpc" "main" {
 
 
 resource "aws_internet_gateway" "main" {
-  vpc_id = "${aws_vpc.main.id}"
+  vpc_id = aws_vpc.main.id
 }
 
 
 resource "aws_route" "internet_access" {
-  route_table_id = "${aws_vpc.main.main_route_table_id}"
+  route_table_id = aws_vpc.main.main_route_table_id
   destination_cidr_block = "0.0.0.0/0"
-  gateway_id = "${aws_internet_gateway.main.id}"
+  gateway_id = aws_internet_gateway.main.id
 }
 
 
 resource "aws_subnet" "main" {
-  vpc_id = "${aws_vpc.main.id}"
+  vpc_id = aws_vpc.main.id
   cidr_block = "10.0.0.0/24"
   map_public_ip_on_launch = true
   availability_zone = var.availability_zone
@@ -33,7 +33,7 @@ resource "aws_security_group" "node" {
   name = "${var.cluster_name}-node"
   description = "Compute farm node security group"
 
-  vpc_id = "${aws_vpc.main.id}"
+  vpc_id = aws_vpc.main.id
 
   # outbound: allow all
   egress {

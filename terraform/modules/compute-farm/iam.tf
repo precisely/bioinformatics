@@ -20,7 +20,7 @@ data "aws_iam_policy_document" "cf_node" {
 resource "aws_iam_role" "cf_node" {
   name = "${var.cluster_name}-cf-node"
   path = "/"
-  assume_role_policy = "${data.aws_iam_policy_document.cf_node.json}"
+  assume_role_policy = data.aws_iam_policy_document.cf_node.json
 }
 
 
@@ -50,13 +50,13 @@ data "aws_iam_policy_document" "s3_base" {
 
 resource "aws_iam_policy" "s3_base" {
   name = "${var.cluster_name}-s3-base"
-  policy = "${data.aws_iam_policy_document.s3_base.json}"
+  policy = data.aws_iam_policy_document.s3_base.json
 }
 
 
 resource "aws_iam_role_policy_attachment" "s3_base" {
-  role = "${aws_iam_role.cf_node.name}"
-  policy_arn = "${aws_iam_policy.s3_base.arn}"
+  role = aws_iam_role.cf_node.name
+  policy_arn = aws_iam_policy.s3_base.arn
 }
 
 
@@ -90,17 +90,17 @@ data "aws_iam_policy_document" "s3_yas3fs" {
 
 resource "aws_iam_policy" "s3_yas3fs" {
   name = "${var.cluster_name}-s3-yas3fs"
-  policy = "${data.aws_iam_policy_document.s3_yas3fs.json}"
+  policy = data.aws_iam_policy_document.s3_yas3fs.json
 }
 
 
 resource "aws_iam_role_policy_attachment" "s3_yas3fs" {
-  role = "${aws_iam_role.cf_node.name}"
-  policy_arn = "${aws_iam_policy.s3_yas3fs.arn}"
+  role = aws_iam_role.cf_node.name
+  policy_arn = aws_iam_policy.s3_yas3fs.arn
 }
 
 
 resource "aws_iam_instance_profile" "cf_node" {
   name = "${var.cluster_name}-cf-node"
-  role = "${aws_iam_role.cf_node.name}"
+  role = aws_iam_role.cf_node.name
 }
