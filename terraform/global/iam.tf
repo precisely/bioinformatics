@@ -3,29 +3,29 @@ data "aws_caller_identity" "current" {}
 
 ### users
 
-resource "aws_iam_user" "aneil" {
+module "user_aneil" {
+  source = "../modules/user"
   name = "aneil"
-  path = "/"
 }
 
-resource "aws_iam_user" "cv" {
+module "user_cv" {
+  source = "../modules/user"
   name = "cv"
-  path = "/"
 }
 
-resource "aws_iam_user" "rick" {
+module "user_rick" {
+  source = "../modules/user"
   name = "rick"
-  path = "/"
 }
 
-resource "aws_iam_user" "razib" {
+module "user_razib" {
+  source = "../modules/user"
   name = "razib"
-  path = "/"
 }
 
-resource "aws_iam_user" "gareth" {
+module "user_gareth" {
+  source = "../modules/user"
   name = "gareth"
-  path = "/"
 }
 
 
@@ -40,8 +40,8 @@ resource "aws_iam_group_membership" "administrators" {
   name = "administrators"
   group = aws_iam_group.administrators.name
   users = [
-    "${aws_iam_user.aneil.name}",
-    "${aws_iam_user.cv.name}"
+    "aneil",
+    "cv"
   ]
 }
 
@@ -62,11 +62,11 @@ resource "aws_iam_group_membership" "developers" {
   name = "developers"
   group = aws_iam_group.developers.name
   users = [
-    "${aws_iam_user.aneil.name}",
-    "${aws_iam_user.cv.name}",
-    "${aws_iam_user.rick.name}",
-    "${aws_iam_user.razib.name}",
-    "${aws_iam_user.gareth.name}"
+    "aneil",
+    "cv",
+    "rick",
+    "razib",
+    "gareth"
   ]
 }
 
