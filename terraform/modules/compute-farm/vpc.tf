@@ -4,7 +4,7 @@ resource "aws_vpc" "main" {
   enable_dns_hostnames = true
 
   tags = {
-    Name = "${var.cluster_name} Main"
+    Name = "${var.name} Main"
   }
 }
 
@@ -30,7 +30,7 @@ resource "aws_subnet" "main" {
 
 
 resource "aws_security_group" "node" {
-  name = "${var.cluster_name}-node"
+  name = "${var.name}-node"
   description = "Compute farm node security group"
 
   vpc_id = aws_vpc.main.id

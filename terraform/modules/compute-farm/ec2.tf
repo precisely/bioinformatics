@@ -39,7 +39,7 @@ data "aws_ami" "precisely_cf" {
 
 
 resource "aws_key_pair" "ssh" {
-  key_name = "${var.cluster_name} SSH key"
+  key_name = "${var.name} SSH key"
   public_key = file(var.ssh_public_key_path)
 }
 
@@ -59,7 +59,7 @@ resource "aws_launch_configuration" "compute_farm" {
   instance_type = var.instance_type
   key_name = aws_key_pair.ssh.key_name
   security_groups = [aws_security_group.node.id]
-  iam_instance_profile = "cf-node-${var.cluster_name}"
+  iam_instance_profile = "cf-node-${var.name}"
   ebs_block_device {
     device_name = "/dev/xvdf"
     volume_type = "gp2"
@@ -84,7 +84,7 @@ resource "aws_autoscaling_group" "compute_farm" {
 
   tag {
     key = "Name"
-    value = var.cluster_name
+    value = var.name
     propagate_at_launch = true
   }
 }

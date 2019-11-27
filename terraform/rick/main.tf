@@ -29,7 +29,7 @@ variable "ebs_size_gb" {
 module "cluster" {
   source = "../modules/compute-farm"
 
-  cluster_name = "rick-cf-cluster"
+  name = "rick"
   availability_zone = "us-west-1a"
   instance_type = "m5.16xlarge"
   machine_count = var.machine_count

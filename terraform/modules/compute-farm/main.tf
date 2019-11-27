@@ -1,6 +1,6 @@
 ### input variables
 
-variable "cluster_name" {
+variable "name" {
   type = string
 }
 

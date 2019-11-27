@@ -29,7 +29,7 @@ variable "ebs_size_gb" {
 module "cluster" {
   source = "../modules/compute-farm"
 
-  cluster_name = "aneil-cf-cluster"
+  name = "aneil"
   availability_zone = "us-west-1a"
   instance_type = "t2.micro"
   machine_count = var.machine_count
