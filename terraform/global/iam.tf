@@ -1,3 +1,6 @@
+data "aws_caller_identity" "current" {}
+
+
 ### users
 
 resource "aws_iam_user" "aneil" {
@@ -72,6 +75,16 @@ resource "aws_iam_group_policy_attachment" "developers-IAMUserChangePassword" {
   policy_arn = "arn:aws:iam::aws:policy/IAMUserChangePassword"
 }
 
+resource "aws_iam_group_policy_attachment" "developers-IAMUserSSHKeys" {
+  group = aws_iam_group.developers.name
+  policy_arn = "arn:aws:iam::aws:policy/IAMUserSSHKeys"
+}
+
+resource "aws_iam_group_policy_attachment" "developers-IAMSelfManageServiceSpecificCredentials" {
+  group = aws_iam_group.developers.name
+  policy_arn = "arn:aws:iam::aws:policy/IAMSelfManageServiceSpecificCredentials"
+}
+
 resource "aws_iam_group_policy_attachment" "developers-AmazonEC2FullAccess" {
   group = aws_iam_group.developers.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2FullAccess"
@@ -100,4 +113,29 @@ resource "aws_iam_group_policy_attachment" "developers-AmazonRDSFullAccess" {
 resource "aws_iam_group_policy_attachment" "developers-CloudWatchFullAccess" {
   group = aws_iam_group.developers.name
   policy_arn = "arn:aws:iam::aws:policy/CloudWatchFullAccess"
+}
+
+resource "aws_iam_group_policy_attachment" "developers-pass_ec2_role" {
+  group = aws_iam_group.developers.name
+  policy_arn = aws_iam_policy.pass_ec2_role.arn
+}
+
+
+### policy: passing a role
+
+data "aws_iam_policy_document" "pass_ec2_role" {
+  statement {
+    actions = [
+      "iam:GetRole",
+      "iam:PassRole"
+    ]
+    resources = [
+      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:*"
+    ]
+  }
+}
+
+resource "aws_iam_policy" "pass_ec2_role" {
+  name = "cf-pass-ec2-role"
+  policy = data.aws_iam_policy_document.pass_ec2_role.json
 }

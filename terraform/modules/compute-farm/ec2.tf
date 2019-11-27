@@ -59,7 +59,7 @@ resource "aws_launch_configuration" "compute_farm" {
   instance_type = var.instance_type
   key_name = aws_key_pair.ssh.key_name
   security_groups = [aws_security_group.node.id]
-  iam_instance_profile = aws_iam_instance_profile.cf_node.name
+  iam_instance_profile = "cf-node-${var.cluster_name}"
   ebs_block_device {
     device_name = "/dev/xvdf"
     volume_type = "gp2"
