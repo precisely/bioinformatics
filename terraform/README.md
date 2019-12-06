@@ -159,6 +159,23 @@ The following workflow should work:
 **NB:** Avoid copying data across regions in AWS, as it can be expensive. Your cluster should already be set up to point to an S3 bucket in the region closest to you.
 
 
+*** Debugging S3 problems
+
+Guidelines for using S3 mounts:
+- Avoid operations more complicated than copying files in and out of S3, particularly with large files. It's just not very reliable.
+- Avoid renaming directories. S3 has no directories internally, just object keys which masquerade as paths. This means that a "directory" "rename" is internally a copy+delete operation on potentially many objects contained inside the directory. A failure on any of them (which may easily occur due to S3's inherent flakiness).
+- Avoid uploading to S3 at too high speed, expecially for large files. Empirically, it seems that saturating the _sending_ network's bandwidth leads to an increased probability of a failed upload. When copying into S3 with a utility which supports a bandwidth throttle switch, use it.
+
+FAQ:
+- Why is S3 flakey? Because it runs over HTTP, a stateless protocol. File operations do not map well to a stateless implementation, as evidenced by the utter failure of WebDAV.
+- Why do we provide `/data-s3` as a filesystem if S3's filesystem emulation is so flakey? Because using raw `aws s3` commands is annoying. Feel free to do that if you prefer, though. The CLI is available and should work.
+- Why S3 in the first place? Because there is no good alternative to providing large data storage, certainly at anything like the price.
+
+If `/data-s3` starts to look stale or errors out, restart it:
+- Unmount the S3 volume: `sudo umount /data-s3`
+- Remount it: `sudo yas3fs s3://precisely-bio-data-norcal /data-s3 --region us-west-1`
+
+
 ### Adding software
 
 You have root access to every instance using `sudo`. Keep in mind, however, that all instances are ephemeral, and will not retain the software you install on them after being destroyed (though they will survive a reboot). If you want something permanently installed on these nodes, we will do this by updating Ansible configurations and using Packer to build new AMIs (see the related sibling directories for more details).
