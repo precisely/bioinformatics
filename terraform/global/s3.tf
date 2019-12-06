@@ -7,6 +7,18 @@ resource "aws_s3_bucket" "biodev_data_norcal" {
     # prevent accidental deletion
     prevent_destroy = true
   }
+
+  versioning {
+    enabled = true
+  }
+
+  lifecycle_rule {
+    prefix  = "/"
+    enabled = true
+    noncurrent_version_expiration {
+      days = 30
+    }
+  }
 }
 
 
@@ -26,6 +38,18 @@ resource "aws_s3_bucket" "biodev_data_oregon" {
     # prevent accidental deletion
     prevent_destroy = true
   }
+
+  versioning {
+    enabled = true
+  }
+
+  lifecycle_rule {
+    prefix  = "/"
+    enabled = true
+    noncurrent_version_expiration {
+      days = 30
+    }
+  }
 }
 
 
@@ -44,6 +68,18 @@ resource "aws_s3_bucket" "biodev_data_sydney" {
   lifecycle {
     # prevent accidental deletion
     prevent_destroy = true
+  }
+
+  versioning {
+    enabled = true
+  }
+
+  lifecycle_rule {
+    prefix  = "/"
+    enabled = true
+    noncurrent_version_expiration {
+      days = 30
+    }
   }
 }
 
