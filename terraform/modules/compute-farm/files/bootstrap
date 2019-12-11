@@ -10,6 +10,3 @@ mkfs -t ext4 "$${device}"
 mkdir -p /scratch
 mount "$${device}" /scratch
 chown ubuntu /scratch
-
-# S3 remote mount
-su ubuntu -c "yas3fs s3://${data_s3_bucket}/ /data-s3 --region ${region} --topic ${data_sns_topic_arn} --new-queue"

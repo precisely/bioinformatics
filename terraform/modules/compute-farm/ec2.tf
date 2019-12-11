@@ -49,7 +49,6 @@ data "template_file" "bootstrap" {
   vars = {
     region = data.terraform_remote_state.global.outputs.biodev_data_s3_regions[var.data_s3_bucket]
     data_s3_bucket = var.data_s3_bucket
-    data_sns_topic_arn = data.terraform_remote_state.global.outputs.biodev_data_s3_sns_arns[var.data_s3_bucket]
   }
 }
 

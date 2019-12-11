@@ -60,46 +60,6 @@ resource "aws_iam_role_policy_attachment" "s3_base" {
 }
 
 
-data "aws_iam_policy_document" "s3_yas3fs" {
-  # SNS
-  statement {
-    actions = [
-      "sns:ConfirmSubscription",
-      "sns:GetTopicAttributes",
-      "sns:Publish",
-      "sns:Subscribe",
-      "sns:Unsubscribe"
-    ]
-    resources = ["arn:aws:sns:*:${data.aws_caller_identity.current.account_id}:*"]
-  }
-  # SQS
-  statement {
-    actions = [
-      "sqs:CreateQueue",
-      "sqs:DeleteMessage",
-      "sqs:GetQueueAttributes",
-      "sqs:GetQueueUrl",
-      "sqs:ReceiveMessage",
-      "sqs:SetQueueAttributes",
-      "sqs:SendMessage"
-    ]
-    resources = ["arn:aws:sqs:*:${data.aws_caller_identity.current.account_id}:*"]
-  }
-}
-
-
-resource "aws_iam_policy" "s3_yas3fs" {
-  name = "s3-yas3fs-${var.name}"
-  policy = data.aws_iam_policy_document.s3_yas3fs.json
-}
-
-
-resource "aws_iam_role_policy_attachment" "s3_yas3fs" {
-  role = aws_iam_role.cf_node.name
-  policy_arn = aws_iam_policy.s3_yas3fs.arn
-}
-
-
 resource "aws_iam_instance_profile" "cf_node" {
   name = "cf-node-${var.name}"
   role = aws_iam_role.cf_node.name

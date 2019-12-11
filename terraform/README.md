@@ -149,31 +149,14 @@ After that, you have 60sec to connect to the instance, using SSH or Mosh normall
 
 Each instance mounts an individual `/scratch` EBS volume. This volume is specific to the instance, and will be destroyed along with the instance.
 
-Each instance also mounts `/data-s3`, which uses FUSE to mount the cluster region's S3 data bucket. Use this to share data and for all durable storage.
+Use the [AWS S3 CLI](https://docs.aws.amazon.com/cli/latest/reference/s3/) to work with files in S3. It is already installed.
 
 The following workflow should work:
-- Copy data files from `/data-s3` into `/scratch`. Do not point to files in `/data-s3` directoy, as this will be slow and inefficient. Remember that `/data-s3` represents an S3 bucket.
-- Work in `/scratch`. This should work fairly well: the EBS volume mounted here should be backed with an SSD. If IO feels too slow, we can experiment with higher-performance (and pricier) SSD options.
-- Copy anything you want to save from `/scratch` back into `/data-s3`.
+- Copy data files from S3 into `/scratch`.
+- Work in `/scratch`. This should work fairly well: the EBS volume mounted here should be backed with an SSD. If IO feels too slow, we can experiment with higher-performance (and pricier) SSD options. Remember this data will not survive instance termination.
+- Copy anything you want to save from `/scratch` back into S3.
 
 **NB:** Avoid copying data across regions in AWS, as it can be expensive. Your cluster should already be set up to point to an S3 bucket in the region closest to you.
-
-
-*** Debugging S3 problems
-
-Guidelines for using S3 mounts:
-- Avoid operations more complicated than copying files in and out of S3, particularly with large files. It's just not very reliable.
-- Avoid renaming directories. S3 has no directories internally, just object keys which masquerade as paths. This means that a "directory" "rename" is internally a copy+delete operation on potentially many objects contained inside the directory. A failure on any of them (which may easily occur due to S3's inherent flakiness).
-- Avoid uploading to S3 at too high speed, expecially for large files. Empirically, it seems that saturating the _sending_ network's bandwidth leads to an increased probability of a failed upload. When copying into S3 with a utility which supports a bandwidth throttle switch, use it.
-
-FAQ:
-- Why is S3 flakey? Because it runs over HTTP, a stateless protocol. File operations do not map well to a stateless implementation, as evidenced by the utter failure of WebDAV.
-- Why do we provide `/data-s3` as a filesystem if S3's filesystem emulation is so flakey? Because using raw `aws s3` commands is annoying. Feel free to do that if you prefer, though. The CLI is available and should work.
-- Why S3 in the first place? Because there is no good alternative to providing large data storage, certainly at anything like the price.
-
-If `/data-s3` starts to look stale or errors out, restart it:
-- Unmount the S3 volume: `sudo umount /data-s3`
-- Remount it: `sudo yas3fs s3://precisely-bio-data-norcal /data-s3 --region us-west-1`
 
 
 ### Adding software
