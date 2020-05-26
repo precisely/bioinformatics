@@ -70,11 +70,6 @@ resource "aws_iam_group_membership" "developers" {
   ]
 }
 
-resource "aws_iam_group_policy_attachment" "developers-IAMUserChangePassword" {
-  group = aws_iam_group.developers.name
-  policy_arn = "arn:aws:iam::aws:policy/IAMUserChangePassword"
-}
-
 resource "aws_iam_group_policy_attachment" "developers-IAMUserSSHKeys" {
   group = aws_iam_group.developers.name
   policy_arn = "arn:aws:iam::aws:policy/IAMUserSSHKeys"
